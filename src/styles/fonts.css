@@ -1,0 +1,24 @@
+/*
+  Definición básica de las familias tipográficas del proyecto.
+  Se alinea con theme.typography.fontFamily en src/core/theme/index.ts
+*/
+
+:root {
+  --font-family-regular: "Inter", system-ui, -apple-system, BlinkMacSystemFont,
+    "Segoe UI", sans-serif;
+  --font-family-medium: var(--font-family-regular);
+  --font-family-semibold: var(--font-family-regular);
+  --font-family-bold: var(--font-family-regular);
+
+  /* Tipografía de títulos (estilo Times New Roman) */
+  --font-family-heading: "Times New Roman", ui-serif, Georgia, "Times", serif;
+}
+
+body {
+  font-family: var(--font-family-regular);
+}
+
+/* Utilidad para aplicar la tipografía de títulos en componentes concretos */
+.font-heading {
+  font-family: var(--font-family-heading);
+}

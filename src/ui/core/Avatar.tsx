@@ -1,0 +1,39 @@
+import React from "react";
+import { cn } from "../utils";
+
+export interface AvatarProps extends React.HTMLAttributes<HTMLDivElement> {
+  src?: string;
+  alt?: string;
+  fallback?: string;
+}
+
+const Avatar = React.forwardRef<HTMLDivElement, AvatarProps>(
+  ({ className, src, alt, fallback, ...props }, ref) => {
+    return (
+      <div
+        ref={ref}
+        className={cn(
+          "relative flex size-10 shrink-0 overflow-hidden rounded-full",
+          className
+        )}
+        {...props}
+      >
+        {src ? (
+          <img
+            src={src}
+            alt={alt || "Avatar"}
+            className="aspect-square size-full object-cover"
+          />
+        ) : (
+          <div className="flex size-full items-center justify-center bg-muted text-primary font-medium">
+            {fallback || "?"}
+          </div>
+        )}
+      </div>
+    );
+  }
+);
+
+Avatar.displayName = "Avatar";
+
+export { Avatar };
