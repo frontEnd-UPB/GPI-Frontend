@@ -277,6 +277,21 @@ export const mockVacationRequests: VacationRequest[] = [
   },
 ];
 
+export interface VacationBalance {
+  id: string;
+  employeeId: string;
+  assigned: number;
+  used: number;
+  available: number;
+}
+
+export const mockVacationBalances: VacationBalance[] = [
+  { id: "1", employeeId: "1", assigned: 30, used: 5, available: 25 },
+  { id: "2", employeeId: "2", assigned: 30, used: 10, available: 20 },
+  { id: "3", employeeId: "5", assigned: 30, used: 15, available: 15 },
+  { id: "4", employeeId: "6", assigned: 30, used: 0, available: 30 },
+];
+
 export const mockDashboardStats = {
   totalEmployees: 156,
   totalAppointments: 1104,
