@@ -583,3 +583,5 @@ En JWT real, `token` ya no sería JSON: sería el token del backend.
 ## 18) Documentación
 
 La documentación oficial del frontend vive en este archivo: `README.md`.
+
+...
