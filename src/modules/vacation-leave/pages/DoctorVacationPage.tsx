@@ -8,7 +8,7 @@ import { useVacationBalance } from "../hooks/useVacationBalance";
 import VacationBalanceCard from "../components/VacationBalanceCard";
 
 const DoctorVacationPage: React.FC = () => {
-  const doctorId = "doctor-001";
+  const doctorId = "1";
 
   const { balance, loading, error, refetch } = useVacationBalance(doctorId);
 
