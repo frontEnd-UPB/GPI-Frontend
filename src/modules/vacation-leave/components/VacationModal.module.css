@@ -1,0 +1,306 @@
+/* ---- Overlay ---- */
+.overlay {
+  position: fixed;
+  inset: 0;
+  background-color: rgba(0, 0, 0, 0.5);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 1000;
+  padding: 1rem;
+}
+
+/* ---- Modal Card ---- */
+.modal {
+  background-color: #fff;
+  border-radius: 12px;
+  width: 100%;
+  max-width: 620px;
+  max-height: 90vh;
+  overflow-y: auto;
+  box-shadow: 0 8px 32px rgba(0, 0, 0, 0.2);
+  outline: none;
+  font-family: "Segoe UI", Tahoma, Geneva, Verdana, sans-serif;
+}
+
+/* ---- Header ---- */
+.header {
+  background-color: #1a237e;
+  padding: 16px 24px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  border-radius: 12px 12px 0 0;
+}
+
+.title {
+  color: #fff;
+  margin: 0;
+  font-size: 1.15rem;
+  font-weight: 700;
+}
+
+.closeButton {
+  background: none;
+  border: none;
+  color: #fff;
+  font-size: 1.3rem;
+  cursor: pointer;
+  padding: 4px 8px;
+  line-height: 1;
+  transition: opacity 0.2s ease;
+}
+
+.closeButton:hover {
+  opacity: 0.7;
+}
+
+/* ---- Body ---- */
+.body {
+  padding: 24px;
+}
+
+/* ---- Date Row ---- */
+.dateRow {
+  display: flex;
+  gap: 24px;
+  background-color: #2c3178;
+  border-radius: 30px;
+  padding: 16px 24px;
+  margin-bottom: 20px;
+}
+
+.dateField {
+  flex: 1;
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+
+.dateLabel {
+  font-size: 0.75rem;
+  font-weight: 600;
+  color: #b0b4e0;
+  white-space: nowrap;
+}
+
+.dateInputWrapper {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+}
+
+.calendarIcon {
+  font-size: 1rem;
+}
+
+.dateInput {
+  border: none;
+  background: transparent;
+  font-size: 1rem;
+  font-weight: 700;
+  color: #fff;
+  outline: none;
+  width: 120px;
+  cursor: pointer;
+}
+
+.dateText {
+  font-size: 1rem;
+  font-weight: 700;
+  color: #fff;
+}
+
+/* ---- Type & Status Row ---- */
+.typeStatusRow {
+  display: flex;
+  gap: 24px;
+  margin-bottom: 20px;
+  align-items: flex-start;
+}
+
+.typeStatusRow .fieldGroup {
+  flex: 1;
+  margin-bottom: 0;
+}
+
+/* ---- Field Groups ---- */
+.fieldGroup {
+  margin-bottom: 20px;
+}
+
+.label {
+  display: block;
+  font-size: 0.85rem;
+  font-weight: 700;
+  color: #1a237e;
+  margin-bottom: 6px;
+}
+
+.optional {
+  font-weight: 400;
+  color: #888;
+}
+
+/* ---- Read-Only Fields ---- */
+.readOnlyField {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 10px 14px;
+  border: 1px solid #e8e8e8;
+  border-radius: 8px;
+  font-size: 0.95rem;
+  color: #666;
+  background-color: #fafafa;
+}
+
+.readOnlyTextarea {
+  padding: 12px 14px;
+  border: 1px solid #e8e8e8;
+  border-radius: 8px;
+  font-size: 0.95rem;
+  color: #666;
+  background-color: #fafafa;
+  min-height: 100px;
+  white-space: pre-line;
+  line-height: 1.5;
+}
+
+/* ---- Select ---- */
+.select {
+  width: 100%;
+  padding: 10px 14px;
+  border: 1px solid #ddd;
+  border-radius: 8px;
+  font-size: 0.95rem;
+  color: #333;
+  background-color: #fff;
+  outline: none;
+  cursor: pointer;
+  appearance: none;
+}
+
+.select:focus {
+  border-color: #1a237e;
+}
+
+/* ---- Textarea ---- */
+.textarea {
+  width: 100%;
+  padding: 12px 14px;
+  border: 1px solid #ddd;
+  border-radius: 8px;
+  font-size: 0.95rem;
+  color: #333;
+  resize: vertical;
+  outline: none;
+  font-family: inherit;
+  line-height: 1.5;
+}
+
+.textarea:focus {
+  border-color: #1a237e;
+}
+
+/* ---- File Input ---- */
+.fileInputWrapper {
+  position: relative;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 10px 14px;
+  border: 1px solid #ddd;
+  border-radius: 8px;
+  cursor: pointer;
+  overflow: hidden;
+}
+
+.fileIcon {
+  font-size: 1rem;
+}
+
+.fileInput {
+  position: absolute;
+  inset: 0;
+  opacity: 0;
+  cursor: pointer;
+}
+
+.filePlaceholder {
+  font-size: 0.9rem;
+  color: #aaa;
+}
+
+.fileError {
+  color: #c62828;
+  font-size: 0.8rem;
+  margin-top: 4px;
+}
+
+/* ---- Rejection Reason ---- */
+.rejectionBox {
+  background-color: #ffebee;
+  border: 1px solid #ffcdd2;
+  border-radius: 10px;
+  padding: 16px;
+  margin-bottom: 20px;
+}
+
+.rejectionTitle {
+  font-size: 0.85rem;
+  font-weight: 700;
+  color: #c62828;
+  display: block;
+  margin-bottom: 6px;
+}
+
+.rejectionText {
+  font-size: 0.85rem;
+  color: #c62828;
+  margin: 0;
+  white-space: pre-line;
+  line-height: 1.5;
+}
+
+/* ---- Action Buttons ---- */
+.actions {
+  display: flex;
+  gap: 16px;
+  margin-top: 24px;
+}
+
+.resendButton {
+  flex: 1;
+  padding: 12px;
+  background-color: #4caf50;
+  color: #fff;
+  border: none;
+  border-radius: 24px;
+  font-size: 1rem;
+  font-weight: 700;
+  cursor: pointer;
+  letter-spacing: 0.5px;
+  transition: background-color 0.2s ease;
+}
+
+.resendButton:hover {
+  background-color: #388e3c;
+}
+
+.cancelRequestButton {
+  flex: 1;
+  padding: 12px;
+  background-color: #f44336;
+  color: #fff;
+  border: none;
+  border-radius: 24px;
+  font-size: 1rem;
+  font-weight: 700;
+  cursor: pointer;
+  transition: background-color 0.2s ease;
+}
+
+.cancelRequestButton:hover {
+  background-color: #d32f2f;
+}
