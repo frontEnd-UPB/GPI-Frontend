@@ -6,7 +6,7 @@ import { ErrorMessage } from "../../../core/components/feedback/ErrorMessage";
 //vacation balance
 import { useVacationBalance } from "../hooks/useVacationBalance";
 import VacationBalanceCard from "../components/VacationBalanceCard";
-import VacationRequestForm from "../components/VacationRequestForm";
+import VacationRequestButton from "../components/VacationRequestButton";
 
 const DoctorVacationPage: React.FC = () => {
   const doctorId = "1";
@@ -30,15 +30,9 @@ const DoctorVacationPage: React.FC = () => {
           { label: "Doctor" },
         ]}
       />
-      <div className="container mx-auto px-5 py-8">
-        <div>
-            <VacationBalanceCard balance={balance} />
-        </div>
-      </div>
-      <div className="container mx-auto px-5 py-8">
-        <div>
-            <VacationRequestForm visible={true} onSubmit={() => {}} onCancel={() => {}} />
-        </div>
+      <div className="max-w-4xl mx-auto px-6 py-8 flex flex-col gap-8">
+        <VacationBalanceCard balance={balance} />
+        <VacationRequestButton />
       </div>
     </MainContainer>
   );
