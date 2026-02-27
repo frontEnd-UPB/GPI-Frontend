@@ -34,6 +34,16 @@ export interface Appointment {
   status: "scheduled" | "confirmed" | "completed" | "cancelled";
 }
 
+export enum VacationReason {
+  Vacations = "Vacations",
+  SickLeave = "Sick Leave",
+  PersonalLeave = "Personal Leave",
+  MaternityLeave = "Maternity Leave",
+  PaternityLeave = "Paternity Leave",
+  FamilyVacation = "Family Vacation",
+  MedicalLeave = "Medical Leave",
+  Other = "Other",
+}
 export interface VacationRequest {
   id: string;
   employeeId: string;
@@ -41,7 +51,7 @@ export interface VacationRequest {
   startDate: string;
   endDate: string;
   days: number;
-  reason: string;
+  reason: VacationReason;
   status: "pending" | "approved" | "rejected";
   requestDate: string;
 }
@@ -249,7 +259,7 @@ export const mockVacationRequests: VacationRequest[] = [
     startDate: "2026-03-01",
     endDate: "2026-03-05",
     days: 5,
-    reason: "Family vacation",
+    reason: VacationReason.FamilyVacation,
     status: "pending",
     requestDate: "2026-02-15",
   },
@@ -260,7 +270,7 @@ export const mockVacationRequests: VacationRequest[] = [
     startDate: "2026-03-10",
     endDate: "2026-03-15",
     days: 6,
-    reason: "Personal leave",
+    reason: VacationReason.PersonalLeave,
     status: "pending",
     requestDate: "2026-02-18",
   },
@@ -271,7 +281,7 @@ export const mockVacationRequests: VacationRequest[] = [
     startDate: "2026-02-26",
     endDate: "2026-03-02",
     days: 5,
-    reason: "Medical leave",
+    reason: VacationReason.MedicalLeave,
     status: "approved",
     requestDate: "2026-02-10",
   },
@@ -301,3 +311,7 @@ export const mockDashboardStats = {
   employeesOnVacationToday: 2,
   returningNextWeek: 1,
 };
+
+export const ALLOWED_FILE_TYPES = [".pdf", ".jpg", ".jpeg", ".png", ".doc", ".docx"];
+export const MAX_FILE_SIZE_MB = 5;
+export const MAX_FILE_SIZE_BYTES = MAX_FILE_SIZE_MB * 1024 * 1024;
