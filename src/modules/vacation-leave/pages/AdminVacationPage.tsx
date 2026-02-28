@@ -1,8 +1,13 @@
 import React from "react";
 import { MainContainer, PageHeader } from "../../../core/components";
 import { ROUTE_PATHS } from "../../../routes/routes";
-
+import VacationStatusTable from "../components/VacationStatusTable"; 
+import { mockVacationRequests } from "../../../core/mocks/data";
+import type { VacationRequest } from "../../../core/mocks/data";
 const AdminVacationPage: React.FC = () => {
+  const handleView = (vacation: VacationRequest) => {
+    console.log("Viewing vacation:", vacation);
+  };
   return (
     <MainContainer>
       <PageHeader
@@ -14,12 +19,12 @@ const AdminVacationPage: React.FC = () => {
         ]}
       />
       <div className="container mx-auto px-5 py-8">
-        <p className="text-sm text-muted-foreground">
-          Base page for admin vacation management. Add your module UI here.
-        </p>
+        <VacationStatusTable
+          vacations={mockVacationRequests}
+          onView={handleView}
+        />
       </div>
     </MainContainer>
   );
 };
-
 export default AdminVacationPage;
