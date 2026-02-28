@@ -14,12 +14,14 @@ interface VacationRequestFormProps {
   visible: boolean;
   onSubmit: (data: VacationSubmitData) => void;
   onCancel: () => void;
+  availableDays?: number | null;
 }
 
 export default function VacationRequestForm({
   visible,
   onSubmit,
   onCancel,
+  availableDays,
 }: VacationRequestFormProps) {
   const { colors, typography, radius, spacing } = theme;
 
@@ -31,7 +33,7 @@ export default function VacationRequestForm({
     handleFileChange,
     handleSubmit,
     handleCancel,
-  } = useVacationRequestForm(onSubmit, onCancel);
+  } = useVacationRequestForm(onSubmit, onCancel, availableDays);
 
   return (
     /* ---- Expand / Collapse wrapper ---- */

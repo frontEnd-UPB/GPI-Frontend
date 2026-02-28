@@ -5,12 +5,15 @@ import { ROUTE_PATHS } from "../../../routes/routes";
 import { ErrorMessage } from "../../../core/components/feedback/ErrorMessage";
 //vacation balance
 import { useVacationBalance } from "../hooks/useVacationBalance";
+import { useSubmitVacationRequest } from "../hooks/useSubmitVacationRequest";
 import VacationBalanceCard from "../components/VacationBalanceCard";
 import VacationRequestButton from "../components/VacationRequestButton";
 
 const DoctorVacationPage: React.FC = () => {
   const doctorId = "1";
-  const { balance, loading, error, refetch } = useVacationBalance(doctorId);
+  const { balance, loading ,error, refetch } = useVacationBalance(doctorId);
+  const { submit, error: submitError } = useSubmitVacationRequest(doctorId, refetch);
+
   if (error) {
     return (
       <div>
@@ -32,7 +35,10 @@ const DoctorVacationPage: React.FC = () => {
       />
       <div className="max-w-4xl mx-auto px-6 py-8 flex flex-col gap-8">
         <VacationBalanceCard balance={balance} />
-        <VacationRequestButton />
+        {submitError && (
+          <ErrorMessage message={`Error submitting request: ${submitError}`} />
+        )}
+        <VacationRequestButton onSubmit={submit} availableDays={balance?.available} />
       </div>
     </MainContainer>
   );

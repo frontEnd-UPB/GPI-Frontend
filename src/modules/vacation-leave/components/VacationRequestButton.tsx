@@ -6,10 +6,12 @@ import type { VacationSubmitData } from "../hooks/useVacationRequestForm";
 
 interface VacationRequestButtonProps {
   onSubmit?: (data: VacationSubmitData) => void;
+  availableDays?: number | null;
 }
 
 export default function VacationRequestButton({
   onSubmit,
+  availableDays,
 }: VacationRequestButtonProps) {
   const [formVisible, setFormVisible] = useState(false);
   const { colors, typography, radius, spacing } = theme;
@@ -55,6 +57,7 @@ export default function VacationRequestButton({
         visible={formVisible}
         onSubmit={handleSubmit}
         onCancel={handleCancel}
+        availableDays={availableDays}
          />
      
     </div>

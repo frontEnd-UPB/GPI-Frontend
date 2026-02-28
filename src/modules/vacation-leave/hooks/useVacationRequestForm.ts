@@ -20,7 +20,8 @@ export interface VacationSubmitData extends VacationFormValues {
 
 export function useVacationRequestForm(
   onSubmit: (data: VacationSubmitData) => void,
-  onCancel: () => void
+  onCancel: () => void,
+  availableDays?: number | null
 ) {
   const [attachment, setAttachment] = useState<File | null>(null);
   const [fileError, setFileError] = useState<string>("");
@@ -59,16 +60,43 @@ export function useVacationRequestForm(
   };
 
   const handleSubmit = form.handleSubmit((data) => {
-    if (
-      data.startDate &&
-      data.endDate &&
-      data.endDate < data.startDate
-    ) {
-      form.setError("endDate", {
-        message: "End date must be after start date.",
-      });
-      return;
+    const today = new Date();
+    today.setHours(0, 0, 0, 0);
+
+    if (data.startDate) {
+      const start = new Date(data.startDate);
+      start.setHours(0, 0, 0, 0);
+      if (start < today) {
+        form.setError("startDate", {
+          message: "Start date cannot be in the past.",
+        });
+        return;
+      }
     }
+
+    if (data.startDate && data.endDate) {
+      if (data.endDate < data.startDate) {
+        form.setError("endDate", {
+          message: "End date must be after start date.",
+        });
+        return;
+      }
+
+      if (availableDays != null) {
+        const days =
+          Math.ceil(
+            (data.endDate.getTime() - data.startDate.getTime()) /
+              (1000 * 60 * 60 * 24)
+          ) + 1;
+        if (days > availableDays) {
+          form.setError("endDate", {
+            message: `Request exceeds your available balance (${availableDays} day${availableDays === 1 ? "" : "s"}).`,
+          });
+          return;
+        }
+      }
+    }
+
     onSubmit({ ...data, attachment });
     form.reset();
     setAttachment(null);
