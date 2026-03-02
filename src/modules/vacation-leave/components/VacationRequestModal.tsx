@@ -4,6 +4,7 @@ import DateRangeDisplay from "./DateRangeDisplay";
 import type { VacationRequest } from "../../../core/mocks/data";
 import { theme } from "../../../core/theme";
 
+
 interface VacationRequestModalProps {
   open: boolean;
   onClose: () => void;
