@@ -22,7 +22,7 @@ function ThemedContainer({ children, className }: ThemedContainerProps) {
         <img src={welcomeImage} alt="Welcome" className="absolute inset-0 w-full h-full object-cover object-[34%_50%] scale-110 translate-y-5" />
       </div>
       {/* PARTE DERECHA DEL CONTAINER QUE CONTENDRÁ EL FORMS */}
-      <div className="flex-1 flex items-center justify-center p-8">
+      <div className="flex-1 flex items-center justify-center p-12 ">
         {children}
       </div>
     </div>

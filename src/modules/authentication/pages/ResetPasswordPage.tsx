@@ -9,12 +9,12 @@ import { Input, Button } from "../../../core/components";
 const ResetPasswordPage: React.FC = () => {
   const handleSubmit: React.FormEventHandler<HTMLFormElement> = (e) => {
     e.preventDefault();
-    //logica de login 
+    //logica de reset password 
   };
 
   const handleForgotPassword = (event: React.MouseEvent<HTMLAnchorElement>) => {
     event.preventDefault();
-    // logica de login 
+    // logica de forgot password 
   };
 
   return (
@@ -37,13 +37,13 @@ const ResetPasswordPage: React.FC = () => {
             
             <p className="text-sm text-primary-foreground font-semibold mt-4 mb-2">
             New Password</p>
-            <Input id="email" type="email" placeholder="Enter your email" required />
+            <Input id="newPassword" type="password" placeholder="Enter your new password" required />
             <p className="text-sm text-primary-foreground font-semibold mt-4 mb-2">
             Confirm Password</p>
-            <Input id="password" type="password" placeholder="************" required />
+            <Input id="confirmPassword" type="password" placeholder="Confirm your new password" required />
             
             <div className="mt-6 flex justify-center">
-              <Button type="button" className="login-button z-10 bg-chart-3" >
+              <Button type="submit" className="z-10 bg-chart-3" >
                Save New Password
               </Button>
             </div>
