@@ -1,4 +1,5 @@
 import { theme } from "../../../core/theme";
+import { FiCalendar } from "react-icons/fi";
 
 interface DateRangeDisplayProps {
   startDate: string;
@@ -24,37 +25,51 @@ export default function DateRangeDisplay({
       }}
     >
       {/* Start Date */}
-      <div style={{ flex: 1, minWidth: 140 }}>
-        <label
-          style={{
-            fontSize: typography.fontSize.xs,
-            fontFamily: typography.fontFamily.semiBold,
-            color: colors.primaryDark,
-          }}
-        >
-          Start Date
-        </label>
-
-        <div style={{ 
-            marginTop: 6,
-            //color: colors.primaryDark,
-            //fontFamily: typography.fontFamily.semiBold,
-             }}>{startDate}</div>
+      <div style={{ 
+        flex: 1, 
+        minWidth: 140,
+        display: "flex",
+        alignItems: "flex-start",
+        gap: spacing.sm
+      }}>
+        <FiCalendar color={colors.primaryDark} size={20} style={{ marginTop: 2 }} />
+        <div>
+          <label
+            style={{
+              fontSize: typography.fontSize.xs,
+              fontFamily: typography.fontFamily.semiBold,
+              color: colors.primaryDark,
+              display: "block",
+            }}
+          >
+            Start Date
+          </label>
+          <div style={{ marginTop: 6 }}>{startDate}</div>
+        </div>
       </div>
 
       {/* End Date */}
-      <div style={{ flex: 1, minWidth: 140 }}>
-        <label
-          style={{
-            fontSize: typography.fontSize.xs,
-            fontFamily: typography.fontFamily.semiBold,
-            color: colors.primaryDark,
-          }}
-        >
-          End Date
-        </label>
-
-        <div style={{ marginTop: 6 }}>{endDate}</div>
+      <div style={{ 
+        flex: 1, 
+        minWidth: 140,
+        display: "flex",
+        alignItems: "flex-start",
+        gap: spacing.sm
+      }}>
+        <FiCalendar color={colors.primaryDark} size={20} style={{ marginTop: 2 }} />
+        <div>
+          <label
+            style={{
+              fontSize: typography.fontSize.xs,
+              fontFamily: typography.fontFamily.semiBold,
+              color: colors.primaryDark,
+              display: "block",
+            }}
+          >
+            End Date
+          </label>
+          <div style={{ marginTop: 6 }}>{endDate}</div>
+        </div>
       </div>
     </div>
   );
