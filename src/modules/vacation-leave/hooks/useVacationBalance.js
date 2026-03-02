@@ -1,5 +1,5 @@
 import { useState, useEffect } from "react";
-import { getVacationBalance } from "../services/useVacationDoctorService";
+import { getVacationBalance } from "../services/vacationDoctorService";
  
 export function useVacationBalance(doctorId) {
   const [balance, setBalance] = useState({
