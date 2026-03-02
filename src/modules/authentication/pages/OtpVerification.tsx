@@ -6,6 +6,7 @@ import {Footer } from "../../../core/components/layout/Footer";
 import { ThemedContainer } from "../components/themed-container";
 import { InputOTP, InputOTPGroup, InputOTPSlot } from "../../../ui/input-otp";
 import { Button } from "../../../core";
+import BlurredBackground from "../components/BlurredBackground";
 
 const handleSubmit = (e: React.FormEvent) => {
   e.preventDefault();
@@ -62,11 +63,7 @@ const OtpVerificationPage: React.FC = () => {
   return (
     <MainLayout>
       <TopInfoBar />
-      <div
-        className="min-h-screen flex items-center justify-center p-4 relative"
-        style={{ backgroundImage: `url(${bgImage})`, backgroundSize: "cover", backgroundPosition: "center" }}
-      >
-        <div className="absolute inset-0 backdrop-blur-sm" style={{ background: "rgba(255, 255, 255, 0.3)" }} />
+        <BlurredBackground >
         <ThemedContainer>
             <form className="otp-form mt-[-200px]" onSubmit={handleSubmit}>
 
@@ -133,7 +130,7 @@ const OtpVerificationPage: React.FC = () => {
             </form>
 
         </ThemedContainer>
-      </div>
+        </BlurredBackground >
       <Footer />
     </MainLayout>
   );
