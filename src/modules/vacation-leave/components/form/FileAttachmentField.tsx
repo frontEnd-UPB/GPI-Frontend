@@ -26,6 +26,7 @@ export default function FileAttachmentField({
           fontSize: typography.fontSize.sm,
           fontFamily: typography.fontFamily.bold,
           color: colors.primaryDark,
+          fontWeight: "bold",
         }}
       >
         Attach Document{" "}
@@ -44,6 +45,7 @@ export default function FileAttachmentField({
         type="file"
         accept={ALLOWED_FILE_TYPES.join(",")}
         onChange={onChange}
+        style={{ borderColor: colors.textSecondary }}
         className={attachment ? "text-foreground" : "text-muted-foreground"}
       />
 

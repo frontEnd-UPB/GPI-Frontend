@@ -1,4 +1,5 @@
 import React from "react";
+import { useState } from "react";
 import { MainContainer, PageHeader } from "../../../core/components";
 import { ROUTE_PATHS } from "../../../routes/routes";
 //core
@@ -8,11 +9,19 @@ import { useVacationBalance } from "../hooks/useVacationBalance";
 import { useSubmitVacationRequest } from "../hooks/useSubmitVacationRequest";
 import VacationBalanceCard from "../components/VacationBalanceCard";
 import VacationRequestButton from "../components/VacationRequestButton";
+import VacationStatusTable from "../components/VacationStatusTable";
+import { mockVacationRequests } from "../../../core";
+import VacationRequestModal from "../components/VacationRequestModal";
+import type { VacationRequest } from "../../../core/mocks/data";
 
 const DoctorVacationPage: React.FC = () => {
   const doctorId = "1";
-  const { balance, loading ,error, refetch } = useVacationBalance(doctorId);
+  const { balance, error, refetch } = useVacationBalance(doctorId);
   const { submit, error: submitError } = useSubmitVacationRequest(doctorId, refetch);
+
+  const [selectedVacation, setSelectedVacation] =
+    useState<VacationRequest | null>(null);
+  const [openModal, setOpenModal] = useState(false);
 
   if (error) {
     return (
@@ -22,6 +31,11 @@ const DoctorVacationPage: React.FC = () => {
       </div>
     );
   }
+  const handleView = (vacation: VacationRequest) => {
+      setSelectedVacation(vacation);
+      setOpenModal(true);
+    };
+  
 
   return (
     <MainContainer>
@@ -39,6 +53,17 @@ const DoctorVacationPage: React.FC = () => {
           <ErrorMessage message={`Error submitting request: ${submitError}`} />
         )}
         <VacationRequestButton onSubmit={submit} availableDays={balance?.available} />
+        
+        <VacationStatusTable
+          vacations={mockVacationRequests}
+          onView={handleView}
+        />
+
+        <VacationRequestModal
+          open={openModal}
+          onClose={() => setOpenModal(false)}
+          vacation={selectedVacation}
+        />
       </div>
     </MainContainer>
   );

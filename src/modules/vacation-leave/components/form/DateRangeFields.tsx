@@ -19,14 +19,13 @@ export default function DateRangeFields({ control }: DateRangeFieldsProps) {
 
   return (
     <div
+      className="flex flex-col sm:flex-row sm:items-start"
       style={{
-        display: "flex",
         gap: spacing.xxl,
-        backgroundColor: colors.background,
-        borderRadius: radius.full,
+        backgroundColor: colors.primaryLight,
+        borderRadius: radius.xl,
         padding: `${spacing.lg}px ${spacing.xxl}px`,
         marginBottom: spacing.xl,
-        flexWrap: "wrap",
       }}
     >
       {/* Start Date */}
@@ -35,12 +34,13 @@ export default function DateRangeFields({ control }: DateRangeFieldsProps) {
         name="startDate"
         rules={{ required: "Start date is required." }}
         render={({ field }) => (
-          <FormItem style={{ flex: 1, minWidth: 140 }}>
+          <FormItem className="flex-1 min-w-[140px] flex flex-col items-center">
             <FormLabel
               style={{
-                fontSize: typography.fontSize.xs,
-                fontFamily: typography.fontFamily.semiBold,
+                fontSize: typography.fontSize.md,
+                fontFamily: typography.fontFamily.bold,
                 color: colors.primaryDark,
+                fontWeight: "bold",
               }}
             >
               Start Date
@@ -50,9 +50,11 @@ export default function DateRangeFields({ control }: DateRangeFieldsProps) {
                 value={field.value ?? undefined}
                 onChange={(d) => field.onChange(d ?? null)}
                 placeholder="DD/MM/YYYY"
+                className="border-0 bg-transparent justify-center gap-2 text-center"
+                valueClassName="font-bold"
               />
             </FormControl>
-            <FormMessage />
+            <FormMessage className="pl-1 pt-0.5" />
           </FormItem>
         )}
       />
@@ -63,12 +65,13 @@ export default function DateRangeFields({ control }: DateRangeFieldsProps) {
         name="endDate"
         rules={{ required: "End date is required." }}
         render={({ field }) => (
-          <FormItem style={{ flex: 1, minWidth: 140 }}>
+          <FormItem className="flex-1 min-w-[140px] flex flex-col items-center">
             <FormLabel
               style={{
-                fontSize: typography.fontSize.xs,
-                fontFamily: typography.fontFamily.semiBold,
+                fontSize: typography.fontSize.md,
+                fontFamily: typography.fontFamily.bold,
                 color: colors.primaryDark,
+                fontWeight: "bold",
               }}
             >
               End Date
@@ -78,9 +81,11 @@ export default function DateRangeFields({ control }: DateRangeFieldsProps) {
                 value={field.value ?? undefined}
                 onChange={(d) => field.onChange(d ?? null)}
                 placeholder="DD/MM/YYYY"
+                className="border-0 bg-transparent justify-center gap-2 text-center"
+                valueClassName="font-bold"
               />
             </FormControl>
-            <FormMessage />
+            <FormMessage className="pl-1 pt-0.5" />
           </FormItem>
         )}
       />
