@@ -9,12 +9,14 @@ interface VacationRequestModalProps {
   open: boolean;
   onClose: () => void;
   vacation: VacationRequest | null;
+  onCancelRequest: (id: string) => void;
 }
 
 export default function VacationRequestModal({
   open,
   onClose,
   vacation,
+  onCancelRequest,
 }: VacationRequestModalProps) {
   const { colors, spacing, radius, typography } = theme;
 
@@ -22,6 +24,11 @@ export default function VacationRequestModal({
 
   const isPending = vacation.status === "pending";
   const isRejected = vacation.status === "rejected";
+
+  const handleCancel = () => {
+    onCancelRequest(vacation.id);
+    onClose();
+  };
 
   return (
     <Modal open={open} onClose={onClose} title="Vacation Leave Request" size="lg">
@@ -135,6 +142,7 @@ export default function VacationRequestModal({
           </button>
 
           <button
+            onClick={handleCancel}
             style={{
               backgroundColor: colors.error,
               color: colors.textOnPrimary,

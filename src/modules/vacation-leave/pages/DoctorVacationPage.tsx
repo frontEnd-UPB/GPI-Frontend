@@ -19,6 +19,9 @@ const DoctorVacationPage: React.FC = () => {
   const { balance, error, refetch } = useVacationBalance(doctorId);
   const { submit, error: submitError } = useSubmitVacationRequest(doctorId, refetch);
 
+  const [vacations, setVacations] = useState<VacationRequest[]>(
+      mockVacationRequests
+    );
   const [selectedVacation, setSelectedVacation] =
     useState<VacationRequest | null>(null);
   const [openModal, setOpenModal] = useState(false);
@@ -35,6 +38,17 @@ const DoctorVacationPage: React.FC = () => {
       setSelectedVacation(vacation);
       setOpenModal(true);
     };
+  const handleCancelRequest = (id: string) => {
+    setVacations(prev =>
+      prev.map(v =>
+        v.id === id ? { ...v, status: "canceled" } : v
+      )
+    );
+
+    setSelectedVacation(prev =>
+      prev && prev.id === id ? { ...prev, status: "canceled" } : prev
+    );
+  };
   
 
   return (
@@ -63,6 +77,7 @@ const DoctorVacationPage: React.FC = () => {
           open={openModal}
           onClose={() => setOpenModal(false)}
           vacation={selectedVacation}
+          onCancelRequest={handleCancelRequest}
         />
       </div>
     </MainContainer>

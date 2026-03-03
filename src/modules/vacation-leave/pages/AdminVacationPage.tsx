@@ -8,7 +8,12 @@ import VacationRequestModal from "../components/VacationRequestModal";
 import { mockVacationRequests } from "../../../core/mocks/data";
 import type { VacationRequest } from "../../../core/mocks/data";
 
+
+
 const AdminVacationPage: React.FC = () => {
+  const [vacations, setVacations] = useState<VacationRequest[]>(
+    mockVacationRequests
+  );
   const [selectedVacation, setSelectedVacation] =
     useState<VacationRequest | null>(null);
 
@@ -17,6 +22,18 @@ const AdminVacationPage: React.FC = () => {
   const handleView = (vacation: VacationRequest) => {
     setSelectedVacation(vacation);
     setOpenModal(true);
+  };
+
+  const handleCancelRequest = (id: string) => {
+    setVacations(prev =>
+      prev.map(v =>
+        v.id === id ? { ...v, status: "canceled" } : v
+      )
+    );
+
+    setSelectedVacation(prev =>
+      prev && prev.id === id ? { ...prev, status: "canceled" } : prev
+    );
   };
 
   return (
@@ -32,7 +49,7 @@ const AdminVacationPage: React.FC = () => {
 
       <div className="container mx-auto px-5 py-8">
         <VacationStatusTable
-          vacations={mockVacationRequests}
+          vacations={vacations}
           onView={handleView}
         />
       </div>
@@ -41,6 +58,7 @@ const AdminVacationPage: React.FC = () => {
         open={openModal}
         onClose={() => setOpenModal(false)}
         vacation={selectedVacation}
+        onCancelRequest={handleCancelRequest}
       />
     </MainContainer>
   );
