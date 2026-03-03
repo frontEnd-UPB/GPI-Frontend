@@ -2,7 +2,18 @@ import React, { useMemo, useState } from "react";
 import { ChevronLeft, ChevronRight } from "lucide-react";
 import { Button } from "../../../ui/button";
 import { specialties } from "../constants/specialties";
-import { vacationEvents } from "../mocks/events";
+
+export type CalendarEvent = {
+  id: string;
+  doctorName: string;
+  specialty: string;
+  startDate: string;
+  endDate: string;
+};
+
+type CalendarioProps = {
+  events: CalendarEvent[];
+};
 
 function startOfDay(d: Date) {
   return new Date(d.getFullYear(), d.getMonth(), d.getDate());
@@ -15,7 +26,7 @@ function formatDateKey(d: Date) {
   return `${y}-${m}-${day}`;
 }
 
-export default function Calendario() {
+export default function Calendario({ events }: CalendarioProps) {
   const [currentMonth, setCurrentMonth] = useState(() => {
     const now = new Date();
     return new Date(now.getFullYear(), now.getMonth(), 1);
@@ -48,10 +59,10 @@ export default function Calendario() {
 
   // Index events by date key for quick lookup (an event spanning multiple days will
   // be added to each date in its range).
-  const eventsByDate = useMemo(() => {
-    const map: Record<string, typeof vacationEvents> = {};
+  const eventsByDate = (events: CalendarEvent[]) => {
+    const map: Record<string, CalendarEvent[]> = {};
 
-    vacationEvents.forEach((evt) => {
+    events.forEach((evt) => {
       const start = startOfDay(new Date(evt.startDate));
       const end = startOfDay(new Date(evt.endDate));
       for (let d = new Date(start); d <= end; d.setDate(d.getDate() + 1)) {
@@ -62,7 +73,9 @@ export default function Calendario() {
     });
 
     return map;
-  }, []);
+  };
+
+  const eventsMap = useMemo(() => eventsByDate(events), [events]);
 
   const monthLabel = useMemo(() => currentMonth.toLocaleString("en-US", { month: "long", year: "numeric" }), [currentMonth]);
 
@@ -113,7 +126,7 @@ export default function Calendario() {
             const key = formatDateKey(date);
             const dayNumber = date.getDate();
             const isOtherMonth = date.getMonth() !== currentMonth.getMonth();
-            const events = eventsByDate[key] || [];
+            const events = eventsMap[key] || [];
 
             return (
               <div key={key} className="border-r border-b border-[#CECECE] p-2 relative group hover:bg-slate-50 transition-colors">
