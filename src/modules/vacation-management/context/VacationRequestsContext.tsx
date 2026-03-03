@@ -2,6 +2,7 @@ import React, { createContext, useContext, useMemo, useState } from "react";
 import type { VacationRequest } from "../../../core/mocks/data";
 import { mockVacationRequests, mockEmployees } from "../../../core/mocks/data";
 import { specialties as specialtyConstants } from "../constants/specialties";
+import { vacationEvents as moduleVacationEvents } from "../mocks/events";
 import { VACATION_STATUS } from "../../../core/constants";
 
 export interface VacationRequestsContextValue {
@@ -30,7 +31,28 @@ const VacationRequestsContext = createContext<VacationRequestsContextValue | und
 export const VacationRequestsProvider: React.FC<{ children: React.ReactNode }> = ({
   children,
 }) => {
-  const [requests, setRequests] = useState<VacationRequest[]>(mockVacationRequests);
+  // Include module-local mock events as approved requests so they appear in requests state
+  const moduleMockRequests: VacationRequest[] = moduleVacationEvents.map((me, idx) => {
+    const matched = mockEmployees.find((m) => m.name === me.doctorName);
+    const employeeId = matched ? matched.id : "";
+    const start = new Date(me.startDate);
+    const end = new Date(me.endDate);
+    const days = Math.round((end.getTime() - start.getTime()) / (1000 * 60 * 60 * 24)) + 1;
+
+    return {
+      id: `mod-${me.id}-${idx}`,
+      employeeId,
+      employeeName: me.doctorName,
+      startDate: me.startDate,
+      endDate: me.endDate,
+      days,
+      reason: "Imported mock event",
+      status: VACATION_STATUS.APPROVED,
+      requestDate: me.startDate,
+    } as VacationRequest;
+  });
+
+  const [requests, setRequests] = useState<VacationRequest[]>([...mockVacationRequests, ...moduleMockRequests]);
   const [search, setSearch] = useState<string>("");
   const [specialtyFilter, setSpecialtyFilter] = useState<string>("");
 
@@ -78,13 +100,33 @@ export const VacationRequestsProvider: React.FC<{ children: React.ReactNode }> =
         if (e.department) empMap[e.id] = normalize(e.department);
       });
 
-      const allEvents = requests.map((r) => ({
-        id: r.id,
-        doctorName: r.employeeName,
-        specialty: empMap[r.employeeId] ?? "",
-        startDate: r.startDate,
-        endDate: r.endDate,
-      }));
+      // Only include approved requests in calendar events (table continues to show pending)
+      const fromRequests = requests
+        .filter((r) => r.status === VACATION_STATUS.APPROVED)
+        .map((r) => ({
+          id: r.id,
+          doctorName: r.employeeName,
+          specialty: empMap[r.employeeId] ?? "",
+          startDate: r.startDate,
+          endDate: r.endDate,
+        }));
+
+      // Include module-local mock events so the calendar shows additional approved vacations
+      const fromModuleMocks = moduleVacationEvents.map((me) => {
+        // Try to resolve specialty from core mockEmployees by name when possible
+        const matched = mockEmployees.find((m) => m.name === me.doctorName);
+        const resolvedSpecialty = matched ? normalize(matched.department) : me.specialty;
+
+        return {
+          id: `mod-${me.id}`,
+          doctorName: me.doctorName,
+          specialty: resolvedSpecialty,
+          startDate: me.startDate,
+          endDate: me.endDate,
+        };
+      });
+
+      const allEvents = [...fromRequests, ...fromModuleMocks];
 
       // Apply centralized filtering (search by doctor name and specialty)
       const filteredEvents = allEvents.filter((evt) => {

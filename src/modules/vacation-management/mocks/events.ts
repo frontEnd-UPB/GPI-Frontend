@@ -36,4 +36,18 @@ export const vacationEvents: VacationEvent[] = [
     startDate: "2026-03-01",
     endDate: "2026-03-02",
   },
+  {
+    id: "evt-5",
+    doctorName: "Laura Martínez",
+    specialty: "General Medicine",
+    startDate: "2026-03-15",
+    endDate: "2026-03-18",
+  },
+  {
+    id: "evt-6",
+    doctorName: "María Gómez",
+    specialty: "Gynecology",
+    startDate: "2026-04-05",
+    endDate: "2026-04-10",
+  },
 ];

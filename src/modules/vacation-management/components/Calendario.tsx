@@ -1,7 +1,7 @@
 import React, { useMemo, useState } from "react";
 import { ChevronLeft, ChevronRight } from "lucide-react";
 import { Button } from "../../../ui/button";
-import { specialties } from "../constants/specialties";
+import { specialties as specialtyConstants } from "../constants/specialties";
 
 export type CalendarEvent = {
   id: string;
@@ -34,27 +34,27 @@ export default function Calendario({ events }: CalendarioProps) {
 
   const specialtyColorMap = useMemo(() => {
     const map: Record<string, string> = {};
-    specialties.forEach((s) => (map[s.name] = s.color));
+    specialtyConstants.forEach((s) => (map[s.name] = s.color));
     return map;
   }, []);
 
   // Build calendar grid (start on Sunday - 0) covering the full weeks that include
   // the current month (may include days from previous/next month to fill weeks).
-  const days = useMemo(() => {
+  const { days, gridStart, gridEnd } = useMemo(() => {
     const year = currentMonth.getFullYear();
     const month = currentMonth.getMonth();
 
     const firstOfMonth = new Date(year, month, 1);
     const lastOfMonth = new Date(year, month + 1, 0);
 
-    const gridStart = new Date(year, month, 1 - firstOfMonth.getDay());
-    const gridEnd = new Date(year, month, lastOfMonth.getDate() + (6 - lastOfMonth.getDay()));
+    const gs = new Date(year, month, 1 - firstOfMonth.getDay());
+    const ge = new Date(year, month, lastOfMonth.getDate() + (6 - lastOfMonth.getDay()));
 
     const list: Date[] = [];
-    for (let d = startOfDay(gridStart); d <= startOfDay(gridEnd); d.setDate(d.getDate() + 1)) {
+    for (let d = startOfDay(gs); d <= startOfDay(ge); d.setDate(d.getDate() + 1)) {
       list.push(new Date(d));
     }
-    return list;
+    return { days: list, gridStart: startOfDay(gs), gridEnd: startOfDay(ge) };
   }, [currentMonth]);
 
   // Index events by date key for quick lookup (an event spanning multiple days will
@@ -76,6 +76,30 @@ export default function Calendario({ events }: CalendarioProps) {
   };
 
   const eventsMap = useMemo(() => eventsByDate(events), [events]);
+
+  // Determine which specialties appear in the currently visible month grid
+  const visibleSpecialties = useMemo(() => {
+    const set = new Set<string>();
+
+    events.forEach((evt) => {
+      const s = startOfDay(new Date(evt.startDate));
+      const e = startOfDay(new Date(evt.endDate));
+      if (s <= gridEnd && e >= gridStart) {
+        if (evt.specialty) set.add(evt.specialty);
+      }
+    });
+
+    // Order by canonical specialtyConstants order, then append any unknowns
+    const ordered: string[] = [];
+    for (const sc of specialtyConstants) {
+      if (set.has(sc.name)) ordered.push(sc.name);
+    }
+    for (const name of Array.from(set)) {
+      if (!specialtyConstants.find((sc) => sc.name === name)) ordered.push(name);
+    }
+
+    return ordered;
+  }, [events, gridStart, gridEnd]);
 
   const monthLabel = useMemo(() => currentMonth.toLocaleString("en-US", { month: "long", year: "numeric" }), [currentMonth]);
 
@@ -102,13 +126,18 @@ export default function Calendario({ events }: CalendarioProps) {
           </Button>
         </div>
 
-        <div className="flex items-center gap-4">
-          {specialties.map((spec) => (
-            <div key={spec.name} className="flex items-center gap-1.5">
-              <div className="w-2 h-2 rounded-full" style={{ backgroundColor: spec.color }} />
-              <span className="text-[#757575] text-xs font-medium">{spec.name}</span>
-            </div>
-          ))}
+        <div className="flex items-center gap-4 justify-end mr-6 min-w-[220px]">
+          {visibleSpecialties.map((name) => {
+            const spec = specialtyConstants.find((s) => s.name === name);
+            const color = spec ? spec.color : specialtyColorMap[name] || "#999999";
+
+            return (
+              <div key={name} className="flex items-center gap-1.5">
+                <div className="w-2 h-2 rounded-full" style={{ backgroundColor: color }} />
+                <span className="text-[#757575] text-xs font-medium">{name}</span>
+              </div>
+            );
+          })}
         </div>
       </div>
 
