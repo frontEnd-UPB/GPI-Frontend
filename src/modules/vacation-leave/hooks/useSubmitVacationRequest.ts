@@ -3,6 +3,7 @@ import {
   submitVacationRequest,
   type SubmitVacationData,
 } from "../services/vacationDoctorService";
+import type { VacationRequest } from "../../../core/mocks/data";
 
 interface UseSubmitVacationRequestResult {
   submit: (data: SubmitVacationData) => Promise<void>;
@@ -12,7 +13,7 @@ interface UseSubmitVacationRequestResult {
 
 export function useSubmitVacationRequest(
   employeeId: string,
-  onSuccess?: () => void
+  onSuccess?: (newRequest: VacationRequest) => void
 ): UseSubmitVacationRequestResult {
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
@@ -23,8 +24,8 @@ export function useSubmitVacationRequest(
     setLoading(true);
     setError(null);
     try {
-      await submitVacationRequest(employeeId, data);
-      onSuccess?.();
+      const newRequest = await submitVacationRequest(employeeId, data);
+      onSuccess?.(newRequest);
     } catch (err) {
       const message =
         err instanceof Error ? err.message : "Failed to submit request.";

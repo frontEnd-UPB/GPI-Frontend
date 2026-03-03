@@ -17,7 +17,10 @@ import type { VacationRequest } from "../../../core/mocks/data";
 const DoctorVacationPage: React.FC = () => {
   const doctorId = "1";
   const { balance, error, refetch } = useVacationBalance(doctorId);
-  const { submit, error: submitError } = useSubmitVacationRequest(doctorId, refetch);
+  const { submit, error: submitError } = useSubmitVacationRequest(doctorId, (newRequest) => {
+    setVacations((prev) => [...prev, newRequest]);
+    refetch();
+  });
 
   const [vacations, setVacations] = useState<VacationRequest[]>(
       mockVacationRequests
@@ -62,14 +65,17 @@ const DoctorVacationPage: React.FC = () => {
         ]}
       />
       <div className="max-w-4xl mx-auto px-6 py-8 flex flex-col gap-8">
-        <VacationBalanceCard balance={balance} />
+        <VacationBalanceCard balance={balance ?? undefined} />
         {submitError && (
           <ErrorMessage message={`Error submitting request: ${submitError}`} />
         )}
-        <VacationRequestButton onSubmit={submit} availableDays={balance?.available} />
+        <VacationRequestButton
+          onSubmit={(data) => submit({ ...data, startDate: data.startDate!, endDate: data.endDate! })}
+          availableDays={balance?.available}
+        />
         
         <VacationStatusTable
-          vacations={mockVacationRequests}
+          vacations={vacations}
           onView={handleView}
         />
 
