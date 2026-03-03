@@ -41,8 +41,9 @@ export default function VacationRequestButton({
         <Button
           type="button"
           onClick={handleOpen}
-          className="rounded-full font-bold tracking-wide px-8 flex justify-center items-center"
+          className="rounded-full font-bold tracking-wide px-8 flex justify-center items-center w-full sm:w-auto"
           style={{
+            fontFamily: typography.fontFamily.bold,
             backgroundColor: colors.primary,
             color: colors.textOnPrimary,
             fontSize: typography.fontSize.md,

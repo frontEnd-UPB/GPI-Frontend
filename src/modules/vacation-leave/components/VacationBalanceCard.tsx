@@ -29,7 +29,7 @@ export default function VacationBalanceCard({ balance }: VacationBalanceCardProp
   return (
     <div className="flex justify-center w-full">
     <div
-      className="inline-flex flex-col border shadow-sm"
+      className="w-full flex flex-col border shadow-sm"
       style={{
         borderColor: colors.border,
         backgroundColor: colors.surface,
@@ -38,18 +38,17 @@ export default function VacationBalanceCard({ balance }: VacationBalanceCardProp
       }}
     >
       <h2
-        className="font-bold mb-5"
+        className="font-bold mb-5 text-2xl md:text-4xl"
         style={{
           color: colors.primary,
           fontFamily: typography.fontFamily.bold,
-          fontSize: typography.fontSize.display,
         }}
       >
         Vacation Balance
       </h2>
 
       <div
-        className="flex flex-col md:flex-row md:flex-wrap items-center"
+        className="flex flex-col md:flex-row items-center md:justify-evenly"
         style={{ gap: spacing.xxxl }}
       >
         {VACATION_INDICATORS.map((indicator) => {
@@ -63,20 +62,17 @@ export default function VacationBalanceCard({ balance }: VacationBalanceCardProp
               style={{ gap: spacing.lg }}
             >
               <div
-                className="flex items-center justify-center"
+                className="flex items-center justify-center w-10 h-10 sm:w-14 sm:h-14 flex-shrink-0"
                 style={{
-                  width: 56,
-                  height: 56,
                   borderRadius: radius.lg,
                   backgroundColor: `${color}1A`,
                   color,
-                  flexShrink: 0,
                 }}
               >
                 {ICON_MAP[indicator.iconName]}
               </div>
 
-              <div className="flex flex-col" style={{ gap: 3 }}>
+              <div className="flex flex-col" style={{ gap: spacing.xs }}>
                 <span
                   style={{
                     color: colors.textSecondary,

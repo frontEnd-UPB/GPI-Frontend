@@ -35,13 +35,14 @@ export default function TypeSelector({ control }: TypeSelectorProps) {
               fontSize: typography.fontSize.sm,
               fontFamily: typography.fontFamily.bold,
               color: colors.primaryDark,
+              fontWeight: "bold",
             }}
           >
             Type
           </FormLabel>
           <Select value={field.value} onValueChange={field.onChange}>
             <FormControl>
-              <SelectTrigger>
+              <SelectTrigger style={{ borderColor: colors.textSecondary }}>
                 <SelectValue placeholder="Select type" />
               </SelectTrigger>
             </FormControl>

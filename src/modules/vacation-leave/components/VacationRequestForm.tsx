@@ -39,10 +39,10 @@ export default function VacationRequestForm({
     /* ---- Expand / Collapse wrapper ---- */
     <div
       style={{
-        maxHeight: visible ? 900 : 0,
+        maxHeight: visible ? 1400 : 0,
         opacity: visible ? 1 : 0,
         overflow: "hidden",
-        marginBottom: visible ? "1.5rem" : 0,
+        marginBottom: visible ? spacing.xxl : 0,
         transition:
           "max-height 0.5s ease, opacity 0.4s ease, margin-bottom 0.4s ease",
       }}

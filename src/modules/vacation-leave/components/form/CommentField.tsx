@@ -28,6 +28,7 @@ export default function CommentField({ control }: CommentFieldProps) {
               fontSize: typography.fontSize.sm,
               fontFamily: typography.fontFamily.bold,
               color: colors.primaryDark,
+              fontWeight: "bold",
             }}
           >
             Comment{" "}
@@ -44,6 +45,7 @@ export default function CommentField({ control }: CommentFieldProps) {
             <Textarea
               placeholder="Add any additional comments..."
               rows={4}
+              style={{ borderColor: colors.textSecondary }}
               {...field}
             />
           </FormControl>

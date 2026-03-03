@@ -10,6 +10,8 @@ export interface DatePickerProps {
   onChange?: (date: Date | undefined) => void;
   placeholder?: string;
   disabled?: boolean;
+  className?: string;
+  valueClassName?: string;
 }
 
 const DatePicker: React.FC<DatePickerProps> = ({
@@ -17,6 +19,8 @@ const DatePicker: React.FC<DatePickerProps> = ({
   onChange,
   placeholder = "Select a date",
   disabled,
+  className,
+  valueClassName,
 }) => {
   const [open, setOpen] = React.useState(false);
 
@@ -37,10 +41,11 @@ const DatePicker: React.FC<DatePickerProps> = ({
             "flex h-10 w-full items-center justify-between rounded-[10px] border bg-input-background px-4 py-2 text-base text-left transition-colors",
             "border-border text-foreground",
             !value && "text-muted-foreground",
-            disabled && "opacity-50 cursor-not-allowed"
+            disabled && "opacity-50 cursor-not-allowed",
+            className
           )}
         >
-          <span>
+          <span className={value ? valueClassName : ""}>
             {value ? format(value, "PPP") : placeholder}
           </span>
           <CalendarIcon className="size-4 text-primary" />
