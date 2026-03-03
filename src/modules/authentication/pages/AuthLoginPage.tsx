@@ -5,26 +5,39 @@ import { TopInfoBar } from "../../../core/components/layout/TopInfoBar";
 import { Footer } from "../../../core/components/layout/Footer";
 import { ThemedContainer } from "../components/themed-container";
 import BlurredBackground from "../components/BlurredBackground";
+import { useAuth } from "../../../context/AuthContext";
 
 const AuthLoginPage: React.FC = () => {
-  const handleSubmit: React.FormEventHandler<HTMLFormElement> = (e) => {
+  // Manual auth test UI using AuthContext
+
+  const { user, isLoading, login, logout } = useAuth();
+
+  const handleLogin = async (e: React.FormEvent) => {
     e.preventDefault();
-    // TODO: Add login logic
-    console.log("Login submitted");
+    await login({ email: "esthera@example.com", password: "admin123" });
   };
 
-  const handleForgotPassword = (event: React.MouseEvent<HTMLAnchorElement>) => {
-    event.preventDefault();
-    // TODO: Add forgot password logic
-    console.log("Forgot password clicked");
+  const handleLogout = async () => {
+    await logout();
   };
 
   return (
     <MainLayout>
       <TopInfoBar />
-      <BlurredBackground >
+      <BlurredBackground>
         <ThemedContainer>
-          <br />
+          {isLoading ? (
+            <div>Loading...</div>
+          ) : user ? (
+            <>
+              <p>Welcome {user.name}</p>
+              <button onClick={handleLogout}>Logout</button>
+            </>
+          ) : (
+            <form onSubmit={handleLogin}>
+              <button type="submit">Login as Esthera</button>
+            </form>
+          )}
         </ThemedContainer>
       </BlurredBackground>
       <Footer />

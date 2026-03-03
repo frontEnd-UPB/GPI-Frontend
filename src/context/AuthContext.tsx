@@ -1,95 +1,100 @@
-import React, { createContext, useContext, useEffect, useState, ReactNode } from "react";
-import type { UserRole } from "../core/constants/roles";
+import React, { createContext, useContext, useState, useEffect, ReactNode } from "react";
+import type { AuthUser, LoginCredentials } from "../core/types/auth";
+import { mockAuthService } from "../core/mocks/auth.mock";
 
-export interface AuthUser {
-  id: string;
-  name: string;
-  email: string;
-  role: UserRole;
-  profilePicture: string | null;
-}
-
-export interface AuthContextValue {
+// Define the context value shape
+interface AuthContextValue {
   user: AuthUser | null;
-  loading: boolean;
-  signIn: (token: string) => Promise<void>;
-  signOut: () => void;
+  isLoading: boolean;
+  login: (credentials: LoginCredentials) => Promise<void>;
+  logout: () => Promise<void>;
 }
 
+// Create context with undefined default
 const AuthContext = createContext<AuthContextValue | undefined>(undefined);
 
-export interface AuthService {
-  getCurrentUser: () => Promise<AuthUser | null>;
-  signIn: (token: string) => Promise<AuthUser>;
-  signOut: () => Promise<void>;
+// Provider props
+interface AuthProviderProps {
+  children: ReactNode;
 }
 
-const createMockAuthService = (): AuthService => {
-  return {
-    async getCurrentUser() {
-      const stored = window.localStorage.getItem("meddical:user");
-      if (!stored) return null;
-      try {
-        return JSON.parse(stored) as AuthUser;
-      } catch {
-        return null;
-      }
-    },
-    async signIn(token: string) {
-      // En modo mock interpretamos el token como JSON de AuthUser
-      const parsed = JSON.parse(token) as AuthUser;
-      window.localStorage.setItem("meddical:user", JSON.stringify(parsed));
-      return parsed;
-    },
-    async signOut() {
-      window.localStorage.removeItem("meddical:user");
-    },
-  };
-};
-
-const defaultAuthService = createMockAuthService();
-
-export const AuthProvider: React.FC<{ children: ReactNode; authService?: AuthService }> = ({
-  children,
-  authService = defaultAuthService,
-}) => {
+export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
   const [user, setUser] = useState<AuthUser | null>(null);
-  const [loading, setLoading] = useState(true);
+  const [isLoading, setIsLoading] = useState(true);
 
+  // Check for existing session on mount
   useEffect(() => {
-    let active = true;
-    (async () => {
-      const current = await authService.getCurrentUser();
-      if (!active) return;
-      setUser(current);
-      setLoading(false);
-    })();
-    return () => {
-      active = false;
+    const checkSession = async () => {
+      try {
+        const storedUser = localStorage.getItem("meddical:user");
+        if (storedUser) {
+          const userData = JSON.parse(storedUser);
+          setUser(userData);
+          console.log("Session restored for:", userData.email);
+        }
+      } catch (error) {
+        console.error("Failed to restore session:", error);
+        localStorage.removeItem("meddical:user");
+        localStorage.removeItem("meddical:token");
+      } finally {
+        setIsLoading(false);
+      }
     };
-  }, [authService]);
 
-  const signIn = async (token: string) => {
-    const nextUser = await authService.signIn(token);
-    setUser(nextUser);
+    checkSession();
+  }, []);
+
+  // Login function
+  const login = async (credentials: LoginCredentials) => {
+    console.log("Login called with:", credentials);
+    setIsLoading(true);
+    try {
+      const userData = await mockAuthService.login(credentials.email, credentials.password);
+      setUser(userData);
+      console.log("User after login:", userData);
+    } catch (error) {
+      console.error("Login failed:", error);
+      throw error; // Let the form handle the error
+    } finally {
+      setIsLoading(false);
+    }
   };
 
-  const signOut = async () => {
-    await authService.signOut();
-    setUser(null);
+  // Logout function
+  const logout = async () => {
+    console.log("Logout called");
+    setIsLoading(true);
+    try {
+      await mockAuthService.logout();
+      setUser(null);
+      console.log("User after logout:", user);
+    } catch (error) {
+      console.error("Logout failed:", error);
+    } finally {
+      setIsLoading(false);
+    }
+  };
+
+  // Context value
+  const value: AuthContextValue = {
+    user,
+    isLoading,
+    login,
+    logout
   };
 
   return (
-    <AuthContext.Provider value={{ user, loading, signIn, signOut }}>
+    <AuthContext.Provider value={value}>
       {children}
     </AuthContext.Provider>
   );
 };
 
-export const useAuth = (): AuthContextValue => {
-  const ctx = useContext(AuthContext);
-  if (!ctx) {
-    throw new Error("useAuth must be used within AuthProvider");
+// Custom hook for using auth context
+export const useAuth = () => {
+  const context = useContext(AuthContext);
+  if (!context) {
+    throw new Error("useAuth must be used within an AuthProvider");
   }
-  return ctx;
+  return context;
 };
