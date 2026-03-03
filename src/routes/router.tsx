@@ -21,11 +21,24 @@ const LoginRoute: React.FC = () => (
   </Suspense>
 );
 
+const AdminLoginPage = lazy(() => import("../modules/authentication/pages/AdminLoginPage"));
+
+const AdminLoginRoute: React.FC = () => (
+  <Suspense fallback={null}>
+    <AdminLoginPage />
+  </Suspense>
+);
+
+
 const RoutesConfig: React.FC = () => {
   const element = useRoutes([
     {
       path: ROUTE_PATHS.LOGIN,
       element: <LoginRoute />,
+    },
+    {
+      path: "/admin-login",
+      element: <AdminLoginRoute />,
     },
     {
       element: <ProtectedRoute />,

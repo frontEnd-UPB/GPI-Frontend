@@ -10,6 +10,7 @@ export interface Employee {
   employed: string;
   profilePicture: string | null;
   role: UserRole;
+  password?: string; // Solo para propósitos de autenticación en el mock, no se debe usar en producción
 }
 
 export interface Patient {
@@ -57,6 +58,7 @@ export const mockEmployees: Employee[] = [
     employed: "14/06/21",
     profilePicture: null,
     role: "admin",
+    password: "password123", 
   },
   {
     id: "2",
@@ -68,6 +70,7 @@ export const mockEmployees: Employee[] = [
     employed: "14/06/21",
     profilePicture: null,
     role: "doctor",
+    password: "funcionario123",
   },
   {
     id: "3",
@@ -79,6 +82,7 @@ export const mockEmployees: Employee[] = [
     employed: "14/06/21",
     profilePicture: null,
     role: "admin",
+    password: "orgadmin123",
   },
   {
     id: "4",
@@ -90,6 +94,7 @@ export const mockEmployees: Employee[] = [
     employed: "14/06/21",
     profilePicture: null,
     role: "admin",
+    password: "admin1234",
   },
   {
     id: "5",
@@ -101,6 +106,7 @@ export const mockEmployees: Employee[] = [
     employed: "14/06/21",
     profilePicture: null,
     role: "doctor",
+    password: "contraseña123",
   },
   {
     id: "6",
@@ -112,6 +118,7 @@ export const mockEmployees: Employee[] = [
     employed: "14/06/21",
     profilePicture: null,
     role: "doctor",
+    password: "hola1234",
   },
 ];
 
