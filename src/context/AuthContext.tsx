@@ -1,13 +1,13 @@
 import React, { createContext, useContext, useState, useEffect, ReactNode } from "react";
-import type { AuthUser, LoginCredentials } from "../core/types/auth";
+import type { AuthUser, SignInCredentials } from "../core/types/auth";
 import { mockAuthService } from "../core/mocks/auth.mock";
 
 // Define the context value shape
 interface AuthContextValue {
   user: AuthUser | null;
-  isLoading: boolean;
-  login: (credentials: LoginCredentials) => Promise<void>;
-  logout: () => Promise<void>;
+  loading: boolean;
+  signIn: (credentials: SignInCredentials) => Promise<void>;
+  signOut: () => Promise<void>;
 }
 
 // Create context with undefined default
@@ -20,7 +20,7 @@ interface AuthProviderProps {
 
 export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
   const [user, setUser] = useState<AuthUser | null>(null);
-  const [isLoading, setIsLoading] = useState(true);
+  const [loading, setLoading] = useState(true);
 
   // Check for existing session on mount
   useEffect(() => {
@@ -37,7 +37,7 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
         localStorage.removeItem("meddical:user");
         localStorage.removeItem("meddical:token");
       } finally {
-        setIsLoading(false);
+        setLoading(false);
       }
     };
 
@@ -45,42 +45,42 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
   }, []);
 
   // Login function
-  const login = async (credentials: LoginCredentials) => {
+  const login = async (credentials: SignInCredentials) => {
     console.log("Login called with:", credentials);
-    setIsLoading(true);
+    setLoading(true);
     try {
-      const userData = await mockAuthService.login(credentials.email, credentials.password);
+      const userData = await mockAuthService.signIn(credentials.email, credentials.password);
       setUser(userData);
-      console.log("User after login:", userData);
+      console.log("User after signIn:", userData);
     } catch (error) {
       console.error("Login failed:", error);
       throw error; // Let the form handle the error
     } finally {
-      setIsLoading(false);
+      setLoading(false);
     }
   };
 
   // Logout function
   const logout = async () => {
     console.log("Logout called");
-    setIsLoading(true);
+    setLoading(true);
     try {
-      await mockAuthService.logout();
+      await mockAuthService.signOut();
       setUser(null);
-      console.log("User after logout:", user);
+      console.log("User after signOut:", user);
     } catch (error) {
       console.error("Logout failed:", error);
     } finally {
-      setIsLoading(false);
+      setLoading(false);
     }
   };
 
   // Context value
   const value: AuthContextValue = {
     user,
-    isLoading,
-    login,
-    logout
+    loading,
+    signIn: login,
+    signOut: logout
   };
 
   return (

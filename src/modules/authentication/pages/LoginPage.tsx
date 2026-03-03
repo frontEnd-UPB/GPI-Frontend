@@ -11,10 +11,9 @@ type LoginLocationState = {
 };
 
 const LoginPage: React.FC = () => {
-  const { user, signIn } = useAuth();
+  const { user, signIn, loading } = useAuth();
   const navigate = useNavigate();
   const location = useLocation();
-  const [loading, setLoading] = useState(false);
 
   const from = (location.state as LoginLocationState | null)?.from;
   const redirectTo = from && from !== ROUTE_PATHS.LOGIN ? from : ROUTE_PATHS.HOME;
@@ -26,25 +25,16 @@ const LoginPage: React.FC = () => {
   }, [user, navigate, redirectTo]);
 
   const handleQuickLogin = async (employeeId: string) => {
-    setLoading(true);
     try {
       const employee = mockEmployees.find((emp) => emp.id === employeeId);
       if (!employee) return;
 
-      const authUser = {
-        id: employee.id,
-        name: employee.name,
-        email: employee.email,
-        role: employee.role,
-        profilePicture: employee.profilePicture,
-      };
-
-      await signIn(JSON.stringify(authUser));
+      // Use demo password based on role
+      const password = employee.role === "admin" ? "admin123" : "doctor123";
+      await signIn({ email: employee.email, password });
       navigate(redirectTo, { replace: true });
     } catch (error) {
       console.error("Login error:", error);
-    } finally {
-      setLoading(false);
     }
   };
 
@@ -59,17 +49,7 @@ const LoginPage: React.FC = () => {
   return (
     <div className="min-h-screen bg-gradient-to-br from-accent to-muted flex items-center justify-center p-4">
       <Card className="w-full max-w-md">
-        <CardHeader className="text-center">
-          <div className="mx-auto mb-4 flex size-16 items-center justify-center rounded-full bg-primary">
-            <Shield className="size-8 text-primary-foreground" />
-          </div>
-          <CardTitle className="text-2xl font-bold text-primary">
-            MEDDICAL ERP
-          </CardTitle>
-          <p className="text-sm text-muted-foreground mt-2">
-            Demo Login - Select a role to continue
-          </p>
-        </CardHeader>
+        <p> .</p>
         <CardContent className="space-y-3">
           {adminUser && (
             <Button

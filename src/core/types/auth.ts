@@ -5,14 +5,14 @@ export interface AuthUser extends Employee {
   metadata?: Record<string, unknown>;
 }
 
-export interface LoginCredentials {
+export interface SignInCredentials {
   email: string;
   password: string;
 }
 
 export interface AuthContextValue {
   user: AuthUser | null;
-  isLoading: boolean;
-  login: (credentials: LoginCredentials) => Promise<void>;
-  logout: () => void;
+  loading: boolean;
+  signIn: (credentials: SignInCredentials) => Promise<void>;
+  signOut: () => void;
 }
