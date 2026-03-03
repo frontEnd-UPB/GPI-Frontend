@@ -18,6 +18,10 @@ const statusStyles: Record<
     backgroundColor: "#FFCDD2",
     color: "#C62828",
   },
+  canceled: {
+    backgroundColor: "#E3F2FD",
+    color: "#1E88E5",
+  },
 };
 
 interface StatusBadgeProps {

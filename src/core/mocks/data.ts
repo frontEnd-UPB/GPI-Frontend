@@ -52,7 +52,7 @@ export interface VacationRequest {
   endDate: string;
   days: number;
   reason: VacationReason;
-  status: "pending" | "approved" | "rejected";
+  status: "pending" | "approved" | "rejected" | "canceled";
   requestDate: string;
 }
 
