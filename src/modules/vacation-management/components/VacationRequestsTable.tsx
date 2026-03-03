@@ -2,8 +2,8 @@ import React, { useMemo } from "react";
 import { useVacationRequests } from "../context/VacationRequestsContext";
 import { VACATION_STATUS } from "../../../core/constants";
 import { mockEmployees } from "../../../core/mocks/data";
-import VacationFilters from "./VacationFilters";
-import Title from "./Title";
+import { specialties as specialtyConstants } from "../constants/specialties";
+// Title and VacationFilters are rendered by the page to avoid duplication
 
 interface VacationRequestsTableProps {
   sortKey: "startDate" | "employeeName";
@@ -16,15 +16,25 @@ const VacationRequestsTable: React.FC<VacationRequestsTableProps> = ({
   sortDirection,
   onSortChange,
 }) => {
-  const { requests, search, setSearch, specialtyFilter, setSpecialtyFilter } =
-    useVacationRequests();
+  const { requests, search, specialtyFilter } = useVacationRequests();
 
   const { specialtyByEmployeeId, specialties } = useMemo(() => {
     const map: Record<string, string> = {};
 
+    // normalize employee.department to canonical specialties
+    const normalize = (dept?: string) => {
+      if (!dept) return "";
+      const d = dept.toLowerCase();
+      for (const s of specialtyConstants) {
+        const name = s.name.toLowerCase();
+        if (d === name || d.includes(name)) return s.name;
+      }
+      return dept;
+    };
+
     mockEmployees.forEach((employee) => {
       if (employee.department && !map[employee.id]) {
-        map[employee.id] = employee.department;
+        map[employee.id] = normalize(employee.department);
       }
     });
 
@@ -81,18 +91,7 @@ const VacationRequestsTable: React.FC<VacationRequestsTableProps> = ({
   ]);
 
   return (
-    <div className="space-y-8">
-      <Title />
-
-      <VacationFilters
-        search={search}
-        specialty={specialtyFilter}
-        specialties={specialties}
-        onSearchChange={setSearch}
-        onSpecialtyChange={setSpecialtyFilter}
-      />
-
-      <div className="w-full overflow-x-auto">
+    <div className="w-full overflow-x-auto">
         <div className="min-w-[800px] w-full">
 
           {/* HEADER */}
@@ -188,7 +187,6 @@ const VacationRequestsTable: React.FC<VacationRequestsTableProps> = ({
 
         </div>
       </div>
-    </div>
   );
 };
 

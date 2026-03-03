@@ -1,6 +1,7 @@
 import React, { createContext, useContext, useMemo, useState } from "react";
 import type { VacationRequest } from "../../../core/mocks/data";
 import { mockVacationRequests, mockEmployees } from "../../../core/mocks/data";
+import { specialties as specialtyConstants } from "../constants/specialties";
 import { VACATION_STATUS } from "../../../core/constants";
 
 export interface VacationRequestsContextValue {
@@ -60,9 +61,21 @@ export const VacationRequestsProvider: React.FC<{ children: React.ReactNode }> =
   const value = useMemo(
     () => {
       // Derive calendar events from requests and employee data
+      // Normalize employee.department to one of the canonical specialty names
       const empMap: Record<string, string> = {};
+      const normalize = (dept?: string) => {
+        if (!dept) return "";
+        const d = dept.toLowerCase();
+        // try exact or contained match against canonical specialties
+        for (const s of specialtyConstants) {
+          const name = s.name.toLowerCase();
+          if (d === name || d.includes(name)) return s.name;
+        }
+        return dept; // fallback to original
+      };
+
       mockEmployees.forEach((e) => {
-        if (e.department) empMap[e.id] = e.department;
+        if (e.department) empMap[e.id] = normalize(e.department);
       });
 
       const allEvents = requests.map((r) => ({

@@ -5,6 +5,7 @@ import Calendario from "../components/Calendario";
 import { VacationRequestsProvider, useVacationRequests } from "../context/VacationRequestsContext";
 import VacationRequestsTable from "../components/VacationRequestsTable";
 import VacationFilters from "../components/VacationFilters";
+import Title from "../components/Title";
 import { specialties as specialtyConstants } from "../constants/specialties";
 
 const VacationManagementPage: React.FC = () => {
@@ -60,6 +61,8 @@ const InnerContent: React.FC<{
 
   return (
     <div className="container mx-auto px-5 py-8 space-y-8">
+      <Title />
+
       <VacationFilters
         search={search}
         specialty={specialtyFilter}
