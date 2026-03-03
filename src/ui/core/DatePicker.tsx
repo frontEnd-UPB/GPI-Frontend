@@ -46,7 +46,7 @@ const DatePicker: React.FC<DatePickerProps> = ({
           )}
         >
           <span className={value ? valueClassName : ""}>
-            {value ? format(value, "PPP") : placeholder}
+            {value ? format(value, "dd/MM/yyyy") : placeholder}
           </span>
           <CalendarIcon className="size-4 text-primary" />
         </button>

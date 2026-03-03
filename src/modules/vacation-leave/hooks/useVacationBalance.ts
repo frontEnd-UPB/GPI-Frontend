@@ -1,28 +1,33 @@
 import { useState, useEffect } from "react";
 import { getVacationBalance } from "../services/vacationDoctorService";
- 
-export function useVacationBalance(doctorId) {
-  const [balance, setBalance] = useState({
-    assigned: null,
-    used: null,
-    available: null,
-  });
+import type { VacationBalance } from "../../../core/mocks/data";
+
+interface UseVacationBalanceResult {
+  balance: VacationBalance | null;
+  loading: boolean;
+  error: string | null;
+  refetch: () => void;
+}
+
+export function useVacationBalance(doctorId: string): UseVacationBalanceResult {
+  const [balance, setBalance] = useState<VacationBalance | null>(null);
   const [loading, setLoading] = useState(true);
-  const [error, setError] = useState(null);
+  const [error, setError] = useState<string | null>(null);
 
   useEffect(() => {
     let cancelled = false;
+
     async function fetchBalance() {
       try {
         setLoading(true);
         setError(null);
         const data = await getVacationBalance(doctorId);
         if (!cancelled) {
-          setBalance(data);
+          setBalance(data ?? null);
         }
       } catch (err) {
         if (!cancelled) {
-          setError(err.message);
+          setError(err instanceof Error ? err.message : "Unknown error");
         }
       } finally {
         if (!cancelled) {
@@ -30,6 +35,7 @@ export function useVacationBalance(doctorId) {
         }
       }
     }
+
     fetchBalance();
     return () => {
       cancelled = true;
@@ -37,12 +43,15 @@ export function useVacationBalance(doctorId) {
   }, [doctorId]);
 
   const refetch = () => {
-    setBalance({ assigned: null, used: null, available: null });
+    setBalance(null);
     setLoading(true);
     getVacationBalance(doctorId)
-      .then(setBalance)
-      .catch((err) => setError(err.message))
+      .then((data) => setBalance(data ?? null))
+      .catch((err: unknown) =>
+        setError(err instanceof Error ? err.message : "Unknown error")
+      )
       .finally(() => setLoading(false));
   };
+
   return { balance, loading, error, refetch };
 }

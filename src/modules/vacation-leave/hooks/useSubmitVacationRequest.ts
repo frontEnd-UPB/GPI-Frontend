@@ -1,14 +1,23 @@
 import { useState } from "react";
-import { submitVacationRequest } from "../services/vacationDoctorService";
+import {
+  submitVacationRequest,
+  type SubmitVacationData,
+} from "../services/vacationDoctorService";
+
+interface UseSubmitVacationRequestResult {
+  submit: (data: SubmitVacationData) => Promise<void>;
+  loading: boolean;
+  error: string | null;
+}
 
 export function useSubmitVacationRequest(
-  employeeId,
-  onSuccess
-) {
+  employeeId: string,
+  onSuccess?: () => void
+): UseSubmitVacationRequestResult {
   const [loading, setLoading] = useState(false);
-  const [error, setError] = useState(null);
+  const [error, setError] = useState<string | null>(null);
 
-  const submit = async (data) => {
+  const submit = async (data: SubmitVacationData): Promise<void> => {
     if (!data.startDate || !data.endDate) return;
 
     setLoading(true);
