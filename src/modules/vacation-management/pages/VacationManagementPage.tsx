@@ -1,6 +1,7 @@
 import React from "react";
 import { MainContainer, PageHeader } from "../../../core/components";
 import { ROUTE_PATHS } from "../../../routes/routes";
+import Calendario from '../components/Calendario';
 
 const VacationManagementPage: React.FC = () => {
   return (
@@ -13,10 +14,8 @@ const VacationManagementPage: React.FC = () => {
           { label: "Vacation Manager" },
         ]}
       />
-      <div className="container mx-auto px-5 py-8">
-        <p className="text-sm text-muted-foreground">
-          Admin-only vacation management module (placeholder).
-        </p>
+      <div className="flex flex-col items-center justify-center p-8 bg-slate-50 min-h-screen">
+      <Calendario />
       </div>
     </MainContainer>
   );
