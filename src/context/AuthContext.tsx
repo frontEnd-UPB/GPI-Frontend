@@ -1,14 +1,6 @@
 import React, { createContext, useContext, useState, useEffect, ReactNode } from "react";
-import type { AuthUser, SignInCredentials } from "../core/types/auth";
+import type { AuthContextValue, AuthUser, SignInCredentials } from "../core/types/auth";
 import { authModuleService } from "../modules/authentication/services/authModuleService";
-
-// Define the context value shape
-interface AuthContextValue {
-  user: AuthUser | null;
-  loading: boolean;
-  signIn: (credentials: SignInCredentials) => Promise<AuthUser>;
-  signOut: () => Promise<void>;
-}
 
 // Create context with undefined default
 const AuthContext = createContext<AuthContextValue | undefined>(undefined);
@@ -26,9 +18,8 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
   useEffect(() => {
     const checkSession = async () => {
       try {
-        const storedUser = localStorage.getItem("meddical:user");
-        if (storedUser) {
-          const userData = JSON.parse(storedUser);
+        const userData = await authModuleService.getCurrentUser();
+        if (userData) {
           setUser(userData);
           console.log("Sesión restaurada para:", userData.email);
         } else {
@@ -36,8 +27,6 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
         }
       } catch (error) {
         console.error(" Error al restaurar sesión:", error);
-        localStorage.removeItem("meddical:user");
-        localStorage.removeItem("meddical:token");
       } finally {
         setLoading(false);
       }
@@ -47,20 +36,17 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
   }, []);
 
   // SignIn function
-  const signIn = async (credentials: SignInCredentials) => {
+  const signIn = async (credentials: SignInCredentials): Promise<AuthUser> => {
     console.log("signIn llamado con:", credentials.email);
     setLoading(true);
     try {
       const response = await authModuleService.signIn(credentials.email, credentials.password);
-      setUser({
-        id: response.user.id,
-        email: response.user.email,
-        name: response.user.name,
-        role: response.user.role,
-        profilePicture: response.user.profilePicture,
-        metadata: { lastLogin: new Date().toISOString() },
-      });
+      const authUser = response.user;
+      setUser(authUser);
+      // se coloca en el contexto el usuario obtenido del servicio
+      // lo guarda en localStorage, si se recarga el useEffect del contexto restaura la sesión
       console.log(" Usuario después de signIn:", response.user.email);
+      return authUser;
     } catch (error) {
       console.error(" signIn falló:", error);
       throw error;
@@ -76,20 +62,13 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
     try {
       await authModuleService.signOut();
       console.log(" signOut llamado - usuario actual:", user?.email || "ninguno");
-      localStorage.removeItem("meddical:user");
-      localStorage.removeItem("meddical:token");
-      
       setUser(null);
-      
       console.log(" signOut completado - usuario eliminado del contexto");
       console.log("localStorage user:", localStorage.getItem("meddical:user")); // Debe ser null
       
     } catch (error) {
       console.error("Error en signOut:", error);
-      // Aún así limpiamos el estado local
       setUser(null);
-      localStorage.removeItem("meddical:user");
-      localStorage.removeItem("meddical:token");
     } finally {
       setLoading(false);
     }

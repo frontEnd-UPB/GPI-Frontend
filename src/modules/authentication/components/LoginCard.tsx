@@ -1,11 +1,11 @@
 import React from "react";
-import { useAuth } from "../../../context/AuthContext";
 import { mockEmployees } from "../../../core/mocks/data";
 import { Button, Card, CardContent } from "../../../core/components";
 import { Shield, Stethoscope } from "lucide-react";
+import { useSignIn } from "../hooks/useSignIn";
 
 export const LoginCard: React.FC = () => {
-  const { signIn, loading } = useAuth();
+  const { signIn: hookSignIn, signInLoading } = useSignIn();
 
   const handleQuickLogin = async (employeeId: string) => {
     try {
@@ -17,7 +17,7 @@ export const LoginCard: React.FC = () => {
       }
 
       const password = employee.password;
-      await signIn({ email: employee.email, password });
+      await hookSignIn(employee.email, password);
     } catch (error) {
       console.error("Login error:", error);
     }
@@ -39,7 +39,7 @@ export const LoginCard: React.FC = () => {
             variant="outline"
             className="w-full justify-start gap-3 h-auto py-3"
             onClick={() => handleQuickLogin(adminUser.id)}
-            disabled={loading}
+            disabled={signInLoading}
           >
             <div className="flex size-10 items-center justify-center rounded-full bg-accent">
               {React.createElement(roleIcons.admin, {
@@ -58,7 +58,7 @@ export const LoginCard: React.FC = () => {
             variant="outline"
             className="w-full justify-start gap-3 h-auto py-3"
             onClick={() => handleQuickLogin(doctorUser.id)}
-            disabled={loading}
+            disabled={signInLoading}
           >
             <div className="flex size-10 items-center justify-center rounded-full bg-accent">
               {React.createElement(roleIcons.doctor, {

@@ -8,11 +8,11 @@ import { ErrorMessage } from "../../../core/components/feedback/ErrorMessage";
 import BlurredBackground from "../components/BlurredBackground";
 import { useAuth } from "../../../context/AuthContext";
 import { ROUTE_PATHS } from "../../../routes/routes"; 
+import { useSignIn } from "../hooks/useSignIn";
 
 const AdminLoginPage: React.FC = () => {
   const navigate = useNavigate();
-  const { signIn, loading } = useAuth();
-
+  const { signIn: hookSignIn, signInLoading: loading } = useSignIn();
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [error, setError] = useState<string | null>(null);
@@ -21,9 +21,8 @@ const AdminLoginPage: React.FC = () => {
     e.preventDefault();
     setError(null);
     try {
-      const authenticatedUser = await signIn({ email, password });
-
-      if (authenticatedUser.role === "admin") {
+      const { user } = await hookSignIn(email, password);
+      if (user?.role === "admin") {
         navigate(ROUTE_PATHS.VACATIONS_ADMIN, { replace: true });
       } else {
         navigate(ROUTE_PATHS.VACATIONS_DOCTOR, { replace: true });
