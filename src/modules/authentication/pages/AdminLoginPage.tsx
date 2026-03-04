@@ -9,6 +9,7 @@ import BlurredBackground from "../components/BlurredBackground";
 import { ROUTE_PATHS } from "../../../routes/routes"; 
 import { useSignIn } from "../hooks/useSignIn";
 import { useAuth } from "../../../context/AuthContext";
+import { LoginCard } from "../components/LoginCard";
 
 const AdminLoginPage: React.FC = () => {
   const navigate = useNavigate();
@@ -113,6 +114,10 @@ const AdminLoginPage: React.FC = () => {
             </div>
           </form>
         </ThemedContainer>
+        <div className="flex justify-center z-10 mt-4">
+        <br />
+        <LoginCard />
+        </div>
       </BlurredBackground>
       <Footer />
     </div>
