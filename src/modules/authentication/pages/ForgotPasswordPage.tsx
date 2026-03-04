@@ -1,14 +1,21 @@
 import React, { useState } from "react";
+import { useNavigate, useSearchParams } from "react-router-dom";
 import { TopInfoBar } from "../../../core/components/layout/TopInfoBar";
 import { Footer } from "../../../core/components/layout/Footer";
 import { ThemedContainer } from "../components/themed-container";
 import { Input, Button } from "../../../core/components";
 import { ErrorMessage } from "../../../core/components/feedback/ErrorMessage"; // Ajusta la ruta
 import BlurredBackground from "../components/BlurredBackground";
+import { ROUTE_PATHS } from "../../../routes/routes";
 
 const ForgotPasswordPage: React.FC = () => {
+  const navigate = useNavigate();
+  const [searchParams] = useSearchParams();
   const [email, setEmail] = useState("");
   const [error, setError] = useState("");
+
+  const from = searchParams.get("from");
+  const returnLoginPath = from === "patient" ? "/patient-login" : ROUTE_PATHS.LOGIN;
 
   const handleSubmit: React.FormEventHandler<HTMLFormElement> = (e) => {
     e.preventDefault();
@@ -73,8 +80,22 @@ const ForgotPasswordPage: React.FC = () => {
                 Submit
               </Button>
             </div>
+
+            <div className="mt-4 flex justify-center">
+              <p className="text-xs text-primary-foreground">
+                <button
+                  type="button"
+                  className="underline cursor-pointer bg-transparent text-xs font-regular text-primary-foreground"
+                  onClick={() => navigate(returnLoginPath)}
+                >
+                  Return
+                </button>{" "}
+                and Log In
+              </p>
+            </div>
           </form>
         </ThemedContainer>
+        
       </BlurredBackground>
       <Footer />
     </div>
