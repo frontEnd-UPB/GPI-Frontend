@@ -1,12 +1,11 @@
 import React, { useMemo, useState } from "react";
 import { ChevronLeft, ChevronRight } from "lucide-react";
 import { Button } from "../../../ui/button";
-import { specialties as specialtyConstants } from "../constants/specialties";
 
 export type CalendarEvent = {
   id: string;
   doctorName: string;
-  specialty: string;
+  department: string;
   startDate: string;
   endDate: string;
 };
@@ -32,14 +31,17 @@ export default function Calendario({ events }: CalendarioProps) {
     return new Date(now.getFullYear(), now.getMonth(), 1);
   });
 
-  const specialtyColorMap = useMemo(() => {
-    const map: Record<string, string> = {};
-    specialtyConstants.forEach((s) => (map[s.name] = s.color));
-    return map;
-  }, []);
+  const COLOR_PALETTE = [
+    "var(--chart-1)",
+    "var(--chart-2)",
+    "var(--chart-3)",
+    "var(--chart-4)",
+    "var(--chart-5)",
+    "var(--chart-6)",
+    "var(--chart-7)",
+    "var(--chart-8)",
+  ];
 
-  // Build calendar grid (start on Sunday - 0) covering the full weeks that include
-  // the current month (may include days from previous/next month to fill weeks).
   const { days, gridStart, gridEnd } = useMemo(() => {
     const year = currentMonth.getFullYear();
     const month = currentMonth.getMonth();
@@ -48,23 +50,35 @@ export default function Calendario({ events }: CalendarioProps) {
     const lastOfMonth = new Date(year, month + 1, 0);
 
     const gs = new Date(year, month, 1 - firstOfMonth.getDay());
-    const ge = new Date(year, month, lastOfMonth.getDate() + (6 - lastOfMonth.getDay()));
+    const ge = new Date(
+      year,
+      month,
+      lastOfMonth.getDate() + (6 - lastOfMonth.getDay())
+    );
 
     const list: Date[] = [];
-    for (let d = startOfDay(gs); d <= startOfDay(ge); d.setDate(d.getDate() + 1)) {
+    for (
+      let d = startOfDay(gs);
+      d <= startOfDay(ge);
+      d.setDate(d.getDate() + 1)
+    ) {
       list.push(new Date(d));
     }
-    return { days: list, gridStart: startOfDay(gs), gridEnd: startOfDay(ge) };
+
+    return {
+      days: list,
+      gridStart: startOfDay(gs),
+      gridEnd: startOfDay(ge),
+    };
   }, [currentMonth]);
 
-  // Index events by date key for quick lookup (an event spanning multiple days will
-  // be added to each date in its range).
-  const eventsByDate = (events: CalendarEvent[]) => {
+  const eventsMap = useMemo(() => {
     const map: Record<string, CalendarEvent[]> = {};
 
     events.forEach((evt) => {
       const start = startOfDay(new Date(evt.startDate));
       const end = startOfDay(new Date(evt.endDate));
+
       for (let d = new Date(start); d <= end; d.setDate(d.getDate() + 1)) {
         const key = formatDateKey(d);
         if (!map[key]) map[key] = [];
@@ -73,113 +87,165 @@ export default function Calendario({ events }: CalendarioProps) {
     });
 
     return map;
-  };
+  }, [events]);
 
-  const eventsMap = useMemo(() => eventsByDate(events), [events]);
+  const departmentColorMap = useMemo(() => {
+    const map: Record<string, string> = {};
+    let index = 0;
 
-  // Determine which specialties appear in the currently visible month grid
-  const visibleSpecialties = useMemo(() => {
+    events.forEach((evt) => {
+      if (!evt.department) return;
+      if (!map[evt.department]) {
+        map[evt.department] =
+          COLOR_PALETTE[index % COLOR_PALETTE.length];
+        index++;
+      }
+    });
+
+    return map;
+  }, [events]);
+
+  const visibleDepartments = useMemo(() => {
     const set = new Set<string>();
 
     events.forEach((evt) => {
       const s = startOfDay(new Date(evt.startDate));
       const e = startOfDay(new Date(evt.endDate));
+
       if (s <= gridEnd && e >= gridStart) {
-        if (evt.specialty) set.add(evt.specialty);
+        if (evt.department) set.add(evt.department);
       }
     });
 
-    // Order by canonical specialtyConstants order, then append any unknowns
-    const ordered: string[] = [];
-    for (const sc of specialtyConstants) {
-      if (set.has(sc.name)) ordered.push(sc.name);
-    }
-    for (const name of Array.from(set)) {
-      if (!specialtyConstants.find((sc) => sc.name === name)) ordered.push(name);
-    }
-
-    return ordered;
+    return Array.from(set).sort();
   }, [events, gridStart, gridEnd]);
 
-  const monthLabel = useMemo(() => currentMonth.toLocaleString("en-US", { month: "long", year: "numeric" }), [currentMonth]);
+  const monthLabel = useMemo(
+    () =>
+      currentMonth.toLocaleString("en-US", {
+        month: "long",
+        year: "numeric",
+      }),
+    [currentMonth]
+  );
 
   function prevMonth() {
-    setCurrentMonth((m) => new Date(m.getFullYear(), m.getMonth() - 1, 1));
+    setCurrentMonth(
+      (m) => new Date(m.getFullYear(), m.getMonth() - 1, 1)
+    );
   }
 
   function nextMonth() {
-    setCurrentMonth((m) => new Date(m.getFullYear(), m.getMonth() + 1, 1));
+    setCurrentMonth(
+      (m) => new Date(m.getFullYear(), m.getMonth() + 1, 1)
+    );
   }
 
   return (
-    <div className="w-[1212px] h-[684px] bg-white rounded-[19px] shadow-[0_0_20px_#00000014] p-8 flex flex-col items-center">
-      <div className="w-full h-[88px] flex items-center gap-[54px] shrink-0">
-        <div className="flex items-center gap-2 flex-1">
-          <Button variant="ghost" size="icon" className="rounded-full w-10 h-10 flex items-center justify-center" onClick={prevMonth}>
+    <div className="w-full max-w-[1500px] bg-white rounded-[19px] shadow-[0_0_20px_#00000014] p-6 mx-auto">
+
+      {/* Header */}
+      <div className="flex items-center justify-between mb-6">
+        <div className="flex items-center gap-3">
+          <Button variant="ghost" size="icon" className="rounded-full w-10 h-10" onClick={prevMonth}>
             <ChevronLeft className="w-5 h-5 text-[#1F2B6C]" />
           </Button>
-          <h2 className="text-[#1F2B6C] text-center w-[175px] text-xl font-semibold leading-none">
+
+          <h2 className="text-[#1F2B6C] text-xl font-semibold w-[180px] text-center">
             {monthLabel}
           </h2>
-          <Button variant="ghost" size="icon" className="rounded-full w-10 h-10 flex items-center justify-center" onClick={nextMonth}>
+
+          <Button variant="ghost" size="icon" className="rounded-full w-10 h-10" onClick={nextMonth}>
             <ChevronRight className="w-5 h-5 text-[#1F2B6C]" />
           </Button>
         </div>
 
-        <div className="flex items-center gap-4 justify-end mr-6 min-w-[220px]">
-          {visibleSpecialties.map((name) => {
-            const spec = specialtyConstants.find((s) => s.name === name);
-            const color = spec ? spec.color : specialtyColorMap[name] || "#999999";
-
-            return (
-              <div key={name} className="flex items-center gap-1.5">
-                <div className="w-2 h-2 rounded-full" style={{ backgroundColor: color }} />
-                <span className="text-[#757575] text-xs font-medium">{name}</span>
-              </div>
-            );
-          })}
-        </div>
-      </div>
-
-      <div className="w-[1163px] h-[560px] border border-[#CECECE] rounded-[15px] overflow-hidden flex flex-col">
-        <div className="grid grid-cols-7 border-b border-[#CECECE] h-[51px] items-center">
-          {['Su', 'Mo', 'Tu', 'We', 'Th', 'Fr', 'Sa'].map((day) => (
-            <div key={day} className="text-[#757575] text-center text-[15px] font-medium">
-              {day}
+        <div className="flex items-center gap-4">
+          {visibleDepartments.map((name) => (
+            <div key={name} className="flex items-center gap-2">
+              <div
+                className="w-2 h-2 rounded-full"
+                style={{ backgroundColor: departmentColorMap[name] || "var(--chart-1)" }}
+              />
+              <span className="text-xs text-[#757575] font-medium">
+                {name}
+              </span>
             </div>
           ))}
         </div>
+      </div>
 
-        <div className="grid grid-cols-7 flex-1">
-          {days.map((date) => {
+      {/* Calendario */}
+      <div className="rounded-[15px] overflow-hidden border border-[#CECECE]">
+        <div className="grid grid-cols-7 auto-rows-[95px]">
+
+          {/* Header días */}
+          {["Su", "Mo", "Tu", "We", "Th", "Fr", "Sa"].map((day) => (
+            <div
+              key={day}
+              className="text-center py-3 text-[15px] font-medium text-[#757575] border-b border-r border-[#CECECE] last:border-r-0 bg-white"
+            >
+              {day}
+            </div>
+          ))}
+
+          {/* Días */}
+          {days.map((date, index) => {
             const key = formatDateKey(date);
-            const dayNumber = date.getDate();
-            const isOtherMonth = date.getMonth() !== currentMonth.getMonth();
-            const events = eventsMap[key] || [];
+            const isOtherMonth =
+              date.getMonth() !== currentMonth.getMonth();
+            const dayEvents = eventsMap[key] || [];
+
+            const isLastColumn = (index + 1) % 7 === 0;
+            const isLastRow = index >= days.length - 7;
 
             return (
-              <div key={key} className="border-r border-b border-[#CECECE] p-2 relative group hover:bg-slate-50 transition-colors">
-                <span className={`text-[15px] font-medium ${isOtherMonth ? 'text-[#CECECE]' : 'text-[#757575]'}`}>
-                  {dayNumber}
+              <div
+                key={key}
+                className={`
+                  p-2 bg-white hover:bg-slate-50 transition-colors
+                  border-r border-b border-[#CECECE]
+                  ${isLastColumn ? "border-r-0" : ""}
+                  ${isLastRow ? "border-b-0" : ""}
+                `}
+              >
+                <span
+                  className={`text-[13px] font-medium ${
+                    isOtherMonth ? "text-[#CECECE]" : "text-[#757575]"
+                  }`}
+                >
+                  {date.getDate()}
                 </span>
 
-                {events.length > 0 && (
+                {/* Mostrar máximo 2 eventos */}
+                {dayEvents.length > 0 && (
                   <div className="mt-1 flex flex-col gap-1">
-                    {events.map((evt) => (
+                    {dayEvents.slice(0, 2).map((evt) => (
                       <div
                         key={evt.id}
                         className="text-white text-[11px] px-2 py-0.5 rounded-[5px] font-medium truncate"
-                        style={{ backgroundColor: specialtyColorMap[evt.specialty] || '#999999' }}
-                        title={`${evt.doctorName} — ${evt.specialty}`}
+                        style={{
+                          backgroundColor:
+                            departmentColorMap[evt.department] ||
+                            "var(--chart-1)",
+                        }}
                       >
                         {evt.doctorName}
                       </div>
                     ))}
+
+                    {/* Si hay más de 2 */}
+                    {dayEvents.length > 2 && (
+                      <span className="text-[11px] text-[#757575] font-medium">
+                        +{dayEvents.length - 2} more
+                      </span>
+                    )}
                   </div>
                 )}
               </div>
             );
           })}
+
         </div>
       </div>
     </div>

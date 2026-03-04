@@ -43,7 +43,7 @@ const VacationFilters: React.FC<VacationFiltersProps> = ({
             className="w-full md:w-56"
             onChange={(value: string) => onSpecialtyChange(value)}
             options={[
-              { label: "All Specialties", value: "" },
+              { label: "All Departments", value: "" },
               ...specialties.map((item) => ({
                 label: item,
                 value: item,

@@ -1,23 +1,47 @@
-import React, { useMemo } from "react";
+import React, { useMemo, useState } from "react";
 import { useVacationRequests } from "../context/VacationRequestsContext";
 import { VACATION_STATUS } from "../../../core/constants";
-import { mockEmployees } from "../../../core/mocks/data";
-import { useNavigate } from "react-router-dom";
-// Title and VacationFilters are rendered by the page to avoid duplication
+import { mockEmployees, type VacationRequest } from "../../../core/mocks/data";
+import { Modal } from "../../../ui/core/Modal";
+import { Button } from "../../../ui/core/Button";
+import { VacationRequestDetails } from "./VacationRequestDetails";
 
-interface VacationRequestsTableProps {
+interface VacationsHistoryTableProps {
   sortKey: "startDate" | "employeeName";
   sortDirection: "asc" | "desc";
   onSortChange: (key: "startDate" | "employeeName") => void;
 }
 
-const VacationRequestsTable: React.FC<VacationRequestsTableProps> = ({
+const statusStyles: Record<string, { container: string; text: string; label: string }> = {
+  [VACATION_STATUS.PENDING]: {
+    container: "bg-status-pending-foreground",
+    text: "text-status-pending",
+    label: "Pending",
+  },
+  [VACATION_STATUS.APPROVED]: {
+    container: "bg-status-approved-foreground",
+    text: "text-status-approved",
+    label: "Approved",
+  },
+  [VACATION_STATUS.REJECTED]: {
+    container: "bg-status-rejected-foreground",
+    text: "text-status-rejected",
+    label: "Denied",
+  },
+  [VACATION_STATUS.CANCELLED]: {
+    container: "bg-status-canceled-foreground",
+    text: "text-status-canceled",
+    label: "Canceled",
+  },
+};
+
+const VacationsHistoryTable: React.FC<VacationsHistoryTableProps> = ({
   sortKey,
   sortDirection,
   onSortChange,
 }) => {
   const { requests, search, specialtyFilter } = useVacationRequests();
-  const navigate = useNavigate();
+  const [selected, setSelected] = useState<VacationRequest | null>(null);
 
   const { specialtyByEmployeeId, specialties } = useMemo(() => {
     const map: Record<string, string> = {};
@@ -35,7 +59,7 @@ const VacationRequestsTable: React.FC<VacationRequestsTableProps> = ({
 
   const filteredAndSorted = useMemo(() => {
     let result = requests.filter(
-      (request) => request.status === VACATION_STATUS.PENDING
+      (request) => request.status !== VACATION_STATUS.PENDING
     );
 
     if (search.trim()) {
@@ -80,13 +104,18 @@ const VacationRequestsTable: React.FC<VacationRequestsTableProps> = ({
     specialtyByEmployeeId,
   ]);
 
-  return (
-    <div className="w-full overflow-x-auto">
-        <div className="min-w-[800px] w-full">
+  const getStatusStyles = (status: string) => {
+    return statusStyles[status] ?? statusStyles[VACATION_STATUS.PENDING];
+  };
 
+  const handleCloseModal = () => setSelected(null);
+
+  return (
+    <>
+      <div className="w-full overflow-x-auto">
+        <div className="min-w-[800px] w-full">
           {/* HEADER */}
           <div className="flex h-[50px] items-center rounded-t-[20px] bg-primary px-10 text-base font-semibold text-primary-foreground shadow-[0_0_20px_rgba(15,23,42,0.16)]">
-
             <div
               onClick={() => onSortChange("employeeName")}
               className="flex flex-[1] cursor-pointer items-center justify-start gap-1 pl-10"
@@ -122,7 +151,6 @@ const VacationRequestsTable: React.FC<VacationRequestsTableProps> = ({
             <div className="flex flex-[1] items-center justify-center">
               Status
             </div>
-
           </div>
 
           {/* BODY */}
@@ -130,9 +158,10 @@ const VacationRequestsTable: React.FC<VacationRequestsTableProps> = ({
             {filteredAndSorted.map((request, index) => {
               const isEven = index % 2 === 0;
               const isLast = index === filteredAndSorted.length - 1;
+              const styles = getStatusStyles(request.status);
 
               const handleRowClick = () => {
-                navigate(`/vacation-manager/${request.id}`);
+                setSelected(request);
               };
 
               return (
@@ -143,8 +172,8 @@ const VacationRequestsTable: React.FC<VacationRequestsTableProps> = ({
                       isEven ? "bg-muted/40" : "bg-card"
                     } ${isLast ? "rounded-b-[20px]" : ""}`}
                   >
-                    <div className="flex flex-[1] items-center justify-start pl-10 font-medium text-primary">                    
-                        {request.employeeName}
+                    <div className="flex flex-[1] items-center justify-start pl-10 font-medium text-primary">
+                      {request.employeeName}
                     </div>
 
                     <div className="flex flex-[1.5] items-center justify-center text-primary">
@@ -160,10 +189,9 @@ const VacationRequestsTable: React.FC<VacationRequestsTableProps> = ({
                     </div>
 
                     <div className="flex flex-[1] items-center justify-center">
-                      <div className="flex h-[25px] min-w-[120px] items-center justify-center rounded-full bg-status-pending-foreground">
-                        <span className="text-sm font-medium text-status-pending">
-                          {request.status.charAt(0).toUpperCase() +
-                            request.status.slice(1)}
+                      <div className={`flex h-[25px] min-w-[120px] items-center justify-center rounded-full ${styles.container}`}>
+                        <span className={`text-sm font-medium ${styles.text}`}>
+                          {styles.label}
                         </span>
                       </div>
                     </div>
@@ -174,10 +202,25 @@ const VacationRequestsTable: React.FC<VacationRequestsTableProps> = ({
               );
             })}
           </div>
-
         </div>
       </div>
+
+      <Modal
+        open={!!selected}
+        onClose={handleCloseModal}
+        title="Vacation Request"
+        size="xl"
+        headerVariant="primary"
+        footer={
+          <Button variant="primary" onClick={handleCloseModal}>
+            Close
+          </Button>
+        }
+      >
+        {selected && <VacationRequestDetails request={selected} />}
+      </Modal>
+    </>
   );
 };
 
-export default VacationRequestsTable;
+export default VacationsHistoryTable;

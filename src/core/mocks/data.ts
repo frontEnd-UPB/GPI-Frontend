@@ -45,7 +45,8 @@ export interface VacationRequest {
   reason: string;
   status: "pending" | "approved" | "rejected";
   requestDate: string;
-  
+  comment: string | null;
+  attachmentUrl: string | null;
 }
 
 export const mockEmployees: Employee[] = [
@@ -287,6 +288,8 @@ export const mockVacationRequests: VacationRequest[] = [
     reason: "Family vacation",
     status: "pending",
     requestDate: "2026-02-15",
+    comment: null,
+    attachmentUrl: null,
   },
   {
     id: "2",
@@ -298,6 +301,8 @@ export const mockVacationRequests: VacationRequest[] = [
     reason: "Personal leave",
     status: "pending",
     requestDate: "2026-02-18",
+    comment: null,
+    attachmentUrl: null,
   },
   {
     id: "3",
@@ -309,6 +314,8 @@ export const mockVacationRequests: VacationRequest[] = [
     reason: "Medical leave",
     status: "approved",
     requestDate: "2026-02-10",
+    comment: "Medical leave approved by HR.",
+    attachmentUrl: "https://example.com/docs/medical-leave-daniel-thomas.pdf",
   },
   {
     id: "4",
@@ -320,17 +327,21 @@ export const mockVacationRequests: VacationRequest[] = [
     reason: "Conference attendance",
     status: "approved",
     requestDate: "2026-02-28",
+    comment: "Conference trip confirmed and approved.",
+    attachmentUrl: "https://example.com/docs/conference-alexa-liras.pdf",
   },
   {
     id: "5",
     employeeId: "8",
     employeeName: "Carlos Pérez",
-    startDate: "2026-04-05",
-    endDate: "2026-04-12",
+    startDate: "2026-03-05",
+    endDate: "2026-03-12",
     days: 8,
     reason: "Family trip",
     status: "pending",
     requestDate: "2026-03-01",
+    comment: null,
+    attachmentUrl: null,
   },
   {
     id: "6",
@@ -343,6 +354,8 @@ export const mockVacationRequests: VacationRequest[] = [
     status: "rejected",
     rejectionReason: "High workload in Oncology department",
     requestDate: "2026-02-25",
+    comment: "Request rejected due to high workload.",
+    attachmentUrl: null,
   },
   {
     id: "7",
@@ -354,28 +367,73 @@ export const mockVacationRequests: VacationRequest[] = [
     reason: "Short break",
     status: "pending",
     requestDate: "2026-03-02",
+    comment: null,
+    attachmentUrl: null,
   },
   {
     id: "8",
     employeeId: "4",
     employeeName: "Freduardo Hill",
-    startDate: "2026-03-28",
-    endDate: "2026-04-01",
+    startDate: "2026-03-18",
+    endDate: "2026-03-22",
     days: 5,
     reason: "Family visit",
     status: "pending",
     requestDate: "2026-03-02",
+    comment: null,
+    attachmentUrl: null,
   },
   {
     id: "9",
     employeeId: "9",
     employeeName: "María Gómez",
-    startDate: "2026-04-10",
-    endDate: "2026-04-14",
+    startDate: "2026-03-26",
+    endDate: "2026-03-30",
     days: 5,
     reason: "Travel",
     status: "pending",
     requestDate: "2026-03-02",
+    comment: null,
+    attachmentUrl: null,
+  },
+  {
+    id: "10",
+    employeeId: "6",
+    employeeName: "Mark Wilson",
+    startDate: "2026-03-05",
+    endDate: "2026-03-08",
+    days: 4,
+    reason: "Cardiology conference",
+    status: "approved",
+    requestDate: "2026-02-20",
+    comment: "Approved to attend annual cardiology summit.",
+    attachmentUrl: "https://example.com/docs/cardiology-conference-mark-wilson.pdf",
+  },
+  {
+    id: "11",
+    employeeId: "7",
+    employeeName: "Laura Martínez",
+    startDate: "2026-03-25",
+    endDate: "2026-03-29",
+    days: 5,
+    reason: "Family vacation",
+    status: "approved",
+    requestDate: "2026-02-22",
+    comment: "Family vacation scheduled after shift reorganization.",
+    attachmentUrl: null,
+  },
+  {
+    id: "12",
+    employeeId: "8",
+    employeeName: "Carlos Pérez",
+    startDate: "2026-02-18",
+    endDate: "2026-02-22",
+    days: 5,
+    reason: "Post-congress rest days",
+    status: "approved",
+    requestDate: "2026-03-05",
+    comment: "Approved as compensation after international congress.",
+    attachmentUrl: "https://example.com/docs/post-congress-rest-carlos-perez.pdf",
   },
 ];
 

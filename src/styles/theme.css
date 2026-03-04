@@ -42,11 +42,15 @@
   --ring: #159EEC; /* primary */
 
   /* Paleta para gráficos (puedes ajustar más adelante si lo necesitas) */
-  --chart-1: #1e88e5;
-  --chart-2: #2e7d32;
-  --chart-3: #29b6f6;
-  --chart-4: #f9a825;
-  --chart-5: #4caf50;
+  --chart-1: #FF383C;
+  --chart-2: #6155F5;
+  --chart-3: #00C3D0;
+  --chart-4: #FF8D28;
+  --chart-5: #CB30E0;
+  --chart-6: #34C759;
+  --chart-7: #F59E0B;
+  --chart-8: #8B5CF6;
+
 
   /* Status Colors */
   --status-pending: #FFCC00;
@@ -147,6 +151,10 @@
   --color-chart-3: var(--chart-3);
   --color-chart-4: var(--chart-4);
   --color-chart-5: var(--chart-5);
+  --color-chart-6: var(--chart-6);
+  --color-chart-7: var(--chart-7);
+  --color-chart-8: var(--chart-8);
+
   --radius-sm: calc(var(--radius) - 4px);
   --radius-md: calc(var(--radius) - 2px);
   --radius-lg: var(--radius);
