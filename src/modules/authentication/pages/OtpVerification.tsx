@@ -1,23 +1,46 @@
 import React from "react";
-import bgImage from "../assets/auth_bg_image.png";
-import {MainLayout } from "../../../core/components/layout/MainLayout";
-import {TopInfoBar } from "../../../core/components/layout/TopInfoBar";
-import {Footer } from "../../../core/components/layout/Footer";
+import { MainLayout } from "../../../core/components/layout/MainLayout";
+import { TopInfoBar } from "../../../core/components/layout/TopInfoBar";
+import { Footer } from "../../../core/components/layout/Footer";
 import { ThemedContainer } from "../components/themed-container";
 import { InputOTP, InputOTPGroup, InputOTPSlot } from "../../../ui/input-otp";
 import { Button } from "../../../core";
+import { ErrorMessage } from "../../../core/components/feedback/ErrorMessage"; // Ajusta la ruta
 import BlurredBackground from "../components/BlurredBackground";
-
-const handleSubmit = (e: React.FormEvent) => {
-  e.preventDefault();
-  // Use otp value here, e.g., send to API
-  console.log("OTP submitted");
-};
 
 const OtpVerificationPage: React.FC = () => {
   const [otp, setOtp] = React.useState("");
+  const [error, setError] = React.useState("");
   const [showTimer, setShowTimer] = React.useState(false);
   const [seconds, setSeconds] = React.useState(60);
+
+  // Validar que solo sean números
+  const handleOtpChange = (value: string) => {
+    // Solo permite dígitos
+    if (/^\d*$/.test(value)) {
+      setOtp(value);
+      setError(""); // Limpiar error cuando el usuario escribe
+    }
+  };
+
+  const handleSubmit = (e: React.FormEvent) => {
+    e.preventDefault();
+    
+    // Validación básica
+    if (!otp.trim()) {
+      setError("OTP code is required");
+      return;
+    }
+    
+    if (otp.length < 6) {
+      setError("OTP code must be 6 digits");
+      return;
+    }
+    
+    setError("");
+    console.log("OTP válido:", otp);
+    // Use otp value here, e.g., send to API
+  };
 
   // Persist timer state in localStorage
   React.useEffect(() => {
@@ -63,21 +86,22 @@ const OtpVerificationPage: React.FC = () => {
   return (
     <MainLayout>
       <TopInfoBar />
-        <BlurredBackground >
+      <BlurredBackground>
         <ThemedContainer>
-            <form className="otp-form mt-[-200px]" onSubmit={handleSubmit}>
-
+          <form className="otp-form mt-[-200px]" onSubmit={handleSubmit}>
             <div className="mb-10">
-            <h4 className="text-2xl text-primary-foreground font-bold mb-1">
-            OTP Verification</h4>
-            <p className="text-xs text-info ">
-            Check your email to see the verification code.</p>
+              <h4 className="text-2xl text-primary-foreground font-bold mb-1">
+                OTP Verification
+              </h4>
+              <p className="text-xs text-info">
+                Check your email to see the verification code.
+              </p>
             </div>
 
             <div className="flex justify-center">
               <InputOTP
                 value={otp}
-                onChange={setOtp}
+                onChange={handleOtpChange}
                 maxLength={6}
               >
                 <InputOTPGroup className="gap-3">
@@ -91,6 +115,10 @@ const OtpVerificationPage: React.FC = () => {
                 </InputOTPGroup>
               </InputOTP>
             </div>
+
+            <br />
+            {/* Error Message */}
+            {error && <ErrorMessage message={error} />}
 
             <div className="mt-6 flex justify-center">
               <Button
@@ -125,12 +153,9 @@ const OtpVerificationPage: React.FC = () => {
                 </p>
               )}
             </div>
-
-
-            </form>
-
+          </form>
         </ThemedContainer>
-        </BlurredBackground >
+      </BlurredBackground>
       <Footer />
     </MainLayout>
   );
