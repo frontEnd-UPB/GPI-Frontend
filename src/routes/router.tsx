@@ -11,6 +11,11 @@ import AdminVacationPage from "../modules/vacation-admin/pages/AdminVacationPage
 import DoctorVacationPage from "../modules/vacation-doctor/pages/DoctorVacationPage";
 import HomePage from "../modules/home/pages/HomePage";
 import AdminLoginPage from "../modules/authentication/pages/AdminLoginPage";
+import SignUpPage from "../modules/authentication/pages/SignUpPage";
+import PacientLoginPge from "../modules/authentication/pages/PacientLoginPage";
+import ResetPasswordPage from "../modules/authentication/pages/ResetPasswordPage";
+import OtpVerification from "../modules/authentication/pages/OtpVerification";
+import ForgotPasswordPage from "../modules/authentication/pages/ForgotPasswordPage";
 import { ProtectedRoute } from "./ProtectedRoute";
 import { ROUTE_PATHS } from "./routes";
 
@@ -32,6 +37,26 @@ const RoutesConfig: React.FC = () => {
     {
       path: "/admin-login",
       element: <AdminLoginPage />,
+    },
+    {
+      path: "/sign-up",
+      element: <SignUpPage />,
+    },
+    {
+      path: "/reset-password",
+      element: <ResetPasswordPage />,
+    },
+    {
+      path: "/patient-login",
+      element: <PacientLoginPge />,
+    },
+    {
+      path: "/otp-verification",
+      element: <OtpVerification />,
+    },
+    {
+      path: "/forgot-password",
+      element: <ForgotPasswordPage />,
     },
     {
       element: <ProtectedRoute />,

@@ -1,5 +1,4 @@
 import React, { useState } from "react";
-import { MainLayout } from "../../../core/components/layout/MainLayout";
 import { TopInfoBar } from "../../../core/components/layout/TopInfoBar";
 import { Footer } from "../../../core/components/layout/Footer";
 import { ThemedContainer } from "../components/themed-container";
@@ -49,7 +48,7 @@ const ResetPasswordPage: React.FC = () => {
   };
 
   return (
-    <MainLayout>
+    <div className="flex flex-col min-h-screen">
       <TopInfoBar />
       <BlurredBackground>
         <ThemedContainer>
@@ -101,7 +100,7 @@ const ResetPasswordPage: React.FC = () => {
         </ThemedContainer>
       </BlurredBackground>
       <Footer />
-    </MainLayout>
+    </div>
   );
 };
 

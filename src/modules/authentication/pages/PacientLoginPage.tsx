@@ -38,6 +38,11 @@ const AdminLoginPage: React.FC = () => {
     navigate("/reset-password");
   };
 
+  const handleSignUp = (event: React.MouseEvent<HTMLAnchorElement>) => {
+    event.preventDefault();
+    navigate("/sign-up");
+  };
+
   return (
     <div className="flex flex-col min-h-screen">
       <TopInfoBar />
@@ -95,6 +100,19 @@ const AdminLoginPage: React.FC = () => {
               <Button type="submit" className="z-10 bg-chart-3" disabled={loading}>
                 {loading ? "Verifying..." : "Log in"}
               </Button>
+            </div>
+
+            <div className="mt-6 text-center">
+              <p className="text-sm text-primary-foreground">
+                Don't have account?{" "}
+                <a
+                  href="#"
+                  onClick={handleSignUp}
+                  className="text-info hover:underline font-semibold"
+                >
+                  Sign Up here!
+                </a>
+              </p>
             </div>
           </form>
         </ThemedContainer>

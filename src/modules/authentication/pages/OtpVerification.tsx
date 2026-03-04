@@ -1,5 +1,4 @@
 import React from "react";
-import { MainLayout } from "../../../core/components/layout/MainLayout";
 import { TopInfoBar } from "../../../core/components/layout/TopInfoBar";
 import { Footer } from "../../../core/components/layout/Footer";
 import { ThemedContainer } from "../components/themed-container";
@@ -56,7 +55,7 @@ const OtpVerificationPage: React.FC = () => {
   }, []);
 
   React.useEffect(() => {
-    let timer: NodeJS.Timeout;
+    let timer: ReturnType<typeof setInterval>;
     if (showTimer && seconds > 0) {
       timer = setInterval(() => setSeconds((s) => s - 1), 1000);
     }
@@ -84,7 +83,7 @@ const OtpVerificationPage: React.FC = () => {
   };
 
   return (
-    <MainLayout>
+    <div className="flex flex-col min-h-screen">
       <TopInfoBar />
       <BlurredBackground>
         <ThemedContainer>
@@ -157,7 +156,7 @@ const OtpVerificationPage: React.FC = () => {
         </ThemedContainer>
       </BlurredBackground>
       <Footer />
-    </MainLayout>
+    </div>
   );
 };
 
