@@ -1,4 +1,5 @@
 import React from "react";
+import { useNavigate } from "react-router-dom";
 import { TopInfoBar } from "../../../core/components/layout/TopInfoBar";
 import { Footer } from "../../../core/components/layout/Footer";
 import { ThemedContainer } from "../components/themed-container";
@@ -6,12 +7,15 @@ import { InputOTP, InputOTPGroup, InputOTPSlot } from "../../../ui/input-otp";
 import { Button } from "../../../core";
 import { ErrorMessage } from "../../../core/components/feedback/ErrorMessage"; // Ajusta la ruta
 import BlurredBackground from "../components/BlurredBackground";
+import { ROUTE_PATHS } from "../../../routes/routes";
 
 const OtpVerificationPage: React.FC = () => {
+  const navigate = useNavigate();
   const [otp, setOtp] = React.useState("");
   const [error, setError] = React.useState("");
   const [showTimer, setShowTimer] = React.useState(false);
   const [seconds, setSeconds] = React.useState(60);
+  const [expiresAt, setExpiresAt] = React.useState<number | null>(null);
 
   // Validar que solo sean números
   const handleOtpChange = (value: string) => {
@@ -38,47 +42,52 @@ const OtpVerificationPage: React.FC = () => {
     
     setError("");
     console.log("OTP válido:", otp);
-    // Use otp value here, e.g., send to API
+    // ESTE LOGIN DEBE REDIRIGIR AL LOGIN DE PACIENTES
+    navigate(ROUTE_PATHS.LOGIN, { replace: true });
   };
 
   // Persist timer state in localStorage
   React.useEffect(() => {
     const saved = localStorage.getItem("otp-timer");
     if (saved) {
-      const { expiresAt } = JSON.parse(saved);
+      const { expiresAt: savedExpiresAt } = JSON.parse(saved);
       const now = Date.now();
-      if (expiresAt > now) {
+      if (savedExpiresAt > now) {
         setShowTimer(true);
-        setSeconds(Math.ceil((expiresAt - now) / 1000));
+        setExpiresAt(savedExpiresAt);
+        setSeconds(Math.ceil((savedExpiresAt - now) / 1000));
       }
     }
   }, []);
 
   React.useEffect(() => {
-    let timer: ReturnType<typeof setInterval>;
-    if (showTimer && seconds > 0) {
-      timer = setInterval(() => setSeconds((s) => s - 1), 1000);
-    }
-    if (showTimer && seconds > 0) {
-      localStorage.setItem(
-        "otp-timer",
-        JSON.stringify({ expiresAt: Date.now() + seconds * 1000 })
-      );
-    }
-    if (seconds === 0) {
-      setShowTimer(false);
-      localStorage.removeItem("otp-timer");
-    }
+    if (!showTimer || !expiresAt) return;
+
+    const syncCountdown = () => {
+      const remaining = Math.max(0, Math.ceil((expiresAt - Date.now()) / 1000));
+      setSeconds(remaining);
+
+      if (remaining === 0) {
+        setShowTimer(false);
+        setExpiresAt(null);
+        localStorage.removeItem("otp-timer");
+      }
+    };
+
+    syncCountdown();
+    const timer = setInterval(syncCountdown, 1000);
     return () => clearInterval(timer);
-  }, [showTimer, seconds]);
+  }, [showTimer, expiresAt]);
 
   const handleResend = (e: React.MouseEvent) => {
     e.preventDefault();
+    const nextExpiresAt = Date.now() + 60000;
     setShowTimer(true);
     setSeconds(60);
+    setExpiresAt(nextExpiresAt);
     localStorage.setItem(
       "otp-timer",
-      JSON.stringify({ expiresAt: Date.now() + 60000 })
+      JSON.stringify({ expiresAt: nextExpiresAt })
     );
   };
 

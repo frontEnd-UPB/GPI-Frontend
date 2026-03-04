@@ -52,7 +52,7 @@ const AdminLoginPage: React.FC = () => {
 
   const handleForgotPassword = (event: React.MouseEvent<HTMLAnchorElement>) => {
     event.preventDefault();
-    navigate("/reset-password");
+    navigate("/forgot-password?from=doctor");
   };
 
   return (

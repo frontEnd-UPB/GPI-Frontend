@@ -3,6 +3,7 @@ import type { UserRole } from "../core/constants/roles";
 export const ROUTE_PATHS = {
   HOME: "/",
   LOGIN: "/admin-login",
+  //Debe ver login de pacientes
   UNAUTHORIZED: "/unauthorized",
   ADMIN_DASHBOARD: "/admin-dashboard",
   DOCTOR_DASHBOARD: "/doctor-dashboard",
@@ -31,7 +32,10 @@ export type RoutePath = (typeof ROUTE_PATHS)[keyof typeof ROUTE_PATHS];
 
 export const UNAUTHORIZED_ROUTE: RoutePath = ROUTE_PATHS.UNAUTHORIZED;
 
-export const ALWAYS_ALLOWED_ROUTES: RoutePath[] = [ROUTE_PATHS.UNAUTHORIZED];
+export const ALWAYS_ALLOWED_ROUTES: RoutePath[] = [
+  ROUTE_PATHS.UNAUTHORIZED,
+  ROUTE_PATHS.DEMO,
+];
 
 export const ROLE_ROUTE_ACCESS: Record<UserRole, RoutePath[]> = {
   admin: [

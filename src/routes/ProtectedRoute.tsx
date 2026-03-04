@@ -25,8 +25,12 @@ const isRouteAllowed = (path: string, allowedRoutes: string[]) =>
   });
 
 export const ProtectedRoute: React.FC = () => {
-  const { user } = useAuth();
+  const { user, loading } = useAuth();
   const location = useLocation();
+
+  if (loading) {
+    return null;
+  }
 
   if (!user) {
     const from = `${location.pathname}${location.search}${location.hash}`;

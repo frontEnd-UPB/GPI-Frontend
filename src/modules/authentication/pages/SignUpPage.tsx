@@ -44,7 +44,7 @@ const SignUpPage: React.FC = () => {
     setTimeout(() => {
       console.log("Datos de registro:", { fullName, email, password });
       setIsLoading(false);
-      navigate("/patient-login"); 
+      navigate("/otp-verification"); 
     }, 1500);
   };
 
