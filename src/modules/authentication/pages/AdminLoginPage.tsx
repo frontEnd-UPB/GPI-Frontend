@@ -6,7 +6,6 @@ import { ThemedContainer } from "../components/themed-container";
 import { Input, Button } from "../../../core/components";
 import { ErrorMessage } from "../../../core/components/feedback/ErrorMessage";
 import BlurredBackground from "../components/BlurredBackground";
-import { useAuth } from "../../../context/AuthContext";
 import { ROUTE_PATHS } from "../../../routes/routes"; 
 import { useSignIn } from "../hooks/useSignIn";
 
