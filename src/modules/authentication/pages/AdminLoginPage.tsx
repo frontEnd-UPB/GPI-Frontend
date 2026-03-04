@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { TopInfoBar } from "../../../core/components/layout/TopInfoBar";
 import { Footer } from "../../../core/components/layout/Footer";
@@ -8,13 +8,30 @@ import { ErrorMessage } from "../../../core/components/feedback/ErrorMessage";
 import BlurredBackground from "../components/BlurredBackground";
 import { ROUTE_PATHS } from "../../../routes/routes"; 
 import { useSignIn } from "../hooks/useSignIn";
+import { useAuth } from "../../../context/AuthContext";
 
 const AdminLoginPage: React.FC = () => {
   const navigate = useNavigate();
+  const { user, loading: authLoading } = useAuth();
   const { signIn: hookSignIn, signInLoading: loading } = useSignIn();
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [error, setError] = useState<string | null>(null);
+
+  useEffect(() => {
+    if (authLoading || !user) return;
+
+    if (user.role === "admin") {
+      navigate(ROUTE_PATHS.VACATIONS_ADMIN, { replace: true });
+      return;
+    }
+
+    if (user.role === "doctor") {
+    navigate(ROUTE_PATHS.VACATIONS_DOCTOR, { replace: true });
+    }
+
+    navigate(ROUTE_PATHS.UNAUTHORIZED, { replace: true });
+  }, [authLoading, user, navigate]);
 
   const handleSubmit: React.FormEventHandler<HTMLFormElement> = async (e) => {
     e.preventDefault();

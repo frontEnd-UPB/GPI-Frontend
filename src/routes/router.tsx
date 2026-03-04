@@ -1,4 +1,4 @@
-import React, { Suspense, lazy } from "react";
+import React from "react";
 import { AuthProvider } from '../context/AuthContext';
 import { BrowserRouter, Navigate, useRoutes } from "react-router-dom";
 import { MainLayout } from "../core/components";
@@ -20,24 +20,16 @@ import ForgotPasswordPage from "../modules/authentication/pages/ForgotPasswordPa
 import { ProtectedRoute } from "./ProtectedRoute";
 import { ROUTE_PATHS } from "./routes";
 
-const LoginPage = lazy(() => import("../modules/authentication/pages/LoginPage"));
-
-const LoginRoute: React.FC = () => (
-  <Suspense fallback={null}>
-    <LoginPage />
-  </Suspense>
-);
-
 
 const RoutesConfig: React.FC = () => {
   const element = useRoutes([
     {
       path: ROUTE_PATHS.LOGIN,
-      element: <LoginRoute />,
+      element: <AdminLoginPage />,
     },
     {
       path: "/admin-login",
-      element: <AdminLoginPage />,
+      element: <Navigate to={ROUTE_PATHS.LOGIN} replace />,
     },
     {
       path: "/sign-up",
