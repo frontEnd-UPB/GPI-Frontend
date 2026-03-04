@@ -2,8 +2,6 @@ import { Modal } from "../../../ui/core/Modal";
 import StatusBadge from "./StatusBadge";
 import DateRangeDisplay from "./DateRangeDisplay";
 import type { VacationRequest } from "../../../core/mocks/data";
-import { theme } from "../../../core/theme";
-
 
 interface VacationRequestModalProps {
   open: boolean;
@@ -18,8 +16,6 @@ export default function VacationRequestModal({
   vacation,
   onCancelRequest,
 }: VacationRequestModalProps) {
-  const { colors, spacing, radius, typography } = theme;
-
   if (!vacation) return null;
 
   const isPending = vacation.status === "pending";
@@ -31,8 +27,8 @@ export default function VacationRequestModal({
   };
 
   return (
-    <Modal open={open} onClose={onClose} title="Vacation Leave Request" size="lg">
-      
+    <Modal open={open} onClose={onClose} title="Vacation Leave Request" size="xl">
+
       {/* Date Range */}
       <DateRangeDisplay
         startDate={vacation.startDate}
@@ -40,119 +36,50 @@ export default function VacationRequestModal({
       />
 
       {/* Type + Status */}
-      <div
-        style={{
-          display: "flex",
-          justifyContent: "space-between",
-          marginBottom: spacing.xl,
-          flexWrap: "wrap",
-        }}
-      >
-        {/* Type */}
+      <div className="grid grid-cols-2 gap-lg mb-xl">
         <div>
-          <div
-            style={{
-              fontSize: typography.fontSize.sm,
-              fontFamily: typography.fontFamily.semiBold,
-              color: colors.primaryDark,
-              marginBottom: spacing.xs,
-            }}
-          >
-            Type
-          </div>
-
-          <div
-            style={{
-              fontSize: typography.fontSize.md,
-              color: colors.textPrimary,
-            }}
-          >
-            Vacation Leave
-          </div>
+          <p className="text-xs font-semibold text-primary mb-xs uppercase tracking-wide">Type</p>
+          <p className="text-sm text-foreground">{vacation.reason}</p>
         </div>
-
-        {/* Status */}
         <div>
-          <div
-            style={{
-              fontSize: typography.fontSize.sm,
-              fontFamily: typography.fontFamily.semiBold,
-              color: colors.primaryDark,
-              marginBottom: spacing.xs,
-            }}
-          >
-            Current Status
-          </div>
-
+          <p className="text-xs font-semibold text-primary mb-xs uppercase tracking-wide">Status</p>
           <StatusBadge status={vacation.status} />
         </div>
       </div>
 
-      {/* Comment */}
-      <div style={{ marginBottom: spacing.xl }}>
-        <div
-          style={{
-            fontSize: typography.fontSize.sm,
-            fontFamily: typography.fontFamily.semiBold,
-            color: colors.primaryDark,
-            marginBottom: spacing.sm,
-          }}
-        >
-          Comment (Optional)
+      {/* Days */}
+      <div className="grid grid-cols-2 gap-lg mb-xl">
+        <div>
+          <p className="text-xs font-semibold text-primary mb-xs uppercase tracking-wide">Days Requested</p>
+          <p className="text-sm text-foreground">{vacation.days} day{vacation.days !== 1 ? "s" : ""}</p>
         </div>
+        <div>
+          <p className="text-xs font-semibold text-primary mb-xs uppercase tracking-wide">Requested On</p>
+          <p className="text-sm text-foreground">{vacation.requestDate}</p>
+        </div>
+      </div>
 
+      {/* Comment */}
+      <div className="mb-xl">
+        <p className="text-xs font-semibold text-primary mb-xs uppercase tracking-wide">
+          Comment
+        </p>
         <textarea
-          placeholder="Add comment..."
-          disabled={!isPending}
-          style={{
-            width: "100%",
-            minHeight: 90,
-            borderRadius: radius.md,
-            border: `1px solid ${colors.border}`,
-            padding: spacing.md,
-            resize: "none",
-            fontSize: typography.fontSize.sm,
-            color: colors.textPrimary,
-            backgroundColor: isPending ? colors.surface : colors.background,
-          }}
+          placeholder="No comment provided."
+          readOnly
+          className="w-full min-h-[80px] rounded-md border border-border p-md resize-none text-sm text-muted-foreground bg-background"
         />
       </div>
 
       {/* Pending Buttons */}
       {isPending && (
-        <div
-          style={{
-            display: "flex",
-            gap: spacing.md,
-          }}
-        >
-          <button
-            style={{
-              backgroundColor: colors.secondary,
-              color: colors.textOnPrimary,
-              padding: `${spacing.sm}px ${spacing.lg}px`,
-              borderRadius: radius.md,
-              border: "none",
-              cursor: "pointer",
-              fontFamily: typography.fontFamily.medium,
-              fontSize: typography.fontSize.sm,
-            }}
-          >
+        <div className="flex gap-sm">
+          <button className="flex-1 bg-secondary text-white py-sm px-lg rounded-md text-sm font-medium cursor-pointer border-0">
             Resend
           </button>
-
           <button
             onClick={handleCancel}
-            style={{
-              backgroundColor: colors.error,
-              color: colors.textOnPrimary,
-              padding: `${spacing.sm}px ${spacing.lg}px`,
-              borderRadius: radius.md,
-              border: "none",
-              cursor: "pointer",
-              fontFamily: typography.fontFamily.medium,
-              fontSize: typography.fontSize.sm,
-            }}
+            className="flex-1 bg-destructive text-white py-sm px-lg rounded-md text-sm font-medium cursor-pointer border-0"
           >
             Cancel Request
           </button>
@@ -161,17 +88,8 @@ export default function VacationRequestModal({
 
       {/* Rejected message */}
       {isRejected && (
-        <div
-          style={{
-            marginTop: spacing.sm,
-            backgroundColor: "#fdecea",
-            color: colors.error,
-            padding: spacing.md,
-            borderRadius: radius.md,
-            fontSize: typography.fontSize.sm,
-          }}
-        >
-          Rejection Reason: Insufficient staff
+        <div className="bg-destructive/10 text-destructive p-md rounded-md text-sm">
+          <span className="font-semibold">Rejection reason:</span> Insufficient staff
         </div>
       )}
     </Modal>

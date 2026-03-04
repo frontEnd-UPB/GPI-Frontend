@@ -64,7 +64,8 @@ export async function submitVacationRequest(
       requestDate: new Date().toISOString().split("T")[0],
     };
 
-    mockVacationRequests.push(newRequest);
+    // NOTE: do NOT push newRequest into mockVacationRequests here.
+    // The caller's onSuccess callback owns the state update to avoid duplicates.
 
     // Update in-memory balance
     const balanceIndex = mockVacationBalances.findIndex(

@@ -1,4 +1,4 @@
-import { theme } from "../../../core/theme";
+import { format, parseISO } from "date-fns";
 import { FiCalendar } from "react-icons/fi";
 
 interface DateRangeDisplayProps {
@@ -10,65 +10,32 @@ export default function DateRangeDisplay({
   startDate,
   endDate,
 }: DateRangeDisplayProps) {
-  const { colors, typography, radius, spacing } = theme;
+  const fmt = (iso: string) => {
+    try { return format(parseISO(iso), "dd/MM/yyyy"); }
+    catch { return iso; }
+  };
 
   return (
-    <div
-      style={{
-        display: "flex",
-        gap: spacing.xxl,
-        backgroundColor: colors.background,
-        borderRadius: radius.full,
-        padding: `${spacing.lg}px ${spacing.xxl}px`,
-        marginBottom: spacing.xl,
-        flexWrap: "wrap",
-      }}
-    >
+    <div className="flex flex-wrap gap-xxl bg-background rounded-full py-lg px-xxl mb-xl">
       {/* Start Date */}
-      <div style={{ 
-        flex: 1, 
-        minWidth: 140,
-        display: "flex",
-        alignItems: "flex-start",
-        gap: spacing.sm
-      }}>
-        <FiCalendar color={colors.primaryDark} size={20} style={{ marginTop: 2 }} />
+      <div className="flex-1 min-w-[140px] flex items-start gap-sm">
+        <FiCalendar className="text-primary mt-0.5 shrink-0" size={20} />
         <div>
-          <label
-            style={{
-              fontSize: typography.fontSize.xs,
-              fontFamily: typography.fontFamily.semiBold,
-              color: colors.primaryDark,
-              display: "block",
-            }}
-          >
+          <label className="block text-xs font-semibold text-primary">
             Start Date
           </label>
-          <div style={{ marginTop: 6 }}>{startDate}</div>
+          <div className="mt-1.5 text-sm text-foreground">{fmt(startDate)}</div>
         </div>
       </div>
 
       {/* End Date */}
-      <div style={{ 
-        flex: 1, 
-        minWidth: 140,
-        display: "flex",
-        alignItems: "flex-start",
-        gap: spacing.sm
-      }}>
-        <FiCalendar color={colors.primaryDark} size={20} style={{ marginTop: 2 }} />
+      <div className="flex-1 min-w-[140px] flex items-start gap-sm">
+        <FiCalendar className="text-primary mt-0.5 shrink-0" size={20} />
         <div>
-          <label
-            style={{
-              fontSize: typography.fontSize.xs,
-              fontFamily: typography.fontFamily.semiBold,
-              color: colors.primaryDark,
-              display: "block",
-            }}
-          >
+          <label className="block text-xs font-semibold text-primary">
             End Date
           </label>
-          <div style={{ marginTop: 6 }}>{endDate}</div>
+          <div className="mt-1.5 text-sm text-foreground">{fmt(endDate)}</div>
         </div>
       </div>
     </div>

@@ -2,26 +2,11 @@ import type { VacationRequest } from "../../../core/mocks/data";
 
 type VacationStatus = VacationRequest["status"];
 
-const statusStyles: Record<
-  VacationStatus,
-  { backgroundColor: string; color: string }
-> = {
-  pending: {
-    backgroundColor: "#FFF9C4",
-    color: "#F9A825",
-  },
-  approved: {
-    backgroundColor: "#C8E6C9",
-    color: "#2E7D32",
-  },
-  rejected: {
-    backgroundColor: "#FFCDD2",
-    color: "#C62828",
-  },
-  canceled: {
-    backgroundColor: "#E3F2FD",
-    color: "#1E88E5",
-  },
+const STATUS_CLASSES: Record<VacationStatus, string> = {
+  pending:  "bg-warning/15 text-warning",
+  approved: "bg-success/15 text-secondary",
+  rejected: "bg-destructive/15 text-destructive",
+  canceled: "bg-info/15 text-info",
 };
 
 interface StatusBadgeProps {
@@ -29,20 +14,9 @@ interface StatusBadgeProps {
 }
 
 export default function StatusBadge({ status }: StatusBadgeProps) {
-  const style = statusStyles[status];
-
   return (
     <span
-      style={{
-        backgroundColor: style.backgroundColor,
-        color: style.color,
-        padding: "4px 16px",
-        borderRadius: "12px",
-        fontWeight: 600,
-        fontSize: "0.85rem",
-        display: "inline-block",
-        textTransform: "capitalize",
-      }}
+      className={`inline-block py-xs px-lg rounded-full font-semibold text-sm capitalize ${STATUS_CLASSES[status]}`}
     >
       {status}
     </span>

@@ -25,7 +25,7 @@ const DoctorVacationPage: React.FC = () => {
   });
 
   const [vacations, setVacations] = useState<VacationRequest[]>(
-      mockVacationRequests
+      [...mockVacationRequests]
     );
   const [selectedVacation, setSelectedVacation] =
     useState<VacationRequest | null>(null);
