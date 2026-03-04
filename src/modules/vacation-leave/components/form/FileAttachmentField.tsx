@@ -1,5 +1,4 @@
 import type { RefObject } from "react";
-import { theme } from "../../../../core/theme/index";
 import { ALLOWED_FILE_TYPES, MAX_FILE_SIZE_MB } from "../../../../core/mocks/data";
 import { Input } from "../../../../ui/input";
 import { FormItem, FormLabel, FormMessage } from "../../../../ui/form";
@@ -17,25 +16,11 @@ export default function FileAttachmentField({
   fileInputRef,
   onChange,
 }: FileAttachmentFieldProps) {
-  const { colors, typography, spacing } = theme;
-
   return (
-    <FormItem style={{ marginBottom: spacing.xl }}>
-      <FormLabel
-        style={{
-          fontSize: typography.fontSize.sm,
-          fontFamily: typography.fontFamily.bold,
-          color: colors.primaryDark,
-          fontWeight: "bold",
-        }}
-      >
+    <FormItem className="mb-xl">
+      <FormLabel className="text-sm font-bold text-primary">
         Attach Document{" "}
-        <span
-          style={{
-            fontFamily: typography.fontFamily.regular,
-            color: colors.textSecondary,
-          }}
-        >
+        <span className="font-normal text-muted-foreground">
           (if applicable)
         </span>
       </FormLabel>
@@ -45,22 +30,14 @@ export default function FileAttachmentField({
         type="file"
         accept={ALLOWED_FILE_TYPES.join(",")}
         onChange={onChange}
-        style={{ borderColor: colors.textSecondary }}
-        className={attachment ? "text-foreground" : "text-muted-foreground"}
+        className={`border-muted-foreground ${attachment ? "text-foreground" : "text-muted-foreground"}`}
       />
 
       {fileError && (
         <FormMessage>{fileError}</FormMessage>
       )}
 
-      <p
-        style={{
-          color: colors.textDisabled,
-          fontSize: typography.fontSize.xs,
-          fontFamily: typography.fontFamily.regular,
-          marginTop: spacing.xs,
-        }}
-      >
+      <p className="text-disabled text-xs mt-xs">
         Allowed: {ALLOWED_FILE_TYPES.join(", ")} — Max {MAX_FILE_SIZE_MB}MB
       </p>
     </FormItem>

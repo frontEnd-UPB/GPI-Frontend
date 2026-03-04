@@ -13,9 +13,11 @@ import VacationStatusTable from "../components/VacationStatusTable";
 import { mockVacationRequests } from "../../../core";
 import VacationRequestModal from "../components/VacationRequestModal";
 import type { VacationRequest } from "../../../core/mocks/data";
+import { useAuth } from "../../../context/AuthContext";
 
 const DoctorVacationPage: React.FC = () => {
-  const doctorId = "1";
+  const { user } = useAuth();
+  const doctorId = user?.id ?? "";
   const { balance, error, refetch } = useVacationBalance(doctorId);
   const { submit, error: submitError } = useSubmitVacationRequest(doctorId, (newRequest) => {
     setVacations((prev) => [...prev, newRequest]);

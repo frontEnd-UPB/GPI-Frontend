@@ -60,6 +60,7 @@
   --sidebar-accent-foreground: #111827;
   --sidebar-border: #e5e7eb;
   --sidebar-ring: #1e88e5;
+  --disabled: #9ca3af; /* theme.colors.textDisabled */
 }
 
 .dark {
@@ -148,6 +149,24 @@
   --color-sidebar-accent-foreground: var(--sidebar-accent-foreground);
   --color-sidebar-border: var(--sidebar-border);
   --color-sidebar-ring: var(--sidebar-ring);
+
+  /* ── Spacing scale (aligned with core/theme/index.ts) ── */
+  --spacing-xs: 0.25rem;    /* 4px  */
+  --spacing-sm: 0.5rem;     /* 8px  */
+  --spacing-md: 0.75rem;    /* 12px */
+  --spacing-lg: 1rem;       /* 16px */
+  --spacing-xl: 1.25rem;    /* 20px */
+  --spacing-xxl: 1.5rem;    /* 24px */
+  --spacing-xxxl: 2rem;     /* 32px */
+
+  /* ── Extra border-radius (aligned with core/theme/index.ts) ── */
+  --radius-2xl: 1.25rem;    /* 20px = theme.radius.xl */
+
+  /* ── Brand primary blue (#1E88E5 = theme.colors.primary) ── */
+  --color-brand: var(--ring);
+
+  /* ── Disabled text (#9CA3AF = theme.colors.textDisabled) ── */
+  --color-disabled: var(--disabled);
 }
 
 @layer base {

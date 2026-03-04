@@ -1,5 +1,4 @@
 import type { Control } from "react-hook-form";
-import { theme } from "../../../../core/theme/index";
 import { Textarea } from "../../../../ui/textarea";
 import {
   FormControl,
@@ -15,29 +14,15 @@ interface CommentFieldProps {
 }
 
 export default function CommentField({ control }: CommentFieldProps) {
-  const { colors, typography, spacing } = theme;
-
   return (
     <FormField
       control={control}
       name="comment"
       render={({ field }) => (
-        <FormItem style={{ marginBottom: spacing.xl }}>
-          <FormLabel
-            style={{
-              fontSize: typography.fontSize.sm,
-              fontFamily: typography.fontFamily.bold,
-              color: colors.primaryDark,
-              fontWeight: "bold",
-            }}
-          >
+        <FormItem className="mb-xl">
+          <FormLabel className="text-sm font-bold text-primary">
             Comment{" "}
-            <span
-              style={{
-                fontFamily: typography.fontFamily.regular,
-                color: colors.textSecondary,
-              }}
-            >
+            <span className="font-normal text-muted-foreground">
               (Optional)
             </span>
           </FormLabel>
@@ -45,7 +30,7 @@ export default function CommentField({ control }: CommentFieldProps) {
             <Textarea
               placeholder="Add any additional comments..."
               rows={4}
-              style={{ borderColor: colors.textSecondary }}
+              className="border-muted-foreground"
               {...field}
             />
           </FormControl>

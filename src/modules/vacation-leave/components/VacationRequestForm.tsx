@@ -1,4 +1,3 @@
-import { theme } from "../../../core/theme/index";
 import { Form } from "../../../ui/form";
 import { Button } from "../../../ui/button";
 import {
@@ -23,8 +22,6 @@ export default function VacationRequestForm({
   onCancel,
   availableDays,
 }: VacationRequestFormProps) {
-  const { colors, typography, radius, spacing } = theme;
-
   const {
     form,
     attachment,
@@ -38,51 +35,27 @@ export default function VacationRequestForm({
   return (
     /* ---- Expand / Collapse wrapper ---- */
     <div
+      className="overflow-hidden"
       style={{
         maxHeight: visible ? 1400 : 0,
         opacity: visible ? 1 : 0,
-        overflow: "hidden",
-        marginBottom: visible ? spacing.xxl : 0,
+        marginBottom: visible ? "var(--spacing-xxl)" : 0,
         transition:
           "max-height 0.5s ease, opacity 0.4s ease, margin-bottom 0.4s ease",
       }}
     >
       {/* ---- Card ---- */}
-      <div
-        style={{
-          borderRadius: radius.xl,
-          overflow: "hidden",
-          boxShadow: "0 2px 12px rgba(0,0,0,0.10)",
-          backgroundColor: colors.surface,
-          fontFamily: typography.fontFamily.regular,
-        }}
-      >
+      <div className="rounded-2xl overflow-hidden shadow-md bg-card">
         {/* ---- Header ---- */}
-        <div
-          style={{
-            backgroundColor: colors.primaryDark,
-            padding: `${spacing.lg}px ${spacing.xxl}px`,
-          }}
-        >
-          <h2
-            style={{
-              color: colors.textOnPrimary,
-              margin: 0,
-              fontSize: typography.fontSize.lg,
-              fontFamily: typography.fontFamily.bold,
-            }}
-          >
+        <div className="bg-primary py-lg px-xxl">
+          <h2 className="text-white m-0 text-lg font-bold">
             Vacation Leave Request
           </h2>
         </div>
 
         {/* ---- Form Body ---- */}
         <Form {...form}>
-          <form
-            onSubmit={handleSubmit}
-            noValidate
-            style={{ padding: spacing.xxl }}
-          >
+          <form onSubmit={handleSubmit} noValidate className="p-xxl">
             <DateRangeFields control={form.control} />
 
             <TypeSelector control={form.control} />
@@ -97,21 +70,10 @@ export default function VacationRequestForm({
             />
 
             {/* ---- Actions ---- */}
-            <div
-              style={{
-                display: "flex",
-                gap: spacing.lg,
-                marginTop: spacing.xxl,
-              }}
-            >
+            <div className="flex gap-lg mt-xxl">
               <Button
                 type="submit"
-                className="flex-1 rounded-full font-bold tracking-wide"
-                style={{
-                  backgroundColor: colors.success,
-                  color: colors.textOnPrimary,
-                  fontSize: typography.fontSize.md,
-                }}
+                className="flex-1 rounded-full font-bold tracking-wide bg-success text-white text-base"
               >
                 SEND
               </Button>
@@ -120,8 +82,7 @@ export default function VacationRequestForm({
                 type="button"
                 variant="outline"
                 onClick={handleCancel}
-                className="flex-1 rounded-full"
-                style={{ fontSize: typography.fontSize.md }}
+                className="flex-1 rounded-full text-base"
               >
                 Cancel
               </Button>

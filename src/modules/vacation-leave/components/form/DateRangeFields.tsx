@@ -1,5 +1,4 @@
 import type { Control } from "react-hook-form";
-import { theme } from "../../../../core/theme/index";
 import { DatePicker } from "../../../../ui/core/DatePicker";
 import {
   FormControl,
@@ -15,19 +14,8 @@ interface DateRangeFieldsProps {
 }
 
 export default function DateRangeFields({ control }: DateRangeFieldsProps) {
-  const { colors, typography, radius, spacing } = theme;
-
   return (
-    <div
-      className="flex flex-col sm:flex-row sm:items-start"
-      style={{
-        gap: spacing.xxl,
-        backgroundColor: colors.primaryLight,
-        borderRadius: radius.xl,
-        padding: `${spacing.lg}px ${spacing.xxl}px`,
-        marginBottom: spacing.xl,
-      }}
-    >
+    <div className="flex flex-col sm:flex-row sm:items-start gap-xxl bg-accent rounded-2xl px-xxl py-lg mb-xl">
       {/* Start Date */}
       <FormField
         control={control}
@@ -35,14 +23,7 @@ export default function DateRangeFields({ control }: DateRangeFieldsProps) {
         rules={{ required: "Start date is required." }}
         render={({ field }) => (
           <FormItem className="flex-1 min-w-[140px] flex flex-col items-center">
-            <FormLabel
-              style={{
-                fontSize: typography.fontSize.md,
-                fontFamily: typography.fontFamily.bold,
-                color: colors.primaryDark,
-                fontWeight: "bold",
-              }}
-            >
+            <FormLabel className="text-base font-bold text-primary">
               Start Date
             </FormLabel>
             <FormControl>
@@ -66,14 +47,7 @@ export default function DateRangeFields({ control }: DateRangeFieldsProps) {
         rules={{ required: "End date is required." }}
         render={({ field }) => (
           <FormItem className="flex-1 min-w-[140px] flex flex-col items-center">
-            <FormLabel
-              style={{
-                fontSize: typography.fontSize.md,
-                fontFamily: typography.fontFamily.bold,
-                color: colors.primaryDark,
-                fontWeight: "bold",
-              }}
-            >
+            <FormLabel className="text-base font-bold text-primary">
               End Date
             </FormLabel>
             <FormControl>

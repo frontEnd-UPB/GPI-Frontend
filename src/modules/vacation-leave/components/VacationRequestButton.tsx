@@ -1,6 +1,5 @@
 import { useState } from "react";
 import { Button } from "../../../ui/button";
-import { theme } from "../../../core/theme/index";
 import VacationRequestForm from "./VacationRequestForm";
 import type { VacationSubmitData } from "../hooks/useVacationRequestForm";
 
@@ -14,7 +13,6 @@ export default function VacationRequestButton({
   availableDays,
 }: VacationRequestButtonProps) {
   const [formVisible, setFormVisible] = useState(false);
-  const { colors, typography, radius, spacing } = theme;
 
   const handleOpen = () => setFormVisible(true);
 
@@ -27,29 +25,19 @@ export default function VacationRequestButton({
   return (
     <div>
       <div
+        className="overflow-hidden flex justify-center"
         style={{
           maxHeight: formVisible ? 0 : 60,
           opacity: formVisible ? 0 : 1,
-          overflow: "hidden",
           pointerEvents: formVisible ? "none" : "auto",
+          marginBottom: formVisible ? 0 : "var(--spacing-xl)",
           transition: "max-height 0.4s ease, opacity 0.3s ease",
-          marginBottom: formVisible ? 0 : spacing.xl,
-          display: "flex",
-          justifyContent: "center",
         }}
       >
         <Button
           type="button"
           onClick={handleOpen}
-          className="rounded-full font-bold tracking-wide px-8 flex justify-center items-center w-full sm:w-auto"
-          style={{
-            fontFamily: typography.fontFamily.bold,
-            backgroundColor: colors.primary,
-            color: colors.textOnPrimary,
-            fontSize: typography.fontSize.md,
-            borderRadius: radius.lg,
-            padding: `${spacing.xxl}px ${spacing.xxxl}px`,
-          }}
+          className="rounded-full font-bold tracking-wide px-xxxl py-xxl flex justify-center items-center w-full sm:w-auto bg-brand text-white text-base"
         >
           + Request Vacation Leave
         </Button>

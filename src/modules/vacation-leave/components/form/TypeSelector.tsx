@@ -1,5 +1,4 @@
 import type { Control } from "react-hook-form";
-import { theme } from "../../../../core/theme/index";
 import { VacationReason } from "../../../../core/mocks/data";
 import {
   FormControl,
@@ -22,27 +21,18 @@ interface TypeSelectorProps {
 }
 
 export default function TypeSelector({ control }: TypeSelectorProps) {
-  const { colors, typography, spacing } = theme;
-
   return (
     <FormField
       control={control}
       name="type"
       render={({ field }) => (
-        <FormItem style={{ marginBottom: spacing.xl }}>
-          <FormLabel
-            style={{
-              fontSize: typography.fontSize.sm,
-              fontFamily: typography.fontFamily.bold,
-              color: colors.primaryDark,
-              fontWeight: "bold",
-            }}
-          >
+        <FormItem className="mb-xl">
+          <FormLabel className="text-sm font-bold text-primary">
             Type
           </FormLabel>
           <Select value={field.value} onValueChange={field.onChange}>
             <FormControl>
-              <SelectTrigger style={{ borderColor: colors.textSecondary }}>
+              <SelectTrigger className="border-muted-foreground">
                 <SelectValue placeholder="Select type" />
               </SelectTrigger>
             </FormControl>
