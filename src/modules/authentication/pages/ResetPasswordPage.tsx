@@ -1,47 +1,97 @@
-import React from "react";
-import bgImage from "../assets/auth_bg_image.png";
+import React, { useState } from "react";
 import { MainLayout } from "../../../core/components/layout/MainLayout";
 import { TopInfoBar } from "../../../core/components/layout/TopInfoBar";
 import { Footer } from "../../../core/components/layout/Footer";
 import { ThemedContainer } from "../components/themed-container";
 import { Input, Button } from "../../../core/components";
+import { ErrorMessage } from "../../../core/components/feedback/ErrorMessage";
 import BlurredBackground from "../components/BlurredBackground";
 
 const ResetPasswordPage: React.FC = () => {
+  const [newPassword, setNewPassword] = useState("");
+  const [confirmPassword, setConfirmPassword] = useState("");
+  const [error, setError] = useState("");
+
   const handleSubmit: React.FormEventHandler<HTMLFormElement> = (e) => {
     e.preventDefault();
-    //logica de reset password 
+    
+    // Validación básica
+    if (!newPassword.trim()) {
+      setError("New password is required");
+      return;
+    }
+    
+    if (!confirmPassword.trim()) {
+      setError("Please confirm your password");
+      return;
+    }
+    
+    // Validación simple de que coincidan
+    if (newPassword !== confirmPassword) {
+      setError("Passwords do not match");
+      return;
+    }
+    
+    // Validación mínima de seguridad (al menos 6 caracteres)
+    if (newPassword.length < 6) {
+      setError("Password must be at least 6 characters");
+      return;
+    }
+    
+    setError("");
+    console.log("Passwords válidas");
+    // lógica de reset password
   };
 
   const handleForgotPassword = (event: React.MouseEvent<HTMLAnchorElement>) => {
     event.preventDefault();
-    // logica de forgot password 
+    // logica de forgot password
   };
 
   return (
     <MainLayout>
       <TopInfoBar />
-      <BlurredBackground >
+      <BlurredBackground>
         <ThemedContainer>
           <form className="login-form" onSubmit={handleSubmit}>
             <div className="mb-15">
               <h4 className="text-2xl text-primary-foreground font-bold mb-1">
                 Set New Password
               </h4>
-              <p className="text-xs text-info ">
+              <p className="text-xs text-info">
                 Enter your new password to complete the reset process.
               </p>
             </div>
+            
             <p className="text-sm text-primary-foreground font-semibold mt-4 mb-2">
               New Password
             </p>
-            <Input id="newPassword" type="password" placeholder="Enter your new password" required />
+            <Input 
+              id="newPassword" 
+              type="password" 
+              placeholder="Enter your new password" 
+              value={newPassword}
+              onChange={(e) => setNewPassword(e.target.value)}
+              required 
+            />
+            
             <p className="text-sm text-primary-foreground font-semibold mt-4 mb-2">
               Confirm Password
             </p>
-            <Input id="confirmPassword" type="password" placeholder="Confirm your new password" required />
+            <Input 
+              id="confirmPassword" 
+              type="password" 
+              placeholder="Confirm your new password" 
+              value={confirmPassword}
+              onChange={(e) => setConfirmPassword(e.target.value)}
+              required 
+            />
+            
+            {/* Error Message */}
+            {error && <ErrorMessage message={error} />}
+            
             <div className="mt-6 flex justify-center">
-              <Button type="submit" className="z-10 bg-chart-3" >
+              <Button type="submit" className="z-10 bg-chart-3">
                 Save New Password
               </Button>
             </div>
