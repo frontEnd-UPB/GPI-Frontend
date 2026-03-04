@@ -44,7 +44,7 @@ const SignUpPage: React.FC = () => {
     setTimeout(() => {
       console.log("Datos de registro:", { fullName, email, password });
       setIsLoading(false);
-      navigate("/admin-login"); 
+      navigate("/patient-login"); 
     }, 1500);
   };
 
@@ -148,7 +148,7 @@ const SignUpPage: React.FC = () => {
                 <button 
                   type="button" 
                   className="hover:underline font-bold text-info" 
-                  onClick={() => navigate("/admin-login")}
+                  onClick={() => navigate("/patient-login")}
                 >
                   Sign in
                 </button>
