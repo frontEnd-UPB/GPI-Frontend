@@ -32,9 +32,9 @@ const ResetPasswordPage: React.FC = () => {
       return;
     }
     
-    // Validación mínima de seguridad (al menos 6 caracteres)
-    if (newPassword.length < 6) {
-      setError("Password must be at least 6 characters");
+    // Validación mínima de seguridad (al menos 12 caracteres)
+    if (newPassword.length < 12) {
+      setError("Password must be at least 12 characters");
       return;
     }
     
@@ -87,7 +87,9 @@ const ResetPasswordPage: React.FC = () => {
               required 
             />
             
-            {/* Error Message */}
+             {/* add space */}
+              <br />
+           
             {error && <ErrorMessage message={error} />}
             
             <div className="mt-6 flex justify-center">
