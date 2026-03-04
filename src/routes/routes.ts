@@ -2,8 +2,10 @@ import type { UserRole } from "../core/constants/roles";
 
 export const ROUTE_PATHS = {
   HOME: "/",
-  LOGIN: "/login",
+  LOGIN: "/admin-login",
   UNAUTHORIZED: "/unauthorized",
+  ADMIN_DASHBOARD: "/admin-dashboard",
+  DOCTOR_DASHBOARD: "/doctor-dashboard",
 
   DEMO: "/demo",
 
@@ -34,6 +36,7 @@ export const ALWAYS_ALLOWED_ROUTES: RoutePath[] = [ROUTE_PATHS.UNAUTHORIZED];
 export const ROLE_ROUTE_ACCESS: Record<UserRole, RoutePath[]> = {
   admin: [
     ROUTE_PATHS.HOME,
+    ROUTE_PATHS.ADMIN_DASHBOARD,
     ROUTE_PATHS.DEMO,
     ROUTE_PATHS.HR,
     ROUTE_PATHS.ADMIN_STAFF_DIRECTORY,
@@ -46,6 +49,7 @@ export const ROLE_ROUTE_ACCESS: Record<UserRole, RoutePath[]> = {
   ],
   doctor: [
     ROUTE_PATHS.HOME,
+    ROUTE_PATHS.DOCTOR_DASHBOARD,
     ROUTE_PATHS.DEMO,
     ROUTE_PATHS.VACATIONS_DOCTOR,
     ROUTE_PATHS.AGENDA,

@@ -17,6 +17,8 @@ import PacientLoginPge from "../modules/authentication/pages/PacientLoginPage";
 import ResetPasswordPage from "../modules/authentication/pages/ResetPasswordPage";
 import OtpVerification from "../modules/authentication/pages/OtpVerification";
 import ForgotPasswordPage from "../modules/authentication/pages/ForgotPasswordPage";
+import AdminDashboard from "../modules/authentication/pages/AdminDashboard";
+import DoctorDashboard from "../modules/authentication/pages/DoctorDashboard";
 import { ProtectedRoute } from "./ProtectedRoute";
 import { ROUTE_PATHS } from "./routes";
 
@@ -26,10 +28,6 @@ const RoutesConfig: React.FC = () => {
     {
       path: ROUTE_PATHS.LOGIN,
       element: <AdminLoginPage />,
-    },
-    {
-      path: "/admin-login",
-      element: <Navigate to={ROUTE_PATHS.LOGIN} replace />,
     },
     {
       path: "/sign-up",
@@ -52,11 +50,23 @@ const RoutesConfig: React.FC = () => {
       element: <ForgotPasswordPage />,
     },
     {
+      path: "/HomePage",
+      element: <HomePage />,
+    },
+    {
       element: <ProtectedRoute />,
       children: [
         {
           path: ROUTE_PATHS.UNAUTHORIZED,
           element: <UnauthorizedPage />,
+        },
+        {
+          path: "admin-dashboard",
+          element: <AdminDashboard />,
+        },
+        {
+          path: "doctor-dashboard",
+          element: <DoctorDashboard />,
         },
         {
           element: <MainLayout />,

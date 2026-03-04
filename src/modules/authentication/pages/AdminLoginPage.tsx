@@ -23,12 +23,13 @@ const AdminLoginPage: React.FC = () => {
     if (authLoading || !user) return;
 
     if (user.role === "admin") {
-      navigate(ROUTE_PATHS.VACATIONS_ADMIN, { replace: true });
+      navigate(ROUTE_PATHS.ADMIN_DASHBOARD, { replace: true });
       return;
     }
 
     if (user.role === "doctor") {
-    navigate(ROUTE_PATHS.VACATIONS_DOCTOR, { replace: true });
+    navigate(ROUTE_PATHS.DOCTOR_DASHBOARD, { replace: true });
+    return;
     }
 
     navigate(ROUTE_PATHS.UNAUTHORIZED, { replace: true });
@@ -40,9 +41,9 @@ const AdminLoginPage: React.FC = () => {
     try {
       const { user } = await hookSignIn(email, password);
       if (user?.role === "admin") {
-        navigate(ROUTE_PATHS.VACATIONS_ADMIN, { replace: true });
+        navigate(ROUTE_PATHS.ADMIN_DASHBOARD, { replace: true });
       } else {
-        navigate(ROUTE_PATHS.VACATIONS_DOCTOR, { replace: true });
+        navigate(ROUTE_PATHS.DOCTOR_DASHBOARD, { replace: true });
       }
     } catch (err: unknown) {
       setError(err instanceof Error ? err.message : "Invalid email or password");
