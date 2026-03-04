@@ -1,6 +1,6 @@
 import React, { createContext, useContext, useState, useEffect, ReactNode } from "react";
 import type { AuthUser, SignInCredentials } from "../core/types/auth";
-import { mockAuthService } from "../core/mocks/auth.mock";
+import { authModuleService } from "../modules/authentication/services/authModuleService";
 
 // Define the context value shape
 interface AuthContextValue {
@@ -51,10 +51,16 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
     console.log("signIn llamado con:", credentials.email);
     setLoading(true);
     try {
-      const userData = await mockAuthService.signIn(credentials.email, credentials.password);
-      setUser(userData);
-      console.log(" Usuario después de signIn:", userData.email);
-      return userData;
+      const response = await authModuleService.signIn(credentials.email, credentials.password);
+      setUser({
+        id: response.user.id,
+        email: response.user.email,
+        name: response.user.name,
+        role: response.user.role,
+        profilePicture: response.user.profilePicture,
+        metadata: { lastLogin: new Date().toISOString() },
+      });
+      console.log(" Usuario después de signIn:", response.user.email);
     } catch (error) {
       console.error(" signIn falló:", error);
       throw error;
@@ -68,7 +74,7 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
     setLoading(true);
     
     try {
-      await mockAuthService.signOut();
+      await authModuleService.signOut();
       console.log(" signOut llamado - usuario actual:", user?.email || "ninguno");
       localStorage.removeItem("meddical:user");
       localStorage.removeItem("meddical:token");

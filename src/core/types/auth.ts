@@ -1,7 +1,12 @@
 import type { UserRole } from "../constants/roles";
 import type { Employee } from "../mocks/data";
 
-export interface AuthUser extends Employee {
+export interface AuthUser {
+  id: string;
+  email: string;
+  name: string;
+  role: "admin" | "doctor";
+  profilePicture: string | null;
   metadata?: Record<string, unknown>;
 }
 

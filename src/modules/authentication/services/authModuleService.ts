@@ -1,34 +1,60 @@
 import { mockEmployees } from "../../../core/mocks/data";
+import type { AuthUser } from "../../../core/types/auth";
+import { API_ENDPOINTS } from "../../../core/constants";
 
+// This service simulates authentication logic. In a real application, this would involve API calls to a backend server.
 export interface AuthResponse {
   token: string;
-  user: {
-    id: string;
-    email: string;
-    name: string;
-    role: string;
-  };
-  }
+  user: AuthUser;
+}
 
 export const authModuleService = {
-  login: async (email: string, password: string): Promise<AuthResponse> => {
-    
-    return new Promise((resolve, reject) => {
-      setTimeout(() => {
-        const user = mockEmployees.find(
-          (u) => u.email === email && u.password === password
-        );
+  /**
+   * Authenticate user with email and password
+   */
+  signIn: async (email: string, password: string): Promise<AuthResponse> => {
+    // Simulate network latency
+    const networkDelay = Math.random() * 500 + 500;
+    await new Promise(resolve => setTimeout(resolve, networkDelay));
 
-        if (user) {
-          const { password: _, ...userWithoutPassword } = user;
-          resolve({
-            token: "fake-jwt-token",
-            user: userWithoutPassword,
-          });
-        } else {
-          reject(new Error("Credenciales inválidas. Por favor intente de nuevo."));
-        }
-      }, 1000);
-    });
+    const normalizedEmail = email.toLowerCase().trim();
+    const employee = mockEmployees.find(emp => emp.email.toLowerCase() === normalizedEmail);
+    const isValid = employee && employee.password === password;
+    if (!isValid) {
+      throw new Error("Invalid email or password");
+    }
+
+    const token = "mock-jwt-token-" + Date.now();
+    localStorage.setItem("meddical:user", JSON.stringify(employee));
+    localStorage.setItem("meddical:token", token);
+    console.log(`[AUTH] SignIn to ${API_ENDPOINTS.AUTH.LOGIN} successful`);
+    return {
+      token,
+      user: {
+        id: employee.id,
+        email: employee.email,
+        name: employee.name,
+        role: employee.role,
+        profilePicture: employee.profilePicture,
+      },
+    };
   },
+
+  /**
+   * Get currently logged in user
+   */
+  getCurrentUser: async (): Promise<AuthUser | null> => {
+    const stored = localStorage.getItem("meddical:user");
+    return stored ? JSON.parse(stored) : null;
+  },
+
+  /**
+   * Sign out current user
+   */
+  signOut: async (): Promise<void> => {
+    console.log(`[AUTH] Calling ${API_ENDPOINTS.AUTH.LOGOUT}`);
+    await new Promise(resolve => setTimeout(resolve, 300));
+    localStorage.removeItem("meddical:user");
+    localStorage.removeItem("meddical:token");
+  }
 };
