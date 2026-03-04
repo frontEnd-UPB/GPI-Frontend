@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useState,useEffect } from "react";
 import { MainContainer, PageHeader } from "../../../core/components";
 import { ROUTE_PATHS } from "../../../routes/routes";
 import { useVacationBalance } from "../hooks/useVacationBalance";
@@ -23,9 +23,13 @@ const AdminVacationPage: React.FC = () => {
     refetch();
   });
 
-  const [vacations, setVacations] = useState<VacationRequest[]>(
-      mockVacationRequests
-    );
+  const [vacations, setVacations] = useState<VacationRequest[]>([]);
+  
+  useEffect(() => {
+      if (doctorId) {
+        setVacations(mockVacationRequests.filter((v) => v.employeeId === doctorId));
+      }
+    }, [doctorId]);
   const [selectedVacation, setSelectedVacation] =
     useState<VacationRequest | null>(null);
   const [openModal, setOpenModal] = useState(false);
