@@ -30,10 +30,12 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
         if (storedUser) {
           const userData = JSON.parse(storedUser);
           setUser(userData);
-          console.log("Session restored for:", userData.email);
+          console.log("Sesión restaurada para:", userData.email);
+        } else {
+          console.log("ℹNo hay sesión activa");
         }
       } catch (error) {
-        console.error("Failed to restore session:", error);
+        console.error(" Error al restaurar sesión:", error);
         localStorage.removeItem("meddical:user");
         localStorage.removeItem("meddical:token");
       } finally {
@@ -44,32 +46,43 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
     checkSession();
   }, []);
 
-  // Login function
-  const login = async (credentials: SignInCredentials) => {
-    console.log("Login called with:", credentials);
+  // SignIn function
+  const signIn = async (credentials: SignInCredentials) => {
+    console.log("signIn llamado con:", credentials.email);
     setLoading(true);
     try {
       const userData = await mockAuthService.signIn(credentials.email, credentials.password);
       setUser(userData);
-      console.log("User after signIn:", userData);
+      console.log(" Usuario después de signIn:", userData.email);
     } catch (error) {
-      console.error("Login failed:", error);
-      throw error; // Let the form handle the error
+      console.error(" signIn falló:", error);
+      throw error;
     } finally {
       setLoading(false);
     }
   };
 
-  // Logout function
-  const logout = async () => {
-    console.log("Logout called");
+  const signOut = async () => {
+    console.log("signOut llamado - usuario actual:", user?.email || "ninguno");
     setLoading(true);
+    
     try {
       await mockAuthService.signOut();
+      console.log(" signOut llamado - usuario actual:", user?.email || "ninguno");
+      localStorage.removeItem("meddical:user");
+      localStorage.removeItem("meddical:token");
+      
       setUser(null);
-      console.log("User after signOut:", user);
+      
+      console.log(" signOut completado - usuario eliminado del contexto");
+      console.log("localStorage user:", localStorage.getItem("meddical:user")); // Debe ser null
+      
     } catch (error) {
-      console.error("Logout failed:", error);
+      console.error("Error en signOut:", error);
+      // Aún así limpiamos el estado local
+      setUser(null);
+      localStorage.removeItem("meddical:user");
+      localStorage.removeItem("meddical:token");
     } finally {
       setLoading(false);
     }
@@ -79,8 +92,8 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
   const value: AuthContextValue = {
     user,
     loading,
-    signIn: login,
-    signOut: logout
+    signIn,
+    signOut
   };
 
   return (
