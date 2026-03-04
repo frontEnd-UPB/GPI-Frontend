@@ -13,6 +13,6 @@ export interface SignInCredentials {
 export interface AuthContextValue {
   user: AuthUser | null;
   loading: boolean;
-  signIn: (credentials: SignInCredentials) => Promise<void>;
+  signIn: (credentials: SignInCredentials) => Promise<AuthUser>;
   signOut: () => void;
 }

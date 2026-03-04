@@ -6,16 +6,6 @@ import {
   VACATION_STATUS, // For vacation statuses
 } from "../constants"; // or from "./index" depending on your export
 
-// Mock password hashes (in real app, this is on backend)
-
-const PASSWORD_HASHES = {
-  "esthera@example.com": "hashed_admin123",
-  "alexa@example.com": "hashed_doctor123",
-};
-
-// Simple hash simulation (ONLY FOR MOCK)
-const simulateHash = (password: string): string => `hashed_${password}`;
-
 export const mockAuthService = {
   /**
    * Authenticate user with email and password
@@ -32,11 +22,8 @@ export const mockAuthService = {
       emp.email.toLowerCase() === normalizedEmail
     );
     
-    // Verify password [EN REALIDAD ESTO SE HACE EN BACKEND, ESTO ES SOLO SIMULACION]
-    const expectedHash = PASSWORD_HASHES[normalizedEmail as keyof typeof PASSWORD_HASHES];
-    const providedHash = simulateHash(password);
-    
-    const isValid = employee && expectedHash && expectedHash === providedHash;
+    // Verify password against mock data (demo only)
+    const isValid = Boolean(employee && employee.password === password);
     
     if (!isValid) {
       throw new Error("Invalid email or password");

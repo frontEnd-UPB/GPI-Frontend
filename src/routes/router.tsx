@@ -10,6 +10,7 @@ import VacationManagementPage from "../modules/vacation-management/pages/Vacatio
 import AdminVacationPage from "../modules/vacation-admin/pages/AdminVacationPage";
 import DoctorVacationPage from "../modules/vacation-doctor/pages/DoctorVacationPage";
 import HomePage from "../modules/home/pages/HomePage";
+import AdminLoginPage from "../modules/authentication/pages/AdminLoginPage";
 import { ProtectedRoute } from "./ProtectedRoute";
 import { ROUTE_PATHS } from "./routes";
 
@@ -18,14 +19,6 @@ const LoginPage = lazy(() => import("../modules/authentication/pages/LoginPage")
 const LoginRoute: React.FC = () => (
   <Suspense fallback={null}>
     <LoginPage />
-  </Suspense>
-);
-
-const AdminLoginPage = lazy(() => import("../modules/authentication/pages/AdminLoginPage"));
-
-const AdminLoginRoute: React.FC = () => (
-  <Suspense fallback={null}>
-    <AdminLoginPage />
   </Suspense>
 );
 
@@ -38,7 +31,7 @@ const RoutesConfig: React.FC = () => {
     },
     {
       path: "/admin-login",
-      element: <AdminLoginRoute />,
+      element: <AdminLoginPage />,
     },
     {
       element: <ProtectedRoute />,

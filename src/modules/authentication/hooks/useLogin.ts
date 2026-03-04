@@ -1,23 +1,23 @@
 import { useState } from "react";
-import { authModuleService } from "../services/authModuleService";
+import { useAuth } from "../../../context/AuthContext";
 
 export const useLogin = () => {
-  const [isLoading, setIsLoading] = useState(false);
+  const { signIn, loading } = useAuth();
   const [error, setError] = useState<string | null>(null);
 
   const login = async (email: string, password: string) => {
-    setIsLoading(true);
     setError(null);
     try {
-      const response = await authModuleService.login(email, password);
-      return response; 
+      const user = await signIn({ email, password });
+      return {
+        token: localStorage.getItem("meddical:token") ?? "",
+        user,
+      };
     } catch (err: any) {
       setError(err.message);
       throw err;
-    } finally {
-      setIsLoading(false);
     }
   };
 
-  return { login, isLoading, error };
+  return { login, isLoading: loading, error };
 };

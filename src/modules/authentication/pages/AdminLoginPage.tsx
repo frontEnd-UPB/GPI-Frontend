@@ -7,27 +7,31 @@ import { Footer } from "../../../core/components/layout/Footer";
 
 import { Button } from "../../../ui/core/Button";
 import { Input } from "../../../ui/core/Input";
-import { useLogin } from "../hooks/useLogin"; 
+import { useAuth } from "../../../context/AuthContext";
+import { ROUTE_PATHS } from "../../../routes/routes";
 import { theme } from "../../../core/theme"; 
 
 const AdminLoginPage: React.FC = () => {
   const navigate = useNavigate();
-  const { login, isLoading, error } = useLogin();
+  const { signIn, loading } = useAuth();
 
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
+  const [error, setError] = useState<string | null>(null);
 
   const handleSubmit: React.FormEventHandler<HTMLFormElement> = async (e) => {
     e.preventDefault();
+    setError(null);
     try {
-      const result = await login(email, password);
-      if (result.user.role === "ADMIN") {
-        navigate("/admin/vacations");
+      const authenticatedUser = await signIn({ email, password });
+
+      if (authenticatedUser.role === "admin") {
+        navigate(ROUTE_PATHS.VACATIONS_ADMIN, { replace: true });
       } else {
-        navigate("/doctor/vacations");
+        navigate(ROUTE_PATHS.VACATIONS_DOCTOR, { replace: true });
       }
-    } catch (err) {
-      // Error manejado por el hook
+    } catch (err: unknown) {
+      setError(err instanceof Error ? err.message : "Invalid email or password");
     }
   };
 
@@ -68,12 +72,11 @@ const AdminLoginPage: React.FC = () => {
             onSubmit={handleSubmit}
             style={{ backgroundColor: theme.colors.primaryDark }}
           >
-            <div className="mb-2">
+            <div className="mb-6">
               <h2 
+                className="text-2xl font-bold mb-1"
                 style={{ 
                   color: theme.colors.textOnPrimary, 
-                  fontSize: theme.typography.fontSize.display,
-                  fontFamily: theme.typography.fontFamily.bold,
                   lineHeight: 1.2
                 }}
               >
@@ -81,20 +84,21 @@ const AdminLoginPage: React.FC = () => {
                 <br />
                 Welcome Back!
               </h2>
+              <p 
+                className="text-xs"
+                style={{ color: theme.colors.primaryLight }}
+              >
+                Sign in to access your account
+              </p>
             </div>
 
             <div className="form-group space-y-1">
-              <label 
-                htmlFor="email" 
-                className="block"
-                style={{ 
-                  color: theme.colors.textOnPrimary,
-                  fontSize: theme.typography.fontSize.sm,
-                  fontFamily: theme.typography.fontFamily.medium
-                }}
+              <p 
+                className="text-sm font-semibold"
+                style={{ color: theme.colors.textOnPrimary }}
               >
                 Email
-              </label>
+              </p>
               <Input
                 id="email"
                 type="email"
@@ -112,17 +116,12 @@ const AdminLoginPage: React.FC = () => {
             </div>
 
             <div className="form-group space-y-1">
-              <label 
-                htmlFor="password" 
-                className="block"
-                style={{ 
-                  color: theme.colors.textOnPrimary,
-                  fontSize: theme.typography.fontSize.sm,
-                  fontFamily: theme.typography.fontFamily.medium
-                }}
+              <p 
+                className="text-sm font-semibold"
+                style={{ color: theme.colors.textOnPrimary }}
               >
                 Password
-              </label>
+              </p>
               <Input
                 id="password"
                 type="password"
@@ -172,7 +171,7 @@ const AdminLoginPage: React.FC = () => {
             <Button 
               type="submit" 
               className="w-full transition-opacity hover:opacity-90 mt-4" 
-              disabled={isLoading}
+              disabled={loading}
               style={{
                 height: "50px",
                 backgroundColor: theme.colors.info,
@@ -182,7 +181,7 @@ const AdminLoginPage: React.FC = () => {
                 fontFamily: theme.typography.fontFamily.bold
               }}
             >
-              {isLoading ? "Verifying..." : "Log in"}
+              {loading ? "Verifying..." : "Log in"}
             </Button>
           </form>
         </div>

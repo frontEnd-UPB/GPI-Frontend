@@ -6,7 +6,7 @@ import { mockAuthService } from "../core/mocks/auth.mock";
 interface AuthContextValue {
   user: AuthUser | null;
   loading: boolean;
-  signIn: (credentials: SignInCredentials) => Promise<void>;
+  signIn: (credentials: SignInCredentials) => Promise<AuthUser>;
   signOut: () => Promise<void>;
 }
 
@@ -54,6 +54,7 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
       const userData = await mockAuthService.signIn(credentials.email, credentials.password);
       setUser(userData);
       console.log(" Usuario después de signIn:", userData.email);
+      return userData;
     } catch (error) {
       console.error(" signIn falló:", error);
       throw error;
