@@ -65,6 +65,7 @@ export default function VacationRequestModal({
           Comment
         </p>
         <textarea
+          value={vacation.comment ?? ""}
           placeholder="No comment provided."
           readOnly
           className="w-full min-h-[80px] rounded-md border border-border p-md resize-none text-sm text-muted-foreground bg-background"

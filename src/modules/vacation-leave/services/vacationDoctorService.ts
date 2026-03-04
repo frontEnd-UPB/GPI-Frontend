@@ -60,6 +60,7 @@ export async function submitVacationRequest(
       endDate: endDate.toISOString().split("T")[0],
       days,
       reason: type,
+      comment: comment || undefined,
       status: "pending",
       requestDate: new Date().toISOString().split("T")[0],
     };
