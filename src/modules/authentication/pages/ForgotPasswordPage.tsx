@@ -7,34 +7,53 @@ import { Input, Button } from "../../../core/components";
 import { ErrorMessage } from "../../../core/components/feedback/ErrorMessage"; // Ajusta la ruta
 import BlurredBackground from "../components/BlurredBackground";
 import { ROUTE_PATHS } from "../../../routes/routes";
+import { useForgotPassword } from "../hooks/useForgotPassword";
+import type { ForgotPasswordSource } from "../services/forgotPasswordService";
 
 const ForgotPasswordPage: React.FC = () => {
   const navigate = useNavigate();
   const [searchParams] = useSearchParams();
   const [email, setEmail] = useState("");
-  const [error, setError] = useState("");
+  const [validationError, setValidationError] = useState("");
+  const { loading, error, successMessage, token, requestReset, clearFeedback } =
+    useForgotPassword();
 
   const from = searchParams.get("from");
+  const requestSource: ForgotPasswordSource = from === "patient" ? "patient" : "doctor";
   const returnLoginPath = from === "patient" ? "/patient-login" : ROUTE_PATHS.LOGIN;
 
-  const handleSubmit: React.FormEventHandler<HTMLFormElement> = (e) => {
+  const handleSubmit: React.FormEventHandler<HTMLFormElement> = async (e) => {
     e.preventDefault();
     
     // Validación básica
     if (!email.trim()) {
-      setError("Email is required");
+      setValidationError("Email is required");
       return;
     }
     
     // Validación simple de formato de email
     if (!email.includes('@') || !email.includes('.')) {
-      setError("Please enter a valid email address");
+      setValidationError("Please enter a valid email address");
       return;
     }
     
-    setError(""); // Limpiar error
-    console.log("Email válido:", email);
-    // lógica de forgot password (send reset email)
+    setValidationError("");
+    await requestReset(email, requestSource);
+  };
+
+  const handleEmailChange = (value: string) => {
+    setEmail(value);
+    if (validationError) {
+      setValidationError("");
+    }
+    if (error || successMessage || token) {
+      clearFeedback();
+    }
+  };
+
+  const handleGoToReset = () => {
+    if (!token) return;
+    navigate(`/reset-password?token=${encodeURIComponent(token)}&from=${requestSource}`);
   };
 
   return (
@@ -62,24 +81,48 @@ const ForgotPasswordPage: React.FC = () => {
               type="email"
               placeholder="Enter your email"
               value={email}
-              onChange={(e) => setEmail(e.target.value)}
+              onChange={(e) => handleEmailChange(e.target.value)}
               required
               className="w-75"
             />
             
-            <br />
             {/* Error Message */}
-            {error && <ErrorMessage message={error} />}
+            {(validationError || error) && (
+              <>
+                <br />
+                <ErrorMessage message={validationError || error || ""} />
+              </>
+            )}
+
+            {successMessage && (
+              <div className="mt-4 text-center">
+                <p className="text-sm text-primary-foreground">{successMessage}</p>
+              </div>
+            )}
             
             {/* Submit */}
             <div className="mt-6 flex justify-center">
               <Button 
                 type="submit" 
+                disabled={loading}
                 className="w-3/4 mx-auto z-10 bg-chart-3 hover:bg-chart-3 hover:opacity-80"
               >
-                Submit
+                {loading ? "Sending..." : "Submit"}
               </Button>
             </div>
+
+            {token && (
+              <div className="mt-4 flex justify-center">
+                <Button
+                  type="button"
+                  onClick={handleGoToReset}
+                  className="w-3/4 mx-auto z-10"
+                  variant="outline"
+                >
+                  Go to Reset Password
+                </Button>
+              </div>
+            )}
 
             <div className="mt-4 flex justify-center">
               <p className="text-xs text-primary-foreground">
