@@ -11,6 +11,7 @@ import type { VacationRequest } from "../../../core/mocks/data";
 import { useAuth } from "../../../context/AuthContext";
 import VacationBalanceCard from "../components/VacationBalanceCard";
 import VacationRequestButton from "../components/VacationRequestButton";
+import { VacationReason } from "../../../core/mocks/data";
 
 
 
@@ -58,6 +59,37 @@ const AdminVacationPage: React.FC = () => {
     );
   };
 
+  const handleResendRequest = (
+    id: string,
+    updatedReason: VacationReason,
+    updatedComment: string
+  ) => {
+    setVacations((prev) =>
+      prev.map((v) =>
+        v.id === id
+          ? {
+              ...v,
+              reason: updatedReason,
+              comment: updatedComment,
+              status: "pending", // sigue siendo pending
+            }
+          : v
+      )
+    );
+
+    setSelectedVacation((prev) =>
+      prev && prev.id === id
+        ? {
+            ...prev,
+            reason: updatedReason,
+            comment: updatedComment,
+            status: "pending",
+          }
+        : prev
+    );
+  };
+  
+
   return (
     <MainContainer>
       <PageHeader
@@ -88,6 +120,8 @@ const AdminVacationPage: React.FC = () => {
           onClose={() => setOpenModal(false)}
           vacation={selectedVacation}
           onCancelRequest={handleCancelRequest}
+          onResendRequest={handleResendRequest}
+          
         />
       </div>
     </MainContainer>

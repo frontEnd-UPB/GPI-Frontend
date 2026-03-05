@@ -14,6 +14,7 @@ import { mockVacationRequests } from "../../../core";
 import VacationRequestModal from "../components/VacationRequestModal";
 import type { VacationRequest } from "../../../core/mocks/data";
 import { useAuth } from "../../../context/AuthContext";
+import { VacationReason } from "../../../core/mocks/data";
 
 const DoctorVacationPage: React.FC = () => {
   const { user } = useAuth();
@@ -58,6 +59,36 @@ const DoctorVacationPage: React.FC = () => {
       prev && prev.id === id ? { ...prev, status: "canceled" } : prev
     );
   };
+
+  const handleResendRequest = (
+    id: string,
+    updatedReason: VacationReason,
+    updatedComment: string
+  ) => {
+    setVacations((prev) =>
+      prev.map((v) =>
+        v.id === id
+          ? {
+              ...v,
+              reason: updatedReason,
+              comment: updatedComment,
+              status: "pending", // sigue siendo pending
+            }
+          : v
+      )
+    );
+
+    setSelectedVacation((prev) =>
+      prev && prev.id === id
+        ? {
+            ...prev,
+            reason: updatedReason,
+            comment: updatedComment,
+            status: "pending",
+          }
+        : prev
+    );
+  };
   
 
   return (
@@ -90,6 +121,7 @@ const DoctorVacationPage: React.FC = () => {
           onClose={() => setOpenModal(false)}
           vacation={selectedVacation}
           onCancelRequest={handleCancelRequest}
+          onResendRequest={handleResendRequest}
         />
       </div>
     </MainContainer>
