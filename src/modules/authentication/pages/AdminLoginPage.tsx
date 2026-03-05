@@ -10,6 +10,7 @@ import { ROUTE_PATHS } from "../../../routes/routes";
 import { useSignIn } from "../hooks/useSignIn";
 import { useAuth } from "../../../context/AuthContext";
 import { LoginCard } from "../components/LoginCard";
+import { PasswordInputWithEye } from "../components/PasswordInputWithEye";
 
 const AdminLoginPage: React.FC = () => {
   const navigate = useNavigate();
@@ -85,9 +86,8 @@ const AdminLoginPage: React.FC = () => {
             <p className="text-sm text-primary-foreground font-semibold mt-4 mb-2">
               Password
             </p>
-            <Input
+            <PasswordInputWithEye
               id="password"
-              type="password"
               placeholder="••••••••••••"
               value={password}
               onChange={(e) => setPassword(e.target.value)}

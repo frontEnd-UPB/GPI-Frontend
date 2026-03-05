@@ -5,11 +5,10 @@ import { Footer } from "../../../core/components/layout/Footer";
 import { ThemedContainer } from "../components/themed-container";
 import BlurredBackground from "../components/BlurredBackground";
 import { ErrorMessage } from "../../../core/components/feedback/ErrorMessage";
-
 // Usando las importaciones que prefieres de ui/core
 import { Button } from "../../../ui/core/Button";
 import { Input } from "../../../ui/core/Input";
-import { Eye, EyeOff } from "lucide-react";
+import { PasswordInputWithEye } from "../components/PasswordInputWithEye";
 
 const SignUpPage: React.FC = () => {
   const navigate = useNavigate();
@@ -20,9 +19,6 @@ const SignUpPage: React.FC = () => {
   const [confirmPassword, setConfirmPassword] = useState("");
   const [error, setError] = useState("");
   const [isLoading, setIsLoading] = useState(false);
-
-  const [showPassword, setShowPassword] = useState(false);
-  const [showConfirmPassword, setShowConfirmPassword] = useState(false);
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -89,46 +85,24 @@ const SignUpPage: React.FC = () => {
             <p className="text-sm text-primary-foreground font-semibold mt-4 mb-2">
               Password
             </p>
-            <div className="relative">
-              <Input
-                id="password"
-                type={showPassword ? "text" : "password"}
-                placeholder="************"
-                value={password}
-                onChange={(e) => setPassword(e.target.value)}
-                required
-                className="pr-10"
-              />
-              <button 
-                type="button"
-                onClick={() => setShowPassword(!showPassword)}
-                className="absolute right-3 top-1/2 -translate-y-1/2 text-gray-400 hover:text-gray-600"
-              >
-                {showPassword ? <EyeOff size={18} /> : <Eye size={18} />}
-              </button>
-            </div>
+            <PasswordInputWithEye
+              id="password"
+              placeholder="************"
+              value={password}
+              onChange={(e) => setPassword(e.target.value)}
+              required
+            />
 
             <p className="text-sm text-primary-foreground font-semibold mt-4 mb-2">
               Confirm Password
             </p>
-            <div className="relative">
-              <Input
-                id="confirmPassword"
-                type={showConfirmPassword ? "text" : "password"}
-                placeholder="************"
-                value={confirmPassword}
-                onChange={(e) => setConfirmPassword(e.target.value)}
-                required
-                className="pr-10"
-              />
-              <button 
-                type="button"
-                onClick={() => setShowConfirmPassword(!showConfirmPassword)}
-                className="absolute right-3 top-1/2 -translate-y-1/2 text-gray-400 hover:text-gray-600"
-              >
-                {showConfirmPassword ? <EyeOff size={18} /> : <Eye size={18} />}
-              </button>
-            </div>
+            <PasswordInputWithEye
+              id="confirmPassword"
+              placeholder="************"
+              value={confirmPassword}
+              onChange={(e) => setConfirmPassword(e.target.value)}
+              required
+            />
 
             <br />
             

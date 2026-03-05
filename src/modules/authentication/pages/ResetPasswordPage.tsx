@@ -9,6 +9,7 @@ import { ErrorMessage } from "../../../core/components/feedback/ErrorMessage";
 import BlurredBackground from "../components/BlurredBackground";
 import { ROUTE_PATHS } from "../../../routes/routes";
 import { useResetPassword } from "../hooks/useResetPassword";
+import { PasswordInputWithEye } from "../components/PasswordInputWithEye";
 
 const ResetPasswordPage: React.FC = () => {
   const navigate = useNavigate();
@@ -103,27 +104,25 @@ const ResetPasswordPage: React.FC = () => {
             <p className="text-sm text-primary-foreground font-semibold mt-4 mb-2">
               New Password
             </p>
-            <Input 
-              id="newPassword" 
-              type="password" 
-              placeholder="Enter your new password" 
+            <PasswordInputWithEye
+              id="newPassword"
+              placeholder="Enter your new password"
               value={newPassword}
               onChange={(e) => setNewPassword(e.target.value)}
               disabled={!isTokenValid || loading || checkingToken}
-              required 
+              required
             />
             
             <p className="text-sm text-primary-foreground font-semibold mt-4 mb-2">
               Confirm Password
             </p>
-            <Input 
-              id="confirmPassword" 
-              type="password" 
-              placeholder="Confirm your new password" 
+            <PasswordInputWithEye
+              id="confirmPassword"
+              placeholder="Confirm your new password"
               value={confirmPassword}
               onChange={(e) => setConfirmPassword(e.target.value)}
               disabled={!isTokenValid || loading || checkingToken}
-              required 
+              required
             />
 
             {(validationError || error) && (
