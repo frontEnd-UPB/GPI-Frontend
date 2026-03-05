@@ -1,6 +1,7 @@
 import { mockEmployees } from "../../../core/mocks/data";
 import { createAuthUser, type AuthUser } from "../../../core/types/auth";
 import { API_ENDPOINTS } from "../../../core/constants";
+import { forgotPasswordService } from "./forgotPasswordService";
 
 // This service simulates authentication logic. In a real application, this would involve API calls to a backend server.
 export interface AuthResponse {
@@ -20,7 +21,8 @@ export const authModuleService = {
     //busqueda en la base de datos simulada por email
     const normalizedEmail = email.toLowerCase().trim();
     const employee = mockEmployees.find(emp => emp.email.toLowerCase() === normalizedEmail);
-    const isValid = employee && employee.password === password;
+    const expectedPassword = forgotPasswordService.getMockPasswordForEmail(normalizedEmail);
+    const isValid = employee && expectedPassword === password;
     if (!isValid) {
       throw new Error("Invalid email or password");
     }

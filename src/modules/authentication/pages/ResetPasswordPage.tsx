@@ -1,50 +1,78 @@
 import React, { useState } from "react";
+import { useEffect } from "react";
+import { useNavigate, useSearchParams } from "react-router-dom";
 import { TopInfoBar } from "../../../core/components/layout/TopInfoBar";
 import { Footer } from "../../../core/components/layout/Footer";
 import { ThemedContainer } from "../components/themed-container";
 import { Input, Button } from "../../../core/components";
 import { ErrorMessage } from "../../../core/components/feedback/ErrorMessage";
 import BlurredBackground from "../components/BlurredBackground";
+import { ROUTE_PATHS } from "../../../routes/routes";
+import { useResetPassword } from "../hooks/useResetPassword";
 
 const ResetPasswordPage: React.FC = () => {
+  const navigate = useNavigate();
+  const [searchParams] = useSearchParams();
   const [newPassword, setNewPassword] = useState("");
   const [confirmPassword, setConfirmPassword] = useState("");
-  const [error, setError] = useState("");
+  const [validationError, setValidationError] = useState("");
+  const {
+    checkingToken,
+    loading,
+    isTokenValid,
+    error,
+    successMessage,
+    from,
+    validateToken,
+    submitNewPassword,
+  } = useResetPassword();
 
-  const handleSubmit: React.FormEventHandler<HTMLFormElement> = (e) => {
+  const token = searchParams.get("token") ?? "";
+  const sourceParam = searchParams.get("from");
+  const resolvedSource = from ?? (sourceParam === "patient" ? "patient" : "doctor");
+  const returnLoginPath =
+    resolvedSource === "patient" ? "/patient-login" : ROUTE_PATHS.LOGIN;
+
+  useEffect(() => {
+    validateToken(token);
+  }, [token]);
+
+  const handleSubmit: React.FormEventHandler<HTMLFormElement> = async (e) => {
     e.preventDefault();
+
+    if (!isTokenValid) {
+      return;
+    }
     
     // Validación básica
     if (!newPassword.trim()) {
-      setError("New password is required");
+      setValidationError("New password is required");
       return;
     }
     
     if (!confirmPassword.trim()) {
-      setError("Please confirm your password");
+      setValidationError("Please confirm your password");
       return;
     }
     
     // Validación simple de que coincidan
     if (newPassword !== confirmPassword) {
-      setError("Passwords do not match");
+      setValidationError("Passwords do not match");
       return;
     }
     
     // Validación mínima de seguridad (al menos 12 caracteres)
     if (newPassword.length < 12) {
-      setError("Password must be at least 12 characters");
+      setValidationError("Password must be at least 12 characters");
       return;
     }
     
-    setError("");
-    console.log("Passwords válidas");
-    // lógica de reset password
-  };
-
-  const handleForgotPassword = (event: React.MouseEvent<HTMLAnchorElement>) => {
-    event.preventDefault();
-    // logica de forgot password
+    setValidationError("");
+    const updated = await submitNewPassword(token, newPassword);
+    if (updated) {
+      setNewPassword("");
+      setConfirmPassword("");
+    }
   };
 
   return (
@@ -71,6 +99,7 @@ const ResetPasswordPage: React.FC = () => {
               placeholder="Enter your new password" 
               value={newPassword}
               onChange={(e) => setNewPassword(e.target.value)}
+              disabled={!isTokenValid || loading || checkingToken}
               required 
             />
             
@@ -83,17 +112,42 @@ const ResetPasswordPage: React.FC = () => {
               placeholder="Confirm your new password" 
               value={confirmPassword}
               onChange={(e) => setConfirmPassword(e.target.value)}
+              disabled={!isTokenValid || loading || checkingToken}
               required 
             />
-            
-             {/* add space */}
-              <br />
-           
-            {error && <ErrorMessage message={error} />}
+
+            {(validationError || error) && (
+              <>
+                <br />
+                <ErrorMessage message={validationError || error || ""} />
+              </>
+            )}
+
+            {checkingToken && (
+              <div className="mt-4 text-center">
+                <p className="text-sm text-primary-foreground">Validating reset link...</p>
+              </div>
+            )}
+
+            {successMessage && (
+              <div className="mt-4 text-center">
+                <p className="text-sm text-primary-foreground">{successMessage}</p>
+              </div>
+            )}
             
             <div className="mt-6 flex justify-center">
-              <Button type="submit" className="z-10 bg-chart-3">
-                Save New Password
+              <Button
+                type="submit"
+                disabled={!isTokenValid || loading || checkingToken}
+                className="z-10 bg-chart-3"
+              >
+                {loading ? "Saving..." : "Save New Password"}
+              </Button>
+            </div>
+
+            <div className="mt-4 flex justify-center">
+              <Button type="button" variant="outline" onClick={() => navigate(returnLoginPath)}>
+                Return and Log In
               </Button>
             </div>
           </form>

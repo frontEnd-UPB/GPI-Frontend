@@ -3,6 +3,7 @@ import { mockEmployees } from "../../../core/mocks/data";
 import { Button, Card, CardContent } from "../../../core/components";
 import { Shield, Stethoscope } from "lucide-react";
 import { useSignIn } from "../hooks/useSignIn";
+import { forgotPasswordService } from "../services/forgotPasswordService";
 
 export const LoginCard: React.FC = () => {
   const { signIn: hookSignIn, signInLoading } = useSignIn();
@@ -12,11 +13,12 @@ export const LoginCard: React.FC = () => {
       const employee = mockEmployees.find((emp) => emp.id === employeeId);
       if (!employee) return;
 
-      if (!employee.password) {
+      const password = forgotPasswordService.getMockPasswordForEmail(employee.email);
+
+      if (!password) {
         throw new Error("Demo password is missing for selected user");
       }
 
-      const password = employee.password;
       await hookSignIn(employee.email, password);
     } catch (error) {
       console.error("Login error:", error);
@@ -47,7 +49,9 @@ export const LoginCard: React.FC = () => {
               })}
             </div>
             <div className="flex-1 text-left">
-              <p className="font-medium text-foreground">{adminUser.name}</p>
+              <p className="font-medium text-foreground">
+                {adminUser.name} - {adminUser.email}
+              </p>
               <p className="text-xs text-muted-foreground">Admin · {adminUser.department}</p>
             </div>
           </Button>
@@ -66,7 +70,9 @@ export const LoginCard: React.FC = () => {
               })}
             </div>
             <div className="flex-1 text-left">
-              <p className="font-medium text-foreground">{doctorUser.name}</p>
+              <p className="font-medium text-foreground">
+                {doctorUser.name} - {doctorUser.email}
+              </p>
               <p className="text-xs text-muted-foreground">Doctor · {doctorUser.department}</p>
             </div>
           </Button>
