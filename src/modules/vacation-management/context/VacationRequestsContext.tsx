@@ -2,6 +2,8 @@ import React, { createContext, useContext, useMemo, useState } from "react";
 import type { VacationRequest } from "../../../core/mocks/data";
 import { mockVacationRequests, mockEmployees } from "../../../core/mocks/data";
 import { VACATION_STATUS } from "../../../core/constants";
+// Servicio API simulado. Más adelante podrá reemplazarse por llamadas HTTP reales.
+// import { approveVacationRequest, rejectVacationRequest, setVacationRequestPending } from "../services/vacationRequestsApi";
 
 export interface VacationRequestsContextValue {
   requests: VacationRequest[];
@@ -35,6 +37,9 @@ export const VacationRequestsProvider: React.FC<{ children: React.ReactNode }> =
   const [specialtyFilter, setSpecialtyFilter] = useState<string>("");
 
   const approveRequest = (id: string) => {
+    // En el futuro, aquí podrías llamar a la API real, por ejemplo:
+    // await approveVacationRequest(id);
+    // y luego recargar o actualizar el estado con la respuesta.
     setRequests((prev) =>
       prev.map((request) =>
         request.id === id
@@ -45,6 +50,7 @@ export const VacationRequestsProvider: React.FC<{ children: React.ReactNode }> =
   };
 
   const rejectRequest = (id: string, reason: string) => {
+    // Futuro: await rejectVacationRequest(id, reason);
     setRequests((prev) =>
       prev.map((request) =>
         request.id === id
@@ -59,6 +65,7 @@ export const VacationRequestsProvider: React.FC<{ children: React.ReactNode }> =
   };
 
   const setRequestPending = (id: string) => {
+    // Futuro: await setVacationRequestPending(id);
     setRequests((prev) =>
       prev.map((request) =>
         request.id === id
