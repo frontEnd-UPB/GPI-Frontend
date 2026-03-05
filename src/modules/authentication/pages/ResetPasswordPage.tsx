@@ -37,6 +37,16 @@ const ResetPasswordPage: React.FC = () => {
     validateToken(token);
   }, [token]);
 
+  useEffect(() => {
+    if (!successMessage) return;
+
+    const redirectTimer = setTimeout(() => {
+      navigate(returnLoginPath, { replace: true });
+    }, 1400);
+
+    return () => clearTimeout(redirectTimer);
+  }, [successMessage, navigate, returnLoginPath]);
+
   const handleSubmit: React.FormEventHandler<HTMLFormElement> = async (e) => {
     e.preventDefault();
 
@@ -132,6 +142,7 @@ const ResetPasswordPage: React.FC = () => {
             {successMessage && (
               <div className="mt-4 text-center">
                 <p className="text-sm text-primary-foreground">{successMessage}</p>
+                <p className="text-xs text-info mt-1">Redirecting to Log In...</p>
               </div>
             )}
             
@@ -142,12 +153,6 @@ const ResetPasswordPage: React.FC = () => {
                 className="z-10 bg-chart-3"
               >
                 {loading ? "Saving..." : "Save New Password"}
-              </Button>
-            </div>
-
-            <div className="mt-4 flex justify-center">
-              <Button type="button" variant="outline" onClick={() => navigate(returnLoginPath)}>
-                Return and Log In
               </Button>
             </div>
           </form>

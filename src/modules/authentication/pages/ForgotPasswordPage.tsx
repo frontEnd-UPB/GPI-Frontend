@@ -113,14 +113,19 @@ const ForgotPasswordPage: React.FC = () => {
 
             {token && (
               <div className="mt-4 flex justify-center">
-                <Button
-                  type="button"
-                  onClick={handleGoToReset}
-                  className="w-3/4 mx-auto z-10"
-                  variant="outline"
-                >
-                  Go to Reset Password
-                </Button>
+                {/* Test button for demonstration purposes, can erase later*/}
+                <div className="w-3/4 mx-auto group text-center">
+                  <Button
+                    type="button"
+                    onClick={handleGoToReset}
+                    className="w-full z-10 bg-chart-3 hover:bg-chart-3 hover:opacity-90 font-semibold"
+                  >
+                    Go Set New Password
+                  </Button>
+                  <p className="mt-2 text-[11px] text-primary-foreground/80 opacity-0 group-hover:opacity-100 transition-opacity duration-200">
+                    This is a test button, real implementation uses link via gmail.
+                  </p>
+                </div>
               </div>
             )}
 
