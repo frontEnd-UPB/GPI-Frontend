@@ -1,5 +1,4 @@
 import React from "react";
-import { AuthProvider } from '../context/AuthContext';
 import { BrowserRouter, Navigate, useRoutes } from "react-router-dom";
 import { MainLayout } from "../core/components";
 import NotFoundPage from "../core/pages/NotFoundPage";
@@ -128,10 +127,8 @@ const RoutesConfig: React.FC = () => {
 
 export const AppRouter: React.FC = () => {
   return (
-    <AuthProvider>
-      <BrowserRouter>
-        <RoutesConfig />
-      </BrowserRouter>
-    </AuthProvider>
+    <BrowserRouter>
+      <RoutesConfig />
+    </BrowserRouter>
   );
 };
