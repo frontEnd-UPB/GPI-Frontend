@@ -1,7 +1,5 @@
-import React, { Suspense, lazy } from "react";
-import { BrowserRouter, Navigate, Outlet, useRoutes } from "react-router-dom";
 import React from "react";
-import { BrowserRouter, Navigate, useRoutes } from "react-router-dom";
+import { BrowserRouter, Navigate, Outlet, useRoutes } from "react-router-dom";
 import { MainLayout } from "../core/components";
 import NotFoundPage from "../core/pages/NotFoundPage";
 import UnauthorizedPage from "../core/pages/UnauthorizedPage";

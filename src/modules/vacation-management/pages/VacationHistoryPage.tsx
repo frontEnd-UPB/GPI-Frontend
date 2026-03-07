@@ -67,9 +67,7 @@ const InnerContent: React.FC<{
 
   return (
     <div className="container mx-auto px-5 py-8 space-y-8">
-      <div className="w-full max-w-[1100px] mx-auto">
-        <GoBackButton />
-      </div>
+      <GoBackButton />
 
       <Title title="Requests History" />
 
