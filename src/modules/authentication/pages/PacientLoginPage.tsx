@@ -6,42 +6,47 @@ import { ThemedContainer } from "../components/themed-container";
 import { Input, Button } from "../../../core/components";
 import { ErrorMessage } from "../../../core/components/feedback/ErrorMessage";
 import BlurredBackground from "../components/BlurredBackground";
-import { useAuth } from "../../../context/AuthContext";
-import { ROUTE_PATHS } from "../../../routes/routes"; 
 import { PasswordInputWithEye } from "../components/PasswordInputWithEye";
+import { ROUTE_PATHS } from "../../../routes/routes";
 
-const AdminLoginPage: React.FC = () => {
+const PacientLoginPage: React.FC = () => {
   const navigate = useNavigate();
-  const { signIn, loading } = useAuth();
 
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [error, setError] = useState<string | null>(null);
+  const [loading, setLoading] = useState(false);
 
   const handleSubmit: React.FormEventHandler<HTMLFormElement> = async (e) => {
     e.preventDefault();
     setError(null);
-    try {
-      const authenticatedUser = await signIn({ email, password });
 
-      if (authenticatedUser.role === "admin") {
-        navigate(ROUTE_PATHS.VACATIONS_ADMIN, { replace: true });
-      } else {
-        navigate(ROUTE_PATHS.VACATIONS_DOCTOR, { replace: true });
-      }
-    } catch (err: unknown) {
-      setError(err instanceof Error ? err.message : "Invalid email or password");
+    if (!email || !password) {
+      setError("Email and password are required");
+      return;
     }
+
+    if (password.length < 8) {
+      setError("Password must be at least 8 characters");
+      return;
+    }
+
+    setLoading(true);
+    // Solo demo/UI: no autentica contra ningún servicio todavía.
+    setTimeout(() => {
+      console.log("[PATIENT LOGIN DEMO]", { email, password });
+      setLoading(false);
+    }, 600);
   };
 
   const handleForgotPassword = (event: React.MouseEvent<HTMLAnchorElement>) => {
     event.preventDefault();
-    navigate("/forgot-password?from=patient");
+    navigate(`${ROUTE_PATHS.FORGOT_PASSWORD}?from=patient`);
   };
 
   const handleSignUp = (event: React.MouseEvent<HTMLAnchorElement>) => {
     event.preventDefault();
-    navigate("/sign-up");
+    navigate(ROUTE_PATHS.SIGN_UP);
   };
 
   return (
@@ -65,7 +70,7 @@ const AdminLoginPage: React.FC = () => {
             <Input
               id="email"
               type="email"
-              placeholder="meddicalhospital@gmail.com"
+              placeholder="patientmail@gmail.com"
               value={email}
               onChange={(e) => setEmail(e.target.value)}
               required
@@ -122,4 +127,4 @@ const AdminLoginPage: React.FC = () => {
   );
 };
 
-export default AdminLoginPage;
+export default PacientLoginPage;

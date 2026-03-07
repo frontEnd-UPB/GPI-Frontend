@@ -8,6 +8,12 @@ export const ROUTE_PATHS = {
   ADMIN_DASHBOARD: "/admin-dashboard",
   DOCTOR_DASHBOARD: "/doctor-dashboard",
 
+  SIGN_UP: "/sign-up",
+  RESET_PASSWORD: "/reset-password",
+  PATIENT_LOGIN: "/patient-login",
+  OTP_VERIFICATION: "/otp-verification",
+  FORGOT_PASSWORD: "/forgot-password",
+
   DEMO: "/demo",
 
   // Admin

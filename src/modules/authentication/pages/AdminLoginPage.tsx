@@ -63,7 +63,7 @@ const AdminLoginPage: React.FC = () => {
         <ThemedContainer>
           <form className="login-form" onSubmit={handleSubmit}>
             <div className="mb-15">
-              <h4 className="text-2xl text-primary-foreground font-bold mb-1">
+              <h4 className="text-2xl text-primary-foreground font-bold mb-0.1">
                 Welcome Back!
               </h4>
               <p className="text-xs text-info">
@@ -71,13 +71,13 @@ const AdminLoginPage: React.FC = () => {
               </p>
             </div>
 
-            <p className="text-sm text-primary-foreground font-semibold mt-4 mb-2">
+            <p className="text-sm text-primary-foreground font-semibold mt-2 mb-2">
               Email
             </p>
             <Input
               id="email"
               type="email"
-              placeholder="meddicalhospital@gmail.com"
+              placeholder="meddical@mail.com"
               value={email}
               onChange={(e) => setEmail(e.target.value)}
               required
@@ -98,11 +98,11 @@ const AdminLoginPage: React.FC = () => {
 
             {error && <ErrorMessage message={error} />}
 
-            <div className="flex justify-between items-center mt-4 mb-6">
+            <div className="flex justify-end mt-1">
               <a
                 href="#"
                 onClick={handleForgotPassword}
-                className="text-sm text-info hover:underline"
+                className="text-sm text--secondary hover:underline"
               >
                 Forgot Password?
               </a>
@@ -116,8 +116,14 @@ const AdminLoginPage: React.FC = () => {
           </form>
         </ThemedContainer>
         <div className="flex justify-center z-10 mt-4">
-        <br />
-        <LoginCard />
+          <LoginCard
+            disabled={loading}
+            onSelectUser={(selectedEmail, selectedPassword) => {
+              setEmail(selectedEmail);
+              setPassword(selectedPassword);
+              setError(null);
+            }}
+          />
         </div>
       </BlurredBackground>
       <Footer />

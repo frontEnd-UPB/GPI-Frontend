@@ -32,8 +32,7 @@ const ResetPasswordPage: React.FC = () => {
   const sourceParam = searchParams.get("from");
   const resolvedSource = from ?? (sourceParam === "patient" ? "patient" : "doctor");
   const returnLoginPath =
-    resolvedSource === "patient" ? "/patient-login" : ROUTE_PATHS.LOGIN;
-
+    resolvedSource === "patient" ? ROUTE_PATHS.PATIENT_LOGIN : ROUTE_PATHS.LOGIN;
   useEffect(() => {
     validateToken(token);
   }, [token]);

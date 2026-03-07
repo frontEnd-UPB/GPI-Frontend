@@ -2,28 +2,13 @@ import React from "react";
 import { mockEmployees } from "../../../core/mocks/data";
 import { Button, Card, CardContent } from "../../../core/components";
 import { Shield, Stethoscope } from "lucide-react";
-import { useSignIn } from "../hooks/useSignIn";
-import { forgotPasswordService } from "../services/forgotPasswordService";
 
-export const LoginCard: React.FC = () => {
-  const { signIn: hookSignIn, signInLoading } = useSignIn();
+interface LoginCardProps {
+  onSelectUser: (email: string, password: string) => void;
+  disabled?: boolean;
+}
 
-  const handleQuickLogin = async (employeeId: string) => {
-    try {
-      const employee = mockEmployees.find((emp) => emp.id === employeeId);
-      if (!employee) return;
-
-      const password = forgotPasswordService.getMockPasswordForEmail(employee.email);
-
-      if (!password) {
-        throw new Error("Demo password is missing for selected user");
-      }
-
-      await hookSignIn(employee.email, password);
-    } catch (error) {
-      console.error("Login error:", error);
-    }
-  };
+export const LoginCard: React.FC<LoginCardProps> = ({ onSelectUser, disabled }) => {
 
   const roleIcons = {
     admin: Shield,
@@ -40,8 +25,8 @@ export const LoginCard: React.FC = () => {
           <Button
             variant="outline"
             className="w-full justify-start gap-3 h-auto py-3"
-            onClick={() => handleQuickLogin(adminUser.id)}
-            disabled={signInLoading}
+            onClick={() => onSelectUser(adminUser.email, adminUser.password)}
+            disabled={disabled}
           >
             <div className="flex size-10 items-center justify-center rounded-full bg-accent">
               {React.createElement(roleIcons.admin, {
@@ -50,7 +35,7 @@ export const LoginCard: React.FC = () => {
             </div>
             <div className="flex-1 text-left">
               <p className="font-medium text-foreground">
-                {adminUser.name} - {adminUser.email}
+                {`${adminUser.firstname} ${adminUser.lastname}`.trim()} - {adminUser.email}
               </p>
               <p className="text-xs text-muted-foreground">Admin · {adminUser.department}</p>
             </div>
@@ -61,8 +46,8 @@ export const LoginCard: React.FC = () => {
           <Button
             variant="outline"
             className="w-full justify-start gap-3 h-auto py-3"
-            onClick={() => handleQuickLogin(doctorUser.id)}
-            disabled={signInLoading}
+            onClick={() => onSelectUser(doctorUser.email, doctorUser.password)}
+            disabled={disabled}
           >
             <div className="flex size-10 items-center justify-center rounded-full bg-accent">
               {React.createElement(roleIcons.doctor, {
@@ -71,7 +56,7 @@ export const LoginCard: React.FC = () => {
             </div>
             <div className="flex-1 text-left">
               <p className="font-medium text-foreground">
-                {doctorUser.name} - {doctorUser.email}
+                {`${doctorUser.firstname} ${doctorUser.lastname}`.trim()} - {doctorUser.email}
               </p>
               <p className="text-xs text-muted-foreground">Doctor · {doctorUser.department}</p>
             </div>

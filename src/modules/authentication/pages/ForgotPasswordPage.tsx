@@ -20,7 +20,7 @@ const ForgotPasswordPage: React.FC = () => {
 
   const from = searchParams.get("from");
   const requestSource: ForgotPasswordSource = from === "patient" ? "patient" : "doctor";
-  const returnLoginPath = from === "patient" ? "/patient-login" : ROUTE_PATHS.LOGIN;
+  const returnLoginPath = from === "patient" ? ROUTE_PATHS.PATIENT_LOGIN : ROUTE_PATHS.LOGIN;
 
   const handleSubmit: React.FormEventHandler<HTMLFormElement> = async (e) => {
     e.preventDefault();

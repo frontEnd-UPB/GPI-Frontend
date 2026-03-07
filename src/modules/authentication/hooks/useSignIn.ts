@@ -10,7 +10,6 @@ export const useSignIn = () => {
     try {
       const currentUser = await ctxSignIn({ email, password });
       return {
-        token: localStorage.getItem("meddical:token") ?? "",
         user: currentUser,
       };
     } catch (err: unknown) {

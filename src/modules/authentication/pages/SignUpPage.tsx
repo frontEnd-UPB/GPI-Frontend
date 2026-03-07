@@ -5,10 +5,13 @@ import { Footer } from "../../../core/components/layout/Footer";
 import { ThemedContainer } from "../components/themed-container";
 import BlurredBackground from "../components/BlurredBackground";
 import { ErrorMessage } from "../../../core/components/feedback/ErrorMessage";
-// Usando las importaciones que prefieres de ui/core
 import { Button } from "../../../ui/core/Button";
 import { Input } from "../../../ui/core/Input";
+import { AUTH_DEBUG } from "../../../core/constants";
 import { PasswordInputWithEye } from "../components/PasswordInputWithEye";
+import { ROUTE_PATHS } from "../../../routes/routes";
+
+const PATIENT_STORE_KEY = "meddical:mock-patients-extra";
 
 const SignUpPage: React.FC = () => {
   const navigate = useNavigate();
@@ -35,12 +38,28 @@ const SignUpPage: React.FC = () => {
     }
 
     setIsLoading(true);
-    
-    // Simulación
+
     setTimeout(() => {
-      console.log("Datos de registro:", { fullName, email, password });
+      const [firstname, ...rest] = fullName.trim().split(" ");
+      const lastname = rest.join(" ") || "";
+
+      const raw = localStorage.getItem(PATIENT_STORE_KEY);
+      const existing = raw ? (JSON.parse(raw) as any[]) : [];
+
+      const newPatient = {
+        id: String(Date.now()),
+        firstname,
+        lastname,
+        email,
+        password,
+      };
+
+      const updated = [...existing, newPatient];
+      localStorage.setItem(PATIENT_STORE_KEY, JSON.stringify(updated));
+
+      if (AUTH_DEBUG) console.log("[SIGNUP MOCK PATIENT STORED]", newPatient);
       setIsLoading(false);
-      navigate("/otp-verification"); 
+      navigate(ROUTE_PATHS.OTP_VERIFICATION);
     }, 1500);
   };
 
@@ -122,7 +141,7 @@ const SignUpPage: React.FC = () => {
                 <button 
                   type="button" 
                   className="hover:underline font-bold text-info" 
-                  onClick={() => navigate("/patient-login")}
+                  onClick={() => navigate(ROUTE_PATHS.PATIENT_LOGIN)}
                 >
                   Sign in
                 </button>

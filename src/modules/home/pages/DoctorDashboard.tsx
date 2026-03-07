@@ -1,5 +1,5 @@
 import React from "react";
-import HomePage from "../../home/pages/HomePage";
+import HomePage from "./HomePage";
 import { DoctorLayout } from "../../../core/components/layout/DoctorLayout";
 
 const DoctorDashboard: React.FC = () => {

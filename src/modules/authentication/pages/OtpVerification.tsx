@@ -5,9 +5,11 @@ import { Footer } from "../../../core/components/layout/Footer";
 import { ThemedContainer } from "../components/themed-container";
 import { InputOTP, InputOTPGroup, InputOTPSlot } from "../../../ui/input-otp";
 import { Button } from "../../../core";
-import { ErrorMessage } from "../../../core/components/feedback/ErrorMessage"; // Ajusta la ruta
+import { AUTH_DEBUG } from "../../../core/constants";
+import { ErrorMessage } from "../../../core/components/feedback/ErrorMessage";
 import BlurredBackground from "../components/BlurredBackground";
 import { ROUTE_PATHS } from "../../../routes/routes";
+import { mockOtpCode } from "../../../core/mocks/data";
 
 const OtpVerificationPage: React.FC = () => {
   const navigate = useNavigate();
@@ -40,10 +42,15 @@ const OtpVerificationPage: React.FC = () => {
       return;
     }
     
+    if (otp !== mockOtpCode) {
+      setError("Invalid OTP code");
+      return;
+    }
+
     setError("");
-    console.log("OTP válido:", otp);
-    // ESTE LOGIN DEBE REDIRIGIR AL LOGIN DE PACIENTES
-    navigate(ROUTE_PATHS.LOGIN, { replace: true });
+    if (AUTH_DEBUG) console.log("[OTP VERIFIED]", otp);
+    // Una vez verificado, llevamos al login de pacientes
+    navigate(ROUTE_PATHS.PATIENT_LOGIN, { replace: true });
   };
 
   // Persist timer state in localStorage

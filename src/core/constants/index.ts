@@ -1,4 +1,7 @@
 export { USER_ROLES } from "./roles";
+export { AUTH_STORAGE_KEYS, type AuthStorageKey } from "./auth-storage";
+
+export const AUTH_DEBUG = true as const;
 
 export const EMPLOYEE_STATUS = {
   ONLINE: "online",
