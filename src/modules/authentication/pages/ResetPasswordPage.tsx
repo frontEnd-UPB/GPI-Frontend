@@ -1,22 +1,24 @@
-import React, { useState } from "react";
-import { useEffect } from "react";
+import React, { useEffect, useState } from "react";
 import { useNavigate, useSearchParams } from "react-router-dom";
 import { TopInfoBar } from "../../../core/components/layout/TopInfoBar";
 import { Footer } from "../../../core/components/layout/Footer";
-import { ThemedContainer } from "../components/themed-container";
-import { Input, Button } from "../../../core/components";
+import { ThemedContainer } from "../components/Container";
+import { Button } from "../../../core/components";
 import { ErrorMessage } from "../../../core/components/feedback/ErrorMessage";
 import BlurredBackground from "../components/BlurredBackground";
 import { ROUTE_PATHS } from "../../../routes/routes";
+import { AUTH_DEBUG } from "../../../core/constants";
 import { useResetPassword } from "../hooks/useResetPassword";
 import { PasswordInputWithEye } from "../components/PasswordInputWithEye";
 
 const ResetPasswordPage: React.FC = () => {
   const navigate = useNavigate();
   const [searchParams] = useSearchParams();
+
   const [newPassword, setNewPassword] = useState("");
   const [confirmPassword, setConfirmPassword] = useState("");
   const [validationError, setValidationError] = useState("");
+
   const {
     checkingToken,
     loading,
@@ -28,14 +30,41 @@ const ResetPasswordPage: React.FC = () => {
     submitNewPassword,
   } = useResetPassword();
 
-  const token = searchParams.get("token") ?? "";
+  const urlToken = searchParams.get("token");
+  const token = urlToken ?? "";
   const sourceParam = searchParams.get("from");
-  const resolvedSource = from ?? (sourceParam === "patient" ? "patient" : "doctor");
+  const initialSource = sourceParam === "patient" ? "patient" : "doctor";
+  const resolvedSource = from ?? initialSource;
   const returnLoginPath =
     resolvedSource === "patient" ? ROUTE_PATHS.PATIENT_LOGIN : ROUTE_PATHS.LOGIN;
+  const flowKey = "meddical:reset-flow-active";
+
   useEffect(() => {
-    validateToken(token);
-  }, [token]);
+    const isFlowActive = sessionStorage.getItem(flowKey) === "1";
+
+    if (AUTH_DEBUG) {
+      console.log("[RESET PASSWORD] validating token", {
+        urlToken,
+        token,
+        isFlowActive,
+      });
+    }
+
+    if (!token || !isFlowActive) {
+      if (AUTH_DEBUG) {
+        console.log("[RESET PASSWORD] missing token or flow inactive, redirecting to login");
+      }
+      sessionStorage.removeItem(flowKey);
+      navigate(returnLoginPath, { replace: true });
+      return;
+    }
+
+    void validateToken(token);
+
+    return () => {
+      sessionStorage.removeItem(flowKey);
+    };
+  }, [token, urlToken, navigate, returnLoginPath, validateToken]);
 
   useEffect(() => {
     if (!successMessage) return;
@@ -53,30 +82,27 @@ const ResetPasswordPage: React.FC = () => {
     if (!isTokenValid) {
       return;
     }
-    
-    // Validación básica
+
     if (!newPassword.trim()) {
       setValidationError("New password is required");
       return;
     }
-    
+
     if (!confirmPassword.trim()) {
       setValidationError("Please confirm your password");
       return;
     }
-    
-    // Validación simple de que coincidan
+
     if (newPassword !== confirmPassword) {
       setValidationError("Passwords do not match");
       return;
     }
-    
-    // Validación mínima de seguridad (al menos 12 caracteres)
+
     if (newPassword.length < 12) {
       setValidationError("Password must be at least 12 characters");
       return;
     }
-    
+
     setValidationError("");
     const updated = await submitNewPassword(token, newPassword);
     if (updated) {
@@ -88,36 +114,35 @@ const ResetPasswordPage: React.FC = () => {
   return (
     <div className="flex flex-col min-h-screen">
       <TopInfoBar />
+
       <BlurredBackground>
         <ThemedContainer>
-          <form className="login-form" onSubmit={handleSubmit}>
-            <div className="mb-15">
-              <h4 className="text-2xl text-primary-foreground font-bold mb-1">
+          <form className="login-form mt-[-150px]" onSubmit={handleSubmit}>
+            <div className="mb-10">
+              <h4 className="text-3xl text-primary-foreground font-bold mb-1">
                 Set New Password
               </h4>
-              <p className="text-xs text-info">
-                Enter your new password to complete the reset process.
-              </p>
+              <p className="text-xs text-secondary">Enter your new password.</p>
             </div>
-            
-            <p className="text-sm text-primary-foreground font-semibold mt-4 mb-2">
+
+            <p className="text-sm text-primary-foreground font-semibold mt-1 mb-2">
               New Password
             </p>
             <PasswordInputWithEye
               id="newPassword"
-              placeholder="Enter your new password"
+              placeholder="••••••••••••"
               value={newPassword}
               onChange={(e) => setNewPassword(e.target.value)}
               disabled={!isTokenValid || loading || checkingToken}
               required
             />
-            
+
             <p className="text-sm text-primary-foreground font-semibold mt-4 mb-2">
               Confirm Password
             </p>
             <PasswordInputWithEye
               id="confirmPassword"
-              placeholder="Confirm your new password"
+              placeholder="••••••••••••"
               value={confirmPassword}
               onChange={(e) => setConfirmPassword(e.target.value)}
               disabled={!isTokenValid || loading || checkingToken}
@@ -131,24 +156,20 @@ const ResetPasswordPage: React.FC = () => {
               </>
             )}
 
-            {checkingToken && (
-              <div className="mt-4 text-center">
-                <p className="text-sm text-primary-foreground">Validating reset link...</p>
-              </div>
-            )}
+            {/* Se elimina el mensaje "Validating reset link..." para simplificar el flujo */}
 
             {successMessage && (
               <div className="mt-4 text-center">
                 <p className="text-sm text-primary-foreground">{successMessage}</p>
-                <p className="text-xs text-info mt-1">Redirecting to Log In...</p>
+                <p className="text-xs text-secondary mt-1">Redirecting to Log In...</p>
               </div>
             )}
-            
-            <div className="mt-6 flex justify-center">
+
+            <div className="mt-8 flex justify-center">
               <Button
                 type="submit"
                 disabled={!isTokenValid || loading || checkingToken}
-                className="z-10 bg-chart-3"
+                className="z-10 bg-secondary hover:bg-secondary/90 text-secondary-foreground font-semibold w-3/4"
               >
                 {loading ? "Saving..." : "Save New Password"}
               </Button>
@@ -156,6 +177,7 @@ const ResetPasswordPage: React.FC = () => {
           </form>
         </ThemedContainer>
       </BlurredBackground>
+
       <Footer />
     </div>
   );

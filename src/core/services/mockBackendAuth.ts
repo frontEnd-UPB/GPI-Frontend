@@ -67,11 +67,15 @@ export const mockBackendAuth = {
     await new Promise((resolve) => setTimeout(resolve, networkDelay));
 
     const normalizedEmail = email.toLowerCase().trim();
+    const overrides = readPasswordOverrides();
     const employee = mockEmployees.find(
       (emp) => emp.email.toLowerCase() === normalizedEmail
     );
 
-    if (!employee || employee.password !== password) {
+    const effectivePassword =
+      overrides[normalizedEmail] ?? employee?.password;
+
+    if (!employee || effectivePassword !== password) {
       throw new Error("Invalid email or password");
     }
 

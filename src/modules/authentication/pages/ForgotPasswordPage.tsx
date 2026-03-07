@@ -1,8 +1,8 @@
-import React, { useState } from "react";
+import React, { useEffect, useRef, useState } from "react";
 import { useNavigate, useSearchParams } from "react-router-dom";
 import { TopInfoBar } from "../../../core/components/layout/TopInfoBar";
 import { Footer } from "../../../core/components/layout/Footer";
-import { ThemedContainer } from "../components/themed-container";
+import { ThemedContainer } from "../components/Container";
 import { Input, Button } from "../../../core/components";
 import { ErrorMessage } from "../../../core/components/feedback/ErrorMessage"; // Ajusta la ruta
 import BlurredBackground from "../components/BlurredBackground";
@@ -22,6 +22,17 @@ const ForgotPasswordPage: React.FC = () => {
   const requestSource: ForgotPasswordSource = from === "patient" ? "patient" : "doctor";
   const returnLoginPath = from === "patient" ? ROUTE_PATHS.PATIENT_LOGIN : ROUTE_PATHS.LOGIN;
 
+  const flowKey = "meddical:reset-flow-active";
+  const programmaticNavRef = useRef(false);
+
+  useEffect(() => {
+    return () => {
+      if (!programmaticNavRef.current) {
+        sessionStorage.removeItem(flowKey);
+      }
+    };
+  }, []);
+
   const handleSubmit: React.FormEventHandler<HTMLFormElement> = async (e) => {
     e.preventDefault();
     
@@ -38,7 +49,19 @@ const ForgotPasswordPage: React.FC = () => {
     }
     
     setValidationError("");
-    await requestReset(email, requestSource);
+    const resetToken = await requestReset(email, requestSource);
+
+    // Solo si el backend mock acepta el email (y genera token) pasamos a OTP
+    if (resetToken) {
+      sessionStorage.setItem(flowKey, "1");
+      programmaticNavRef.current = true;
+      navigate(
+        `${ROUTE_PATHS.OTP_VERIFICATION}?token=${encodeURIComponent(
+          resetToken
+        )}&from=${requestSource}`,
+        { replace: true }
+      );
+    }
   };
 
   const handleEmailChange = (value: string) => {
@@ -64,10 +87,10 @@ const ForgotPasswordPage: React.FC = () => {
           <form className="forgot-password-form mt-[-200px]" onSubmit={handleSubmit}>
             {/* Header */}
             <div className="mb-5">
-              <h4 className="text-2xl text-primary-foreground font-bold mb-1">
+              <h4 className="text-3xl text-primary-foreground font-bold mb-1">
                 Forgot Password?
               </h4>
-              <p className="text-xs text-info">
+              <p className="text-xs text-secondary">
                 Enter your email to reset your password.
               </p>
             </div>
@@ -79,7 +102,7 @@ const ForgotPasswordPage: React.FC = () => {
             <Input
               id="email"
               type="email"
-              placeholder="Enter your email"
+              placeholder="meddical@mail.com"
               value={email}
               onChange={(e) => handleEmailChange(e.target.value)}
               required
@@ -94,40 +117,16 @@ const ForgotPasswordPage: React.FC = () => {
               </>
             )}
 
-            {successMessage && (
-              <div className="mt-4 text-center">
-                <p className="text-sm text-primary-foreground">{successMessage}</p>
-              </div>
-            )}
-            
             {/* Submit */}
             <div className="mt-6 flex justify-center">
               <Button 
                 type="submit" 
                 disabled={loading}
-                className="w-3/4 mx-auto z-10 bg-chart-3 hover:bg-chart-3 hover:opacity-80"
+                className="w-3/4 mx-auto z-10 bg-secondary hover:secondary-foreground hover:bg-secondary/90 font-semibold"
               >
                 {loading ? "Sending..." : "Submit"}
               </Button>
             </div>
-
-            {token && (
-              <div className="mt-4 flex justify-center">
-                {/* Test button for demonstration purposes, can erase later*/}
-                <div className="w-3/4 mx-auto group text-center">
-                  <Button
-                    type="button"
-                    onClick={handleGoToReset}
-                    className="w-full z-10 bg-chart-3 hover:bg-chart-3 hover:opacity-90 font-semibold"
-                  >
-                    Go Set New Password
-                  </Button>
-                  <p className="mt-2 text-[11px] text-primary-foreground/80 opacity-0 group-hover:opacity-100 transition-opacity duration-200">
-                    This is a test button, real implementation uses link via gmail.
-                  </p>
-                </div>
-              </div>
-            )}
 
             <div className="mt-4 flex justify-center">
               <p className="text-xs text-primary-foreground">
@@ -136,9 +135,9 @@ const ForgotPasswordPage: React.FC = () => {
                   className="underline cursor-pointer bg-transparent text-xs font-regular text-primary-foreground"
                   onClick={() => navigate(returnLoginPath)}
                 >
-                  Return
+                  Return to Log In
                 </button>{" "}
-                and Log In
+                
               </p>
             </div>
           </form>

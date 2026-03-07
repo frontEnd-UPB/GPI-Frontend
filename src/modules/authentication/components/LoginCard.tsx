@@ -1,6 +1,6 @@
 import React from "react";
 import { mockEmployees } from "../../../core/mocks/data";
-import { Button, Card, CardContent } from "../../../core/components";
+import { Button } from "../../../core/components";
 import { Shield, Stethoscope } from "lucide-react";
 
 interface LoginCardProps {
@@ -9,66 +9,55 @@ interface LoginCardProps {
 }
 
 export const LoginCard: React.FC<LoginCardProps> = ({ onSelectUser, disabled }) => {
-
-  const roleIcons = {
-    admin: Shield,
-    doctor: Stethoscope,
-  };
-
   const adminUser = mockEmployees.find((emp) => emp.role === "admin");
   const doctorUser = mockEmployees.find((emp) => emp.role === "doctor");
 
   return (
-    <Card className="w-full max-w-md">
-      <CardContent className="space-y-3">
-        {adminUser && (
-          <Button
-            variant="outline"
-            className="w-full justify-start gap-3 h-auto py-3"
-            onClick={() => onSelectUser(adminUser.email, adminUser.password)}
-            disabled={disabled}
-          >
-            <div className="flex size-10 items-center justify-center rounded-full bg-accent">
-              {React.createElement(roleIcons.admin, {
-                className: "size-5 text-ring",
-              })}
-            </div>
-            <div className="flex-1 text-left">
-              <p className="font-medium text-foreground">
-                {`${adminUser.firstname} ${adminUser.lastname}`.trim()} - {adminUser.email}
-              </p>
-              <p className="text-xs text-muted-foreground">Admin · {adminUser.department}</p>
-            </div>
-          </Button>
-        )}
+    <div className="w-[260px] bg-card rounded-xl shadow-lg border border-border p-4 space-y-3">
 
-        {doctorUser && (
-          <Button
-            variant="outline"
-            className="w-full justify-start gap-3 h-auto py-3"
-            onClick={() => onSelectUser(doctorUser.email, doctorUser.password)}
-            disabled={disabled}
-          >
-            <div className="flex size-10 items-center justify-center rounded-full bg-accent">
-              {React.createElement(roleIcons.doctor, {
-                className: "size-5 text-ring",
-              })}
-            </div>
-            <div className="flex-1 text-left">
-              <p className="font-medium text-foreground">
-                {`${doctorUser.firstname} ${doctorUser.lastname}`.trim()} - {doctorUser.email}
-              </p>
-              <p className="text-xs text-muted-foreground">Doctor · {doctorUser.department}</p>
-            </div>
-          </Button>
-        )}
+      {adminUser && (
+        <Button
+          variant="outline"
+          className="w-full flex items-center gap-3 h-12 rounded-lg border-border hover:bg-muted transition"
+          onClick={() => onSelectUser(adminUser.email, adminUser.password)}
+          disabled={disabled}
+        >
+          <div className="flex items-center justify-center size-8 rounded-full bg-secondary/10">
+            <Shield className="size-4 text-secondary" />
+          </div>
 
-        <div className="pt-4 text-center">
-          <p className="text-xs text-muted-foreground">
-            This is a demo environment. Click any user to login.
-          </p>
-        </div>
-      </CardContent>
-    </Card>
+          <div className="flex flex-col text-left leading-tight">
+            <span className="text-sm font-semibold text-foreground">
+              Admin Login
+            </span>
+            <span className="text-xs text-muted-foreground">
+              {adminUser.firstname}
+            </span>
+          </div>
+        </Button>
+      )}
+
+      {doctorUser && (
+        <Button
+          variant="outline"
+          className="w-full flex items-center gap-3 h-12 rounded-lg border-border hover:bg-muted transition"
+          onClick={() => onSelectUser(doctorUser.email, doctorUser.password)}
+          disabled={disabled}
+        >
+          <div className="flex items-center justify-center size-8 rounded-full bg-secondary/10">
+            <Stethoscope className="size-4 text-secondary" />
+          </div>
+
+          <div className="flex flex-col text-left leading-tight">
+            <span className="text-sm font-semibold text-foreground">
+              Doctor Login
+            </span>
+            <span className="text-xs text-muted-foreground">
+              {doctorUser.firstname}
+            </span>
+          </div>
+        </Button>
+      )}
+    </div>
   );
 };

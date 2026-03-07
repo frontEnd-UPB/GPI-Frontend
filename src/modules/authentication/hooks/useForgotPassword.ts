@@ -1,4 +1,5 @@
 import { useState } from "react";
+import { AUTH_DEBUG } from "../../../core/constants";
 import {
   forgotPasswordService,
   type ForgotPasswordSource,
@@ -19,11 +20,18 @@ export const useForgotPassword = () => {
     token: null,
   });
 
-  const requestReset = async (email: string, from: ForgotPasswordSource) => {
+  const requestReset = async (
+    email: string,
+    from: ForgotPasswordSource
+  ): Promise<string | null> => {
     setState({ loading: true, error: null, successMessage: null, token: null });
 
     try {
       const result = await forgotPasswordService.requestPasswordReset(email, from);
+
+      if (AUTH_DEBUG) {
+        console.log("[FORGOT PASSWORD] request result", result);
+      }
 
       if (!result.success || !result.token) {
         setState({
@@ -32,7 +40,7 @@ export const useForgotPassword = () => {
           successMessage: null,
           token: null,
         });
-        return false;
+        return null;
       }
 
       setState({
@@ -42,7 +50,7 @@ export const useForgotPassword = () => {
         token: result.token,
       });
 
-      return true;
+      return result.token;
     } catch {
       setState({
         loading: false,
@@ -50,7 +58,7 @@ export const useForgotPassword = () => {
         successMessage: null,
         token: null,
       });
-      return false;
+      return null;
     }
   };
 

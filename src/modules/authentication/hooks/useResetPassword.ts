@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useCallback, useState } from "react";
 import { forgotPasswordService } from "../services/forgotPasswordService";
 import type { ForgotPasswordSource } from "../services/forgotPasswordService";
 
@@ -21,7 +21,7 @@ export const useResetPassword = () => {
     from: null,
   });
 
-  const validateToken = async (token: string) => {
+  const validateToken = useCallback(async (token: string) => {
     setState((current) => ({
       ...current,
       checkingToken: true,
@@ -63,9 +63,9 @@ export const useResetPassword = () => {
       }));
       return false;
     }
-  };
+  }, []);
 
-  const submitNewPassword = async (token: string, newPassword: string) => {
+  const submitNewPassword = useCallback(async (token: string, newPassword: string) => {
     setState((current) => ({
       ...current,
       loading: true,
@@ -107,7 +107,7 @@ export const useResetPassword = () => {
       }));
       return false;
     }
-  };
+  }, []);
 
   return {
     ...state,

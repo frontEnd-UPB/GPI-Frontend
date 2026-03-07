@@ -297,7 +297,7 @@ export const mockAppointments: Appointment[] = [
 { id:"50", patientId:"50", doctorId:"5", date:"2026-03-18T10:00:00", reason:"Consultation", status:APPOINTMENT_STATUS.SCHEDULED },
 ];
 
-export const mockOtpCode = "123456";
+export const mockOtpCode = "1234";
 
 export const mockVacationRequests: VacationRequest[] = [
   {

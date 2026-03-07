@@ -24,24 +24,22 @@ export const PasswordInputWithEye: React.FC<PasswordInputWithEyeProps> = ({
       <button
         type="button"
         onClick={() => setIsVisible((prev) => !prev)}
-        className="absolute right-3 top-1/2 -translate-y-1/2"
+        className="absolute right-3 top-1/2 -translate-y-1/2 text-foreground/40"
         disabled={disabled}
         aria-label={isVisible ? "Hide password" : "Show password"}
       >
         {isVisible ? (
           <EyeOff
             className={cn(
-              "size-5 transition-opacity",
-              isVisible ? "opacity-100" : "opacity-40",
-              disabled ? "opacity-30" : ""
+              "size-5",
+              disabled && "opacity-30"
             )}
           />
         ) : (
           <Eye
             className={cn(
-              "size-5 transition-opacity",
-              isVisible ? "opacity-100" : "opacity-40",
-              disabled ? "opacity-30" : ""
+              "size-5",
+              disabled && "opacity-30"
             )}
           />
         )}

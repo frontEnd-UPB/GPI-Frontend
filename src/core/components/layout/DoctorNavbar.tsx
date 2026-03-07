@@ -5,7 +5,6 @@ import { ROUTE_PATHS } from "../../../routes/routes";
 
 const doctorLinks: NavbarLink[] = [
   { label: "Dashboard", href: ROUTE_PATHS.DOCTOR_DASHBOARD },
-  { label: "Home", href: ROUTE_PATHS.HOME },
   { label: "Agenda", href: ROUTE_PATHS.AGENDA },
   { label: "Patients", href: ROUTE_PATHS.PATIENTS },
   { label: "Pathology Results", href: ROUTE_PATHS.PATHOLOGY_RESULTS },

@@ -5,10 +5,11 @@ import welcomeImage from "../assets/auth_side_image.png";
 interface ThemedContainerProps {
   children: React.ReactNode;
   className?: string;
+  leftOverlay?: React.ReactNode;
 }
 
 // A reusable container styled with theme and UI conventions for forms in the authentication module
-function ThemedContainer({ children, className }: ThemedContainerProps) {
+function ThemedContainer({ children, className, leftOverlay }: ThemedContainerProps) {
   return (
     <div
       className={cn(
@@ -19,7 +20,19 @@ function ThemedContainer({ children, className }: ThemedContainerProps) {
     >
       {/* PARTE IZQUIERDA DEL CONTAINER CON LA IMAGEN */}
       <div className="hidden md:block bg-background w-1/2 relative">
-        <img src={welcomeImage} alt="Welcome" className="absolute inset-0 w-full h-full object-cover object-[34%_50%] scale-110 translate-y-5" />
+        <img
+          src={welcomeImage}
+          alt="Welcome"
+          className="absolute inset-0 w-full h-full object-cover object-[34%_50%] scale-110 translate-y-5"
+        />
+
+        {leftOverlay && (
+          <div className="absolute inset-0 flex items-center justify-center pointer-events-none">
+            <div className="pointer-events-auto">
+              {leftOverlay}
+            </div>
+          </div>
+        )}
       </div>
       {/* PARTE DERECHA DEL CONTAINER QUE CONTENDRÁ EL FORMS */}
       <div className="flex-1 flex items-center justify-center p-12 ">
