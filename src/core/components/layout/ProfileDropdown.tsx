@@ -2,6 +2,7 @@ import React, { useEffect, useRef } from "react";
 import { useNavigate } from "react-router-dom";
 import { LogOut, CalendarDays, UserCog, PlaneTakeoff } from "lucide-react";
 import { useAuth } from "../../../context/AuthContext";
+import { useSignOut } from "../../../modules/authentication/hooks/useSignOut";
 import { cn } from "../../../ui/utils";
 import { ROUTE_PATHS } from "../../../routes/routes";
 
@@ -10,14 +11,15 @@ interface ProfileDropdownProps {
 }
 
 export const ProfileDropdown: React.FC<ProfileDropdownProps> = ({ onClose }) => {
-  const { user, signOut } = useAuth();
+  const { user } = useAuth();
+  const { signOut: hookSignOut } = useSignOut();
   const navigate = useNavigate();
   const dropdownRef = useRef<HTMLDivElement | null>(null);
 
   if (!user) return null;
 
-  const handleSignOut = () => {
-    signOut();
+  const handleSignOut = async () => {
+    await hookSignOut();
     onClose?.();
   };
 

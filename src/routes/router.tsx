@@ -1,5 +1,7 @@
 import React, { Suspense, lazy } from "react";
 import { BrowserRouter, Navigate, Outlet, useRoutes } from "react-router-dom";
+import React from "react";
+import { BrowserRouter, Navigate, useRoutes } from "react-router-dom";
 import { MainLayout } from "../core/components";
 import NotFoundPage from "../core/pages/NotFoundPage";
 import UnauthorizedPage from "../core/pages/UnauthorizedPage";
@@ -12,6 +14,13 @@ import VacationDetailPage from "../modules/vacation-management/pages/VacationDet
 import AdminVacationPage from "../modules/vacation-admin/pages/AdminVacationPage";
 import DoctorVacationPage from "../modules/vacation-doctor/pages/DoctorVacationPage";
 import HomePage from "../modules/home/pages/HomePage";
+import AdminLoginPage from "../modules/authentication/pages/AdminLoginPage";
+import SignUpPage from "../modules/authentication/pages/SignUpPage";
+import PacientLoginPge from "../modules/authentication/pages/PacientLoginPage";
+import ResetPasswordPage from "../modules/authentication/pages/ResetPasswordPage";
+import OtpVerification from "../modules/authentication/pages/OtpVerification";
+import ForgotPasswordPage from "../modules/authentication/pages/ForgotPasswordPage";
+import { AdminDashboard, DoctorDashboard } from "../modules/home/pages";
 import { ProtectedRoute } from "./ProtectedRoute";
 import { ROUTE_PATHS } from "./routes";
 import { VacationRequestsProvider } from "../modules/vacation-management/context/VacationRequestsContext";
@@ -22,19 +31,36 @@ const VacationManagementSection: React.FC = () => (
   </VacationRequestsProvider>
 );
 
-const LoginPage = lazy(() => import("../modules/authentication/pages/LoginPage"));
-
-const LoginRoute: React.FC = () => (
-  <Suspense fallback={null}>
-    <LoginPage />
-  </Suspense>
-);
 
 const RoutesConfig: React.FC = () => {
   const element = useRoutes([
     {
       path: ROUTE_PATHS.LOGIN,
-      element: <LoginRoute />,
+      element: <AdminLoginPage />,
+    },
+    {
+      path: ROUTE_PATHS.SIGN_UP,
+      element: <SignUpPage />,
+    },
+    {
+      path: ROUTE_PATHS.RESET_PASSWORD,
+      element: <ResetPasswordPage />,
+    },
+    {
+      path: ROUTE_PATHS.PATIENT_LOGIN,
+      element: <PacientLoginPge />,
+    },
+    {
+      path: ROUTE_PATHS.OTP_VERIFICATION,
+      element: <OtpVerification />,
+    },
+    {
+      path: ROUTE_PATHS.FORGOT_PASSWORD,
+      element: <ForgotPasswordPage />,
+    },
+    {
+      path: "/HomePage",
+      element: <HomePage />,
     },
     {
       element: <ProtectedRoute />,
@@ -42,6 +68,14 @@ const RoutesConfig: React.FC = () => {
         {
           path: ROUTE_PATHS.UNAUTHORIZED,
           element: <UnauthorizedPage />,
+        },
+        {
+          path: "admin-dashboard",
+          element: <AdminDashboard />,
+        },
+        {
+          path: "doctor-dashboard",
+          element: <DoctorDashboard />,
         },
         {
           element: <MainLayout />,

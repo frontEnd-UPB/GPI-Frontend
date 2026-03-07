@@ -239,6 +239,16 @@
     line-height: 1.5;
   }
 
+  /* Hide native password reveal icon (e.g. Edge on Windows) so we only show our custom eye */
+  input[type="password"]::-ms-reveal,
+  input[type="password"]::-ms-clear {
+    display: none;
+  }
+
+  input[type="password"]::-webkit-textfield-decoration-container {
+    display: none;
+  }
+
   /* Overrides para react-day-picker (calendario del DatePicker) */
   .rdp {
     margin: 0; /* quita el margen interno que parecía un segundo marco */

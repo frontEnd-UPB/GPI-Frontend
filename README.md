@@ -59,7 +59,9 @@ npm run build
 1. El navegador carga [index.html](index.html) y monta el root.
 2. [src/main.tsx](src/main.tsx) renderiza `<App />` envuelto en `<AuthProvider />`.
 3. [src/app/App.tsx](src/app/App.tsx) renderiza el router: `<AppRouter />`.
-4. [src/routes/router.tsx](src/routes/router.tsx) define las rutas de la SPA.
+4. [src/routes/router.tsx](src/routes/router.tsx) define las rutas de la SPA (`BrowserRouter` + `useRoutes`).
+
+Nota: `AuthProvider` está siendo utilizado (wrapping) en [src/main.tsx](src/main.tsx) 
 
 ---
 
@@ -81,34 +83,44 @@ Expone el contexto:
 
 - `user: AuthUser | null`
 - `loading: boolean`
-- `signIn(token: string): Promise<void>`
-- `signOut(): void`
+- `signIn(credentials: { email; password }): Promise<AuthUser>`
+- `signOut(): Promise<void>`
 
-### 4.3) `AuthService` (patrón de servicio)
+### 4.3) Servicio de auth actual
 
-El provider acepta opcionalmente `authService`.
+Archivo: [src/modules/authentication/services/authModuleService.ts](src/modules/authentication/services/authModuleService.ts)
 
-Interfaz:
-
+- `signIn(email, password)`
 - `getCurrentUser()`
-- `signIn(token)`
 - `signOut()`
 
-Implementación actual: **mock** (`createMockAuthService`).
+La autenticación es mock y valida contra `mockEmployees`, pero la contraseña efectiva se obtiene por:
 
-**Persistencia:** usa `localStorage` con la key `meddical:user`.
+1. `forgotPasswordService.getMockPasswordForEmail(email)` (override en `localStorage` si hubo reset)
+2. fallback a `mockEmployees.password` de [src/core/mocks/data.ts](src/core/mocks/data.ts)
 
-**Detalle clave:** en modo mock, el “token” que recibe `signIn(token)` se interpreta como **JSON string** de un `AuthUser`.
+### 4.4) Persistencia actual (`localStorage`)
 
-### 4.4) Cómo se hace el login hoy
+- `meddical:user`: usuario de sesión
+- `meddical:token`: token mock de sesión
+- `meddical:password-reset-requests`: solicitudes/token de reset mock
+- `meddical:password-overrides`: contraseñas mock reseteadas por email
+- `otp-timer`: estado del contador OTP
 
-Página: [src/modules/authentication/pages/LoginPage.tsx](src/modules/authentication/pages/LoginPage.tsx)
+### 4.5) Cómo se hace el login hoy
 
-- Muestra botones “quick login”
-- Toma un empleado de `mockEmployees`
-- Construye un `authUser`
-- Ejecuta `signIn(JSON.stringify(authUser))`
-- Redirige a `from` (si venías de una ruta protegida) o `/`
+Páginas:
+
+- [src/modules/authentication/pages/AdminLoginPage.tsx](src/modules/authentication/pages/AdminLoginPage.tsx)
+- [src/modules/authentication/pages/PacientLoginPage.tsx](src/modules/authentication/pages/PacientLoginPage.tsx)
+
+Ambas:
+
+- usan `useAuth()` o `useSignIn()`
+- validan email/password contra el mock service
+- redirigen según rol al dashboard correspondiente
+
+Además existe [src/modules/authentication/components/LoginCard.tsx](src/modules/authentication/components/LoginCard.tsx) con quick login demo (`Esthera`/`Alexa`) usando también la contraseña efectiva (override + fallback).
 
 ---
 
@@ -134,7 +146,7 @@ Archivo: [src/routes/ProtectedRoute.tsx](src/routes/ProtectedRoute.tsx)
 
 Qué hace:
 
-1. Si no hay `user` ⇒ redirige a `/login` y guarda `state.from`.
+1. Si no hay `user` ⇒ redirige a `ROUTE_PATHS.LOGIN` (hoy `/admin-login`) y guarda `state.from`.
 2. Normaliza el path actual (quita trailing slash).
 3. Si la ruta está en `ALWAYS_ALLOWED_ROUTES` ⇒ permite.
 4. Si la ruta no está permitida para el rol ⇒ redirige a `/unauthorized`.
@@ -152,9 +164,16 @@ Archivo: [src/routes/router.tsx](src/routes/router.tsx)
 
 Estructura (alto nivel):
 
-- `/login` (lazy-loaded)
+- `/admin-login` (login admin/doctor)
+- `/patient-login`
+- `/sign-up`
+- `/forgot-password`
+- `/reset-password`
+- `/otp-verification`
 - Grupo protegido con `<ProtectedRoute />`:
   - `/unauthorized`
+  - `/admin-dashboard`
+  - `/doctor-dashboard`
   - `<MainLayout />` + children:
     - `/` (Home)
     - rutas admin (staff-directory, vacation manager, etc.)
@@ -226,6 +245,27 @@ Estos datos alimentan:
 
 - login demo (elige un empleado)
 - dashboard (Home)
+- forgot/reset password mock
+
+---
+
+## 8.1) Flujo Forgot/Reset Password (mock)
+
+Servicios y hooks:
+
+- [src/modules/authentication/services/forgotPasswordService.ts](src/modules/authentication/services/forgotPasswordService.ts)
+- [src/modules/authentication/hooks/useForgotPassword.ts](src/modules/authentication/hooks/useForgotPassword.ts)
+- [src/modules/authentication/hooks/useResetPassword.ts](src/modules/authentication/hooks/useResetPassword.ts)
+
+Flujo actual:
+
+1. `ForgotPasswordPage` valida email y llama `requestPasswordReset(email, from)`
+2. Si el email existe en mock, se genera token temporal (TTL 15 min) y se guarda en `meddical:password-reset-requests`
+3. UI muestra botón de test `Go Set New Password` (placeholder del link por gmail real)
+4. `ResetPasswordPage` valida token con `validateResetToken(token)`
+5. Si es válido, permite setear nueva contraseña
+6. `completePasswordReset(token, password)` guarda override en `meddical:password-overrides` y marca token como usado
+7. Redirección automática al login correspondiente tras éxito
 
 ---
 
@@ -261,7 +301,28 @@ Cada módulo hoy es principalmente una **página placeholder** para escalar más
 Módulos actuales:
 
 - `authentication`
-  - [src/modules/authentication/pages/LoginPage.tsx](src/modules/authentication/pages/LoginPage.tsx)
+  - pages:
+    - [src/modules/authentication/pages/AdminLoginPage.tsx](src/modules/authentication/pages/AdminLoginPage.tsx)
+    - [src/modules/authentication/pages/PacientLoginPage.tsx](src/modules/authentication/pages/PacientLoginPage.tsx)
+    - [src/modules/authentication/pages/SignUpPage.tsx](src/modules/authentication/pages/SignUpPage.tsx)
+    - [src/modules/authentication/pages/ForgotPasswordPage.tsx](src/modules/authentication/pages/ForgotPasswordPage.tsx)
+    - [src/modules/authentication/pages/ResetPasswordPage.tsx](src/modules/authentication/pages/ResetPasswordPage.tsx)
+    - [src/modules/authentication/pages/OtpVerification.tsx](src/modules/authentication/pages/OtpVerification.tsx)
+    - [src/modules/authentication/pages/AdminDashboard.tsx](src/modules/authentication/pages/AdminDashboard.tsx)
+    - [src/modules/authentication/pages/DoctorDashboard.tsx](src/modules/authentication/pages/DoctorDashboard.tsx)
+  - components:
+    - [src/modules/authentication/components/LoginCard.tsx](src/modules/authentication/components/LoginCard.tsx)
+    - [src/modules/authentication/components/PasswordInputWithEye.tsx](src/modules/authentication/components/PasswordInputWithEye.tsx)
+    - [src/modules/authentication/components/themed-container.tsx](src/modules/authentication/components/themed-container.tsx)
+    - [src/modules/authentication/components/BlurredBackground.tsx](src/modules/authentication/components/BlurredBackground.tsx)
+  - hooks:
+    - [src/modules/authentication/hooks/useSignIn.ts](src/modules/authentication/hooks/useSignIn.ts)
+    - [src/modules/authentication/hooks/useSignOut.ts](src/modules/authentication/hooks/useSignOut.ts)
+    - [src/modules/authentication/hooks/useForgotPassword.ts](src/modules/authentication/hooks/useForgotPassword.ts)
+    - [src/modules/authentication/hooks/useResetPassword.ts](src/modules/authentication/hooks/useResetPassword.ts)
+  - services:
+    - [src/modules/authentication/services/authModuleService.ts](src/modules/authentication/services/authModuleService.ts)
+    - [src/modules/authentication/services/forgotPasswordService.ts](src/modules/authentication/services/forgotPasswordService.ts)
 - `home`
   - [src/modules/home/pages/HomePage.tsx](src/modules/home/pages/HomePage.tsx)
 - `staff-directory`
@@ -464,8 +525,33 @@ src/
 │  └─ utils/             (vacío hoy)
 ├─ modules/
 │  ├─ authentication/
-│  │  └─ pages/
-│  │     └─ LoginPage.tsx
+│  │  ├─ assets/
+│  │  │  ├─ auth_bg_image.png
+│  │  │  ├─ auth_eyeIcon_image.png
+│  │  │  └─ auth_side_image.png
+│  │  ├─ components/
+│  │  │  ├─ BlurredBackground.tsx
+│  │  │  ├─ LoginCard.tsx
+│  │  │  ├─ PasswordInputWithEye.tsx
+│  │  │  └─ themed-container.tsx
+│  │  ├─ hooks/
+│  │  │  ├─ useForgotPassword.ts
+│  │  │  ├─ useResetPassword.ts
+│  │  │  ├─ useSignIn.ts
+│  │  │  └─ useSignOut.ts
+│  │  ├─ pages/
+│  │  │  ├─ AdminDashboard.tsx
+│  │  │  ├─ AdminLoginPage.tsx
+│  │  │  ├─ Auth_TestPage.tsx
+│  │  │  ├─ DoctorDashboard.tsx
+│  │  │  ├─ ForgotPasswordPage.tsx
+│  │  │  ├─ OtpVerification.tsx
+│  │  │  ├─ PacientLoginPage.tsx
+│  │  │  ├─ ResetPasswordPage.tsx
+│  │  │  └─ SignUpPage.tsx
+│  │  └─ services/
+│  │     ├─ authModuleService.ts
+│  │     └─ forgotPasswordService.ts
 │  ├─ home/
 │  │  └─ pages/
 │  │     └─ HomePage.tsx
@@ -552,28 +638,38 @@ Checklist (código actual):
 Sugerencia de implementación (sin refactor grande):
 
 - Mantener `AuthContext` como API estable.
-- Crear un `JwtAuthService` que implemente `AuthService`.
-- Pasarlo al provider:
+- Reemplazar llamadas mock en:
+  - [src/modules/authentication/services/authModuleService.ts](src/modules/authentication/services/authModuleService.ts)
+  - [src/modules/authentication/services/forgotPasswordService.ts](src/modules/authentication/services/forgotPasswordService.ts)
+- Mantener las firmas actuales del contexto:
+  - `signIn({ email, password })`
+  - `signOut()`
+
+Ejemplo orientativo:
 
 ```tsx
-<AuthProvider authService={jwtAuthService}>
-  <App />
-</AuthProvider>
+const response = await api.post("/auth/login", credentials);
+localStorage.setItem("meddical:token", response.token);
+localStorage.setItem("meddical:user", JSON.stringify(response.user));
 ```
 
-En JWT real, `token` ya no sería JSON: sería el token del backend.
+En JWT real, la validación/refresh del token y recuperación de sesión debe venir del backend, no de `mockEmployees`/`localStorage` como fuente de verdad principal.
 
 ---
 
 ## 17) Troubleshooting común
 
-- “Siempre me manda a `/login`”
+- “Siempre me manda a `/admin-login`”
   - Verificá `localStorage['meddical:user']`.
-  - En mock, `signIn()` espera un JSON válido.
+  - Revisá que `AuthContext` termine de cargar (`loading === false`) antes de evaluar guards.
 
 - “Me manda a `/unauthorized` aunque estoy logueado”
   - Revisá si la ruta existe en `ROLE_ROUTE_ACCESS` para tu rol.
   - Recordá que el sistema valida por prefijo (rutas hijas también cuentan).
+
+- “Reseteé contraseña pero no puedo loguear”
+  - Verificá `localStorage['meddical:password-overrides']`.
+  - Confirmá que el email del login coincide con el email del reset (normalizado en minúsculas).
 
 - “No se aplican estilos”
   - Confirmá que [src/styles/index.css](src/styles/index.css) se importa en [src/main.tsx](src/main.tsx).

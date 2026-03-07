@@ -6,6 +6,7 @@ export interface Employee {
   firstname: string;
   lastname: string;
   email: string;
+  password: string;
   phone: string;
   start_date: string;
   status: (typeof EMPLOYEE_STATUS)[keyof typeof EMPLOYEE_STATUS];
@@ -19,6 +20,8 @@ export interface Patient {
   id: string;
   firstname: string;
   lastname: string;
+  email: string;
+  password: string;
   dateofbirth: string;
   phone: string;
   reason: string;
@@ -53,6 +56,7 @@ export const mockEmployees: Employee[] = [
     firstname: "Esthera",
     lastname: "Jackson",
     email: "esthera@example.com",
+    password: "Password123!",
     phone: "+1 234 567 8900",
     start_date: "2021-06-14",
     status: EMPLOYEE_STATUS.ONLINE,
@@ -66,6 +70,7 @@ export const mockEmployees: Employee[] = [
     firstname: "Alexa",
     lastname: "Liras",
     email: "alexa@example.com",
+    password: "Password123!",
     phone: "+1 234 567 8901",
     start_date: "2021-06-14",
     status: EMPLOYEE_STATUS.OFFLINE,
@@ -79,6 +84,7 @@ export const mockEmployees: Employee[] = [
     firstname: "Laurent",
     lastname: "Michael",
     email: "laurent@example.com",
+    password: "Password123!",
     phone: "+1 234 567 8902",
     start_date: "2021-06-14",
     status: EMPLOYEE_STATUS.ONLINE,
@@ -92,6 +98,7 @@ export const mockEmployees: Employee[] = [
     firstname: "Freduardo",
     lastname: "Hill",
     email: "freduardo@example.com",
+    password: "Password123!",
     phone: "+1 234 567 8903",
     start_date: "2021-06-14",
     status: EMPLOYEE_STATUS.ONLINE,
@@ -105,6 +112,7 @@ export const mockEmployees: Employee[] = [
     firstname: "Daniel",
     lastname: "Thomas",
     email: "daniel@example.com",
+    password: "Password123!",
     phone: "+1 234 567 8904",
     start_date: "2021-06-14",
     status: EMPLOYEE_STATUS.VACATION,
@@ -118,6 +126,7 @@ export const mockEmployees: Employee[] = [
     firstname: "Mark",
     lastname: "Wilson",
     email: "mark@example.com",
+    password: "Password123!",
     phone: "+1 234 567 8905",
     start_date: "2021-06-14",
     status: EMPLOYEE_STATUS.OFFLINE,
@@ -131,6 +140,7 @@ export const mockEmployees: Employee[] = [
     firstname: "Laura",
     lastname: "Martínez",
     email: "laura.martinez@example.com",
+    password: "Password123!",
     phone: "+1 234 567 8906",
     start_date: "2022-03-01",
     status: EMPLOYEE_STATUS.ONLINE,
@@ -144,6 +154,7 @@ export const mockEmployees: Employee[] = [
     firstname: "Carlos",
     lastname: "Pérez",
     email: "carlos.perez@example.com",
+    password: "Password123!",
     phone: "+1 234 567 8907",
     start_date: "2020-11-10",
     status: EMPLOYEE_STATUS.VACATION,
@@ -156,6 +167,7 @@ export const mockEmployees: Employee[] = [
     id: "9",
     firstname: "María",
     lastname: "Gómez",
+    password: "Password123!",
     email: "maria.gomez@example.com",
     phone: "+1 234 567 8908",
     start_date: "2023-09-05",
@@ -168,56 +180,56 @@ export const mockEmployees: Employee[] = [
 ];
 
 export const mockPatients: Patient[] = [
-{ id:"1", firstname:"John", lastname:"Smith", dateofbirth:"1988-02-10", phone:"+1 555 1001", reason:"General consultation", lastVisit:"2026-02-10"},
-{ id:"2", firstname:"Emma", lastname:"Johnson", dateofbirth:"1991-06-12", phone:"+1 555 1002", reason:"Routine checkup", lastVisit:"2026-02-12"},
-{ id:"3", firstname:"Liam", lastname:"Brown", dateofbirth:"1985-09-02", phone:"+1 555 1003", reason:"Back pain", lastVisit:"2026-02-15"},
-{ id:"4", firstname:"Olivia", lastname:"Davis", dateofbirth:"1993-01-14", phone:"+1 555 1004", reason:"Headache", lastVisit:"2026-02-17"},
-{ id:"5", firstname:"Noah", lastname:"Miller", dateofbirth:"1987-11-01", phone:"+1 555 1005", reason:"Skin rash", lastVisit:"2026-02-20"},
-{ id:"6", firstname:"Ava", lastname:"Wilson", dateofbirth:"1994-03-22", phone:"+1 555 1006", reason:"Allergy", lastVisit:"2026-02-22"},
-{ id:"7", firstname:"Lucas", lastname:"Moore", dateofbirth:"1982-12-12", phone:"+1 555 1007", reason:"Chest pain", lastVisit:"2026-02-25"},
-{ id:"8", firstname:"Sophia", lastname:"Taylor", dateofbirth:"1996-07-30", phone:"+1 555 1008", reason:"Routine checkup", lastVisit:"2026-02-26"},
-{ id:"9", firstname:"James", lastname:"Anderson", dateofbirth:"1989-04-04", phone:"+1 555 1009", reason:"Knee pain", lastVisit:"2026-02-27"},
-{ id:"10", firstname:"Mia", lastname:"Thomas", dateofbirth:"1995-10-10", phone:"+1 555 1010", reason:"Consultation", lastVisit:"2026-02-28"},
-{ id:"11", firstname:"Benjamin", lastname:"Jackson", dateofbirth:"1986-05-01", phone:"+1 555 1011", reason:"Routine checkup", lastVisit:"2026-02-11"},
-{ id:"12", firstname:"Charlotte", lastname:"White", dateofbirth:"1992-08-12", phone:"+1 555 1012", reason:"Migraine", lastVisit:"2026-02-12"},
-{ id:"13", firstname:"Henry", lastname:"Harris", dateofbirth:"1983-09-15", phone:"+1 555 1013", reason:"General consultation", lastVisit:"2026-02-13"},
-{ id:"14", firstname:"Amelia", lastname:"Martin", dateofbirth:"1997-03-08", phone:"+1 555 1014", reason:"Skin allergy", lastVisit:"2026-02-14"},
-{ id:"15", firstname:"Alexander", lastname:"Thompson", dateofbirth:"1984-11-22", phone:"+1 555 1015", reason:"Checkup", lastVisit:"2026-02-15"},
-{ id:"16", firstname:"Ella", lastname:"Garcia", dateofbirth:"1998-12-03", phone:"+1 555 1016", reason:"Cold symptoms", lastVisit:"2026-02-16"},
-{ id:"17", firstname:"Daniel", lastname:"Martinez", dateofbirth:"1987-02-18", phone:"+1 555 1017", reason:"Neurology consult", lastVisit:"2026-02-17"},
-{ id:"18", firstname:"Scarlett", lastname:"Robinson", dateofbirth:"1991-04-29", phone:"+1 555 1018", reason:"Routine exam", lastVisit:"2026-02-18"},
-{ id:"19", firstname:"Matthew", lastname:"Clark", dateofbirth:"1980-10-10", phone:"+1 555 1019", reason:"Cardiology consult", lastVisit:"2026-02-19"},
-{ id:"20", firstname:"Victoria", lastname:"Rodriguez", dateofbirth:"1993-09-01", phone:"+1 555 1020", reason:"Gynecology consult", lastVisit:"2026-02-20"},
-{ id:"21", firstname:"Jack", lastname:"Lewis", dateofbirth:"1989-07-07", phone:"+1 555 1021", reason:"Checkup", lastVisit:"2026-02-21"},
-{ id:"22", firstname:"Chloe", lastname:"Lee", dateofbirth:"1996-06-12", phone:"+1 555 1022", reason:"Headache", lastVisit:"2026-02-22"},
-{ id:"23", firstname:"Sebastian", lastname:"Walker", dateofbirth:"1985-01-30", phone:"+1 555 1023", reason:"Back pain", lastVisit:"2026-02-23"},
-{ id:"24", firstname:"Grace", lastname:"Hall", dateofbirth:"1994-05-16", phone:"+1 555 1024", reason:"Allergy", lastVisit:"2026-02-24"},
-{ id:"25", firstname:"David", lastname:"Allen", dateofbirth:"1983-08-20", phone:"+1 555 1025", reason:"Routine exam", lastVisit:"2026-02-25"},
-{ id:"26", firstname:"Lily", lastname:"Young", dateofbirth:"1998-11-05", phone:"+1 555 1026", reason:"Consultation", lastVisit:"2026-02-26"},
-{ id:"27", firstname:"Joseph", lastname:"King", dateofbirth:"1982-03-13", phone:"+1 555 1027", reason:"Chest pain", lastVisit:"2026-02-27"},
-{ id:"28", firstname:"Aria", lastname:"Scott", dateofbirth:"1995-12-12", phone:"+1 555 1028", reason:"Checkup", lastVisit:"2026-02-28"},
-{ id:"29", firstname:"Samuel", lastname:"Green", dateofbirth:"1986-02-01", phone:"+1 555 1029", reason:"Skin issue", lastVisit:"2026-02-20"},
-{ id:"30", firstname:"Hannah", lastname:"Adams", dateofbirth:"1997-04-14", phone:"+1 555 1030", reason:"Routine exam", lastVisit:"2026-02-21"},
-{ id:"31", firstname:"Leo", lastname:"Baker", dateofbirth:"1989-03-12", phone:"+1 555 1031", reason:"Consultation", lastVisit:"2026-02-21"},
-{ id:"32", firstname:"Zoe", lastname:"Nelson", dateofbirth:"1993-09-17", phone:"+1 555 1032", reason:"Allergy", lastVisit:"2026-02-21"},
-{ id:"33", firstname:"Isaac", lastname:"Carter", dateofbirth:"1984-06-30", phone:"+1 555 1033", reason:"Back pain", lastVisit:"2026-02-21"},
-{ id:"34", firstname:"Natalie", lastname:"Mitchell", dateofbirth:"1995-01-04", phone:"+1 555 1034", reason:"Checkup", lastVisit:"2026-02-21"},
-{ id:"35", firstname:"Aaron", lastname:"Perez", dateofbirth:"1987-12-11", phone:"+1 555 1035", reason:"Consultation", lastVisit:"2026-02-21"},
-{ id:"36", firstname:"Layla", lastname:"Roberts", dateofbirth:"1996-03-02", phone:"+1 555 1036", reason:"Routine exam", lastVisit:"2026-02-21"},
-{ id:"37", firstname:"Owen", lastname:"Turner", dateofbirth:"1983-04-18", phone:"+1 555 1037", reason:"Chest pain", lastVisit:"2026-02-21"},
-{ id:"38", firstname:"Aurora", lastname:"Phillips", dateofbirth:"1998-05-25", phone:"+1 555 1038", reason:"Consultation", lastVisit:"2026-02-21"},
-{ id:"39", firstname:"Wyatt", lastname:"Campbell", dateofbirth:"1981-07-13", phone:"+1 555 1039", reason:"Routine exam", lastVisit:"2026-02-21"},
-{ id:"40", firstname:"Stella", lastname:"Parker", dateofbirth:"1992-10-09", phone:"+1 555 1040", reason:"Checkup", lastVisit:"2026-02-21"},
-{ id:"41", firstname:"Luke", lastname:"Evans", dateofbirth:"1986-02-22", phone:"+1 555 1041", reason:"Consultation", lastVisit:"2026-02-21"},
-{ id:"42", firstname:"Hazel", lastname:"Edwards", dateofbirth:"1994-07-30", phone:"+1 555 1042", reason:"Headache", lastVisit:"2026-02-21"},
-{ id:"43", firstname:"Julian", lastname:"Collins", dateofbirth:"1985-08-15", phone:"+1 555 1043", reason:"Back pain", lastVisit:"2026-02-21"},
-{ id:"44", firstname:"Violet", lastname:"Stewart", dateofbirth:"1997-12-01", phone:"+1 555 1044", reason:"Routine exam", lastVisit:"2026-02-21"},
-{ id:"45", firstname:"Nathan", lastname:"Sanchez", dateofbirth:"1988-05-05", phone:"+1 555 1045", reason:"Consultation", lastVisit:"2026-02-21"},
-{ id:"46", firstname:"Luna", lastname:"Morris", dateofbirth:"1996-06-19", phone:"+1 555 1046", reason:"Allergy", lastVisit:"2026-02-21"},
-{ id:"47", firstname:"Christopher", lastname:"Rogers", dateofbirth:"1983-11-11", phone:"+1 555 1047", reason:"Chest pain", lastVisit:"2026-02-21"},
-{ id:"48", firstname:"Penelope", lastname:"Reed", dateofbirth:"1992-04-21", phone:"+1 555 1048", reason:"Routine exam", lastVisit:"2026-02-21"},
-{ id:"49", firstname:"Isaiah", lastname:"Cook", dateofbirth:"1987-09-17", phone:"+1 555 1049", reason:"Consultation", lastVisit:"2026-02-21"},
-{ id:"50", firstname:"Riley", lastname:"Morgan", dateofbirth:"1995-03-10", phone:"+1 555 1050", reason:"Checkup", lastVisit:"2026-02-21"}
+{ id:"1", firstname:"John", lastname:"Smith", email:"john.smith@example.com", password:"Password123!", dateofbirth:"1988-02-10", phone:"+1 555 1001", reason:"General consultation", lastVisit:"2026-02-10"},
+{ id:"2", firstname:"Emma", lastname:"Johnson", email:"emma.johnson@example.com", password:"Password123!", dateofbirth:"1991-06-12", phone:"+1 555 1002", reason:"Routine checkup", lastVisit:"2026-02-12"},
+{ id:"3", firstname:"Liam", lastname:"Brown", email:"liam.brown@example.com", password:"Password123!", dateofbirth:"1985-09-02", phone:"+1 555 1003", reason:"Back pain", lastVisit:"2026-02-15"},
+{ id:"4", firstname:"Olivia", lastname:"Davis", email:"olivia.davis@example.com", password:"Password123!", dateofbirth:"1993-01-14", phone:"+1 555 1004", reason:"Headache", lastVisit:"2026-02-17"},
+{ id:"5", firstname:"Noah", lastname:"Miller", email:"noah.miller@example.com", password:"Password123!", dateofbirth:"1987-11-01", phone:"+1 555 1005", reason:"Skin rash", lastVisit:"2026-02-20"},
+{ id:"6", firstname:"Ava", lastname:"Wilson", email:"ava.wilson@example.com", password:"Password123!", dateofbirth:"1994-03-22", phone:"+1 555 1006", reason:"Allergy", lastVisit:"2026-02-22"},
+{ id:"7", firstname:"Lucas", lastname:"Moore", email:"lucas.moore@example.com", password:"Password123!", dateofbirth:"1982-12-12", phone:"+1 555 1007", reason:"Chest pain", lastVisit:"2026-02-25"},
+{ id:"8", firstname:"Sophia", lastname:"Taylor", email:"sophia.taylor@example.com", password:"Password123!", dateofbirth:"1996-07-30", phone:"+1 555 1008", reason:"Routine checkup", lastVisit:"2026-02-26"},
+{ id:"9", firstname:"James", lastname:"Anderson", email:"james.anderson@example.com", password:"Password123!", dateofbirth:"1989-04-04", phone:"+1 555 1009", reason:"Knee pain", lastVisit:"2026-02-27"},
+{ id:"10", firstname:"Mia", lastname:"Thomas", email:"mia.thomas@example.com", password:"Password123!", dateofbirth:"1995-10-10", phone:"+1 555 1010", reason:"Consultation", lastVisit:"2026-02-28"},
+{ id:"11", firstname:"Benjamin", lastname:"Jackson", email:"benjamin.jackson@example.com", password:"Password123!", dateofbirth:"1986-05-01", phone:"+1 555 1011", reason:"Routine checkup", lastVisit:"2026-02-11"},
+{ id:"12", firstname:"Charlotte", lastname:"White", email:"charlotte.white@example.com", password:"Password123!", dateofbirth:"1992-08-12", phone:"+1 555 1012", reason:"Migraine", lastVisit:"2026-02-12"},
+{ id:"13", firstname:"Henry", lastname:"Harris", email:"henry.harris@example.com", password:"Password123!", dateofbirth:"1983-09-15", phone:"+1 555 1013", reason:"General consultation", lastVisit:"2026-02-13"},
+{ id:"14", firstname:"Amelia", lastname:"Martin", email:"amelia.martin@example.com", password:"Password123!", dateofbirth:"1997-03-08", phone:"+1 555 1014", reason:"Skin allergy", lastVisit:"2026-02-14"},
+{ id:"15", firstname:"Alexander", lastname:"Thompson", email:"alexander.thompson@example.com", password:"Password123!", dateofbirth:"1984-11-22", phone:"+1 555 1015", reason:"Checkup", lastVisit:"2026-02-15"},
+{ id:"16", firstname:"Ella", lastname:"Garcia", email:"ella.garcia@example.com", password:"Password123!", dateofbirth:"1998-12-03", phone:"+1 555 1016", reason:"Cold symptoms", lastVisit:"2026-02-16"},
+{ id:"17", firstname:"Daniel", lastname:"Martinez", email:"daniel.martinez@example.com", password:"Password123!", dateofbirth:"1987-02-18", phone:"+1 555 1017", reason:"Neurology consult", lastVisit:"2026-02-17"},
+{ id:"18", firstname:"Scarlett", lastname:"Robinson", email:"scarlett.robinson@example.com", password:"Password123!", dateofbirth:"1991-04-29", phone:"+1 555 1018", reason:"Routine exam", lastVisit:"2026-02-18"},
+{ id:"19", firstname:"Matthew", lastname:"Clark", email:"matthew.clark@example.com", password:"Password123!", dateofbirth:"1980-10-10", phone:"+1 555 1019", reason:"Cardiology consult", lastVisit:"2026-02-19"},
+{ id:"20", firstname:"Victoria", lastname:"Rodriguez", email:"victoria.rodriguez@example.com", password:"Password123!", dateofbirth:"1993-09-01", phone:"+1 555 1020", reason:"Gynecology consult", lastVisit:"2026-02-20"},
+{ id:"21", firstname:"Jack", lastname:"Lewis", email:"jack.lewis@example.com", password:"Password123!", dateofbirth:"1989-07-07", phone:"+1 555 1021", reason:"Checkup", lastVisit:"2026-02-21"},
+{ id:"22", firstname:"Chloe", lastname:"Lee", email:"chloe.lee@example.com", password:"Password123!", dateofbirth:"1996-06-12", phone:"+1 555 1022", reason:"Headache", lastVisit:"2026-02-22"},
+{ id:"23", firstname:"Sebastian", lastname:"Walker", email:"sebastian.walker@example.com", password:"Password123!", dateofbirth:"1985-01-30", phone:"+1 555 1023", reason:"Back pain", lastVisit:"2026-02-23"},
+{ id:"24", firstname:"Grace", lastname:"Hall", email:"grace.hall@example.com", password:"Password123!", dateofbirth:"1994-05-16", phone:"+1 555 1024", reason:"Allergy", lastVisit:"2026-02-24"},
+{ id:"25", firstname:"David", lastname:"Allen", email:"david.allen@example.com", password:"Password123!", dateofbirth:"1983-08-20", phone:"+1 555 1025", reason:"Routine exam", lastVisit:"2026-02-25"},
+{ id:"26", firstname:"Lily", lastname:"Young", email:"lily.young@example.com", password:"Password123!", dateofbirth:"1998-11-05", phone:"+1 555 1026", reason:"Consultation", lastVisit:"2026-02-26"},
+{ id:"27", firstname:"Joseph", lastname:"King", email:"joseph.king@example.com", password:"Password123!", dateofbirth:"1982-03-13", phone:"+1 555 1027", reason:"Chest pain", lastVisit:"2026-02-27"},
+{ id:"28", firstname:"Aria", lastname:"Scott", email:"aria.scott@example.com", password:"Password123!", dateofbirth:"1995-12-12", phone:"+1 555 1028", reason:"Checkup", lastVisit:"2026-02-28"},
+{ id:"29", firstname:"Samuel", lastname:"Green", email:"samuel.green@example.com", password:"Password123!", dateofbirth:"1986-02-01", phone:"+1 555 1029", reason:"Skin issue", lastVisit:"2026-02-20"},
+{ id:"30", firstname:"Hannah", lastname:"Adams", email:"hannah.adams@example.com", password:"Password123!", dateofbirth:"1997-04-14", phone:"+1 555 1030", reason:"Routine exam", lastVisit:"2026-02-21"},
+{ id:"31", firstname:"Leo", lastname:"Baker", email:"leo.baker@example.com", password:"Password123!", dateofbirth:"1989-03-12", phone:"+1 555 1031", reason:"Consultation", lastVisit:"2026-02-21"},
+{ id:"32", firstname:"Zoe", lastname:"Nelson", email:"zoe.nelson@example.com", password:"Password123!", dateofbirth:"1993-09-17", phone:"+1 555 1032", reason:"Allergy", lastVisit:"2026-02-21"},
+{ id:"33", firstname:"Isaac", lastname:"Carter", email:"isaac.carter@example.com", password:"Password123!", dateofbirth:"1984-06-30", phone:"+1 555 1033", reason:"Back pain", lastVisit:"2026-02-21"},
+{ id:"34", firstname:"Natalie", lastname:"Mitchell", email:"natalie.mitchell@example.com", password:"Password123!", dateofbirth:"1995-01-04", phone:"+1 555 1034", reason:"Checkup", lastVisit:"2026-02-21"},
+{ id:"35", firstname:"Aaron", lastname:"Perez", email:"aaron.perez@example.com", password:"Password123!", dateofbirth:"1987-12-11", phone:"+1 555 1035", reason:"Consultation", lastVisit:"2026-02-21"},
+{ id:"36", firstname:"Layla", lastname:"Roberts", email:"layla.roberts@example.com", password:"Password123!", dateofbirth:"1996-03-02", phone:"+1 555 1036", reason:"Routine exam", lastVisit:"2026-02-21"},
+{ id:"37", firstname:"Owen", lastname:"Turner", email:"owen.turner@example.com", password:"Password123!", dateofbirth:"1983-04-18", phone:"+1 555 1037", reason:"Chest pain", lastVisit:"2026-02-21"},
+{ id:"38", firstname:"Aurora", lastname:"Phillips", email:"aurora.phillips@example.com", password:"Password123!", dateofbirth:"1998-05-25", phone:"+1 555 1038", reason:"Consultation", lastVisit:"2026-02-21"},
+{ id:"39", firstname:"Wyatt", lastname:"Campbell", email:"wyatt.campbell@example.com", password:"Password123!", dateofbirth:"1981-07-13", phone:"+1 555 1039", reason:"Routine exam", lastVisit:"2026-02-21"},
+{ id:"40", firstname:"Stella", lastname:"Parker", email:"stella.parker@example.com", password:"Password123!", dateofbirth:"1992-10-09", phone:"+1 555 1040", reason:"Checkup", lastVisit:"2026-02-21"},
+{ id:"41", firstname:"Luke", lastname:"Evans", email:"luke.evans@example.com", password:"Password123!", dateofbirth:"1986-02-22", phone:"+1 555 1041", reason:"Consultation", lastVisit:"2026-02-21"},
+{ id:"42", firstname:"Hazel", lastname:"Edwards", email:"hazel.edwards@example.com", password:"Password123!", dateofbirth:"1994-07-30", phone:"+1 555 1042", reason:"Headache", lastVisit:"2026-02-21"},
+{ id:"43", firstname:"Julian", lastname:"Collins", email:"julian.collins@example.com", password:"Password123!", dateofbirth:"1985-08-15", phone:"+1 555 1043", reason:"Back pain", lastVisit:"2026-02-21"},
+{ id:"44", firstname:"Violet", lastname:"Stewart", email:"violet.stewart@example.com", password:"Password123!", dateofbirth:"1997-12-01", phone:"+1 555 1044", reason:"Routine exam", lastVisit:"2026-02-21"},
+{ id:"45", firstname:"Nathan", lastname:"Sanchez", email:"nathan.sanchez@example.com", password:"Password123!", dateofbirth:"1988-05-05", phone:"+1 555 1045", reason:"Consultation", lastVisit:"2026-02-21"},
+{ id:"46", firstname:"Luna", lastname:"Morris", email:"luna.morris@example.com", password:"Password123!", dateofbirth:"1996-06-19", phone:"+1 555 1046", reason:"Allergy", lastVisit:"2026-02-21"},
+{ id:"47", firstname:"Christopher", lastname:"Rogers", email:"christopher.rogers@example.com", password:"Password123!", dateofbirth:"1983-11-11", phone:"+1 555 1047", reason:"Chest pain", lastVisit:"2026-02-21"},
+{ id:"48", firstname:"Penelope", lastname:"Reed", email:"penelope.reed@example.com", password:"Password123!", dateofbirth:"1992-04-21", phone:"+1 555 1048", reason:"Routine exam", lastVisit:"2026-02-21"},
+{ id:"49", firstname:"Isaiah", lastname:"Cook", email:"isaiah.cook@example.com", password:"Password123!", dateofbirth:"1987-09-17", phone:"+1 555 1049", reason:"Consultation", lastVisit:"2026-02-21"},
+{ id:"50", firstname:"Riley", lastname:"Morgan", email:"riley.morgan@example.com", password:"Password123!", dateofbirth:"1995-03-10", phone:"+1 555 1050", reason:"Checkup", lastVisit:"2026-02-21"}
 ];
 
 export const mockAppointments: Appointment[] = [
@@ -284,6 +296,8 @@ export const mockAppointments: Appointment[] = [
 { id:"49", patientId:"49", doctorId:"2", date:"2026-03-18T09:00:00", reason:"Consultation", status:APPOINTMENT_STATUS.SCHEDULED },
 { id:"50", patientId:"50", doctorId:"5", date:"2026-03-18T10:00:00", reason:"Consultation", status:APPOINTMENT_STATUS.SCHEDULED },
 ];
+
+export const mockOtpCode = "1234";
 
 export const mockVacationRequests: VacationRequest[] = [
   {
