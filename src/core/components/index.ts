@@ -35,6 +35,9 @@ export type { ModalProps } from "../../ui/core/Modal";
 export { DatePicker } from "../../ui/core/DatePicker";
 export type { DatePickerProps } from "../../ui/core/DatePicker";
 
+export { GoBackButton } from "../../ui/core/GoBackButton";
+export type { GoBackButtonProps } from "../../ui/core/GoBackButton";
+
 export {
   Table,
   TableHeader,

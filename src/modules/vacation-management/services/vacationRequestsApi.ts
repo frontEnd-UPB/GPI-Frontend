@@ -1,4 +1,4 @@
-import { mockVacationRequests, type VacationRequest } from "../../../core/mocks/data";
+import { mockVacationRequests, mockEmployees, type VacationRequest } from "../../../core/mocks/data";
 import { VACATION_STATUS } from "../../../core/constants";
 
 // Simula una "base de datos" en memoria usando los mocks actuales.
@@ -32,7 +32,18 @@ export async function fetchVacationRequests(
 
   if (search && search.trim()) {
     const term = search.toLowerCase();
-    result = result.filter((r) => r.employeeName.toLowerCase().includes(term));
+    const nameByEmployeeId: Record<string, string> = {};
+
+    mockEmployees.forEach((employee) => {
+      if (!nameByEmployeeId[employee.id]) {
+        nameByEmployeeId[employee.id] = `${employee.firstname} ${employee.lastname}`;
+      }
+    });
+
+    result = result.filter((r) => {
+      const name = nameByEmployeeId[r.employeeId]?.toLowerCase() ?? "";
+      return name.includes(term);
+    });
   }
 
   if (departmentByEmployeeId) {

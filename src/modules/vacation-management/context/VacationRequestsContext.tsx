@@ -82,10 +82,14 @@ export const VacationRequestsProvider: React.FC<{ children: React.ReactNode }> =
   const value = useMemo(
     () => {
       // Derive calendar events from requests and employee data
-      const empMap: Record<string, string> = {};
+      const empMap: Record<string, { fullName: string; department: string }> = {};
 
       mockEmployees.forEach((e) => {
-        if (e.department) empMap[e.id] = e.department;
+        const fullName = `${e.firstname} ${e.lastname}`;
+        empMap[e.id] = {
+          fullName,
+          department: e.department ?? "",
+        };
       });
 
       // Only include approved requests in calendar events (table continues to show pending)
@@ -93,8 +97,8 @@ export const VacationRequestsProvider: React.FC<{ children: React.ReactNode }> =
         .filter((r) => r.status === VACATION_STATUS.APPROVED)
         .map((r) => ({
           id: r.id,
-          doctorName: r.employeeName,
-          department: empMap[r.employeeId] ?? "",
+          doctorName: empMap[r.employeeId]?.fullName ?? "Unknown employee",
+          department: empMap[r.employeeId]?.department ?? "",
           startDate: r.startDate,
           endDate: r.endDate,
         }));

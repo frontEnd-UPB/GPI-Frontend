@@ -1,11 +1,13 @@
 import React, { useState } from "react";
 import { Card } from "../../../ui/card";
 import { ChevronLeft, ChevronRight } from "lucide-react";
-import { mockAppointments } from "../../../core/mocks/data";
+import { mockAppointments, mockPatients } from "../../../core/mocks/data";
+import { APPOINTMENT_STATUS } from "../../../core/constants";
 
 interface AppointmentItem {
   patientName: string;
-  time: string;
+  timeLabel: string;
+  dateTime: Date;
 }
 
 interface DayAgenda {
@@ -16,18 +18,24 @@ interface DayAgenda {
 }
 
 export function AppointmentsCalendar({ doctorId }: { doctorId?: string }) {
-  // current month state (start at first appointment month if available, otherwise today)
-  const filteredAll = doctorId ? mockAppointments.filter((a) => a.doctorId === doctorId) : mockAppointments;
+  // Filtrar por doctor (si se pasa) y por status SCHEDULED
+  const filteredAll = mockAppointments.filter((appointment) => {
+    if (doctorId && appointment.doctorId !== doctorId) return false;
+    return appointment.status === APPOINTMENT_STATUS.SCHEDULED;
+  });
 
-  const parseLocalDate = (dateStr: string) => {
-    const [y, m, d] = dateStr.split("-").map((v) => Number(v));
+  const parseLocalDate = (dateTimeStr: string) => {
+    const [datePart] = dateTimeStr.split("T");
+    const [y, m, d] = datePart.split("-").map((v) => Number(v));
     return new Date(y, m - 1, d);
   };
 
-  const parseLocalDateTime = (dateStr: string, timeStr: string) => {
-    const [y, m, d] = dateStr.split("-").map((v) => Number(v));
-    const [hh, mm] = timeStr.split(":").map((v) => Number(v));
-    return new Date(y, m - 1, d, hh, mm);
+  const parseLocalDateTime = (dateTimeStr: string) => {
+    const [datePart, timePart] = dateTimeStr.split("T");
+    const [y, m, d] = datePart.split("-").map((v) => Number(v));
+    if (!timePart) return new Date(y, m - 1, d);
+    const [hh, mm] = timePart.split(":").map((v) => Number(v));
+    return new Date(y, m - 1, d, hh, mm || 0);
   };
 
   const initialMonth = filteredAll.length
@@ -46,17 +54,15 @@ export function AppointmentsCalendar({ doctorId }: { doctorId?: string }) {
 
   // Group by date
   const grouped = filtered.reduce<Record<string, AppointmentItem[]>>((acc, a) => {
-    const list = acc[a.date] || [];
-    const time = (() => {
-      try {
-        const d = parseLocalDateTime(a.date, a.time);
-        return d.toLocaleTimeString('en-US', { hour: "2-digit", minute: "2-digit" });
-      } catch (e) {
-        return a.time;
-      }
-    })();
-    list.push({ patientName: a.patientName, time });
-    acc[a.date] = list;
+    const dateKey = a.date.split("T")[0];
+    const dateTime = parseLocalDateTime(a.date);
+    const timeLabel = dateTime.toLocaleTimeString("es-ES", { hour: "2-digit", minute: "2-digit", hour12: false });
+    const patient = mockPatients.find((p) => p.id === a.patientId);
+    const patientName = patient ? `${patient.firstname} ${patient.lastname}` : "Paciente desconocido";
+
+    const list = acc[dateKey] || [];
+    list.push({ patientName, timeLabel, dateTime });
+    acc[dateKey] = list;
     return acc;
   }, {});
 
@@ -65,9 +71,7 @@ export function AppointmentsCalendar({ doctorId }: { doctorId?: string }) {
   // Ensure appointments for each date are sorted by time
   Object.keys(grouped).forEach((date) => {
     grouped[date].sort((x, y) => {
-      const tx = parseLocalDateTime(date, x.time).getTime();
-      const ty = parseLocalDateTime(date, y.time).getTime();
-      return tx - ty;
+      return x.dateTime.getTime() - y.dateTime.getTime();
     });
   });
 
@@ -124,7 +128,7 @@ export function AppointmentsCalendar({ doctorId }: { doctorId?: string }) {
                           className="bg-muted rounded-lg p-2 border-l-[4px] border-primary flex flex-col justify-center"
                         >
                           <p className="text-primary font-bold text-sm leading-tight">{app.patientName}</p>
-                          <p className="text-secondary text-xs font-semibold">{app.time}</p>
+                              <p className="text-secondary text-xs font-semibold">{app.timeLabel}</p>
                         </div>
                       ))}
                     </div>

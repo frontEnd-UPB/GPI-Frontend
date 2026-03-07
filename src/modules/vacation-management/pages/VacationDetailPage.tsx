@@ -1,4 +1,4 @@
-import React from "react";
+import React, { useEffect } from "react";
 import { useParams, useNavigate } from "react-router-dom";
 import { MainContainer, PageHeader } from "../../../core/components";
 import { ROUTE_PATHS } from "../../../routes/routes";
@@ -7,13 +7,17 @@ import { VacationRequestDetails } from "../components/VacationRequestDetails";
 import Decision from "../components/Decision";
 import { VacationInfoCard } from "../components/VacationInfoCard";
 import { AppointmentsCalendar } from "../components/AppointmentsCalendar";
-import GoBack from "../../../ui/core/GoBack";
+import { GoBackButton } from "../../../core/components";
 import { mockEmployees } from "../../../core/mocks/data";
 
 const VacationDetailPage: React.FC = () => {
   const { id } = useParams<{ id: string }>();
   const navigate = useNavigate();
   const { requests } = useVacationRequests();
+
+  useEffect(() => {
+    window.scrollTo({ top: 0, behavior: "smooth" });
+  }, []);
 
   const request = requests.find((r) => r.id === id);
 
@@ -43,11 +47,11 @@ const VacationDetailPage: React.FC = () => {
   }
 
   const employee = mockEmployees.find((e) => e.id === request?.employeeId);
-  const displayName = employee
-    ? employee.function === "Doctor"
-      ? `Dr. ${request.employeeName}`
-      : `${request.employeeName} (${employee.function})`
-    : request.employeeName;
+  const baseName = employee
+    ? `${employee.firstname} ${employee.lastname}`
+    : "Unknown employee";
+  const isDoctor = employee?.role === "doctor";
+  const displayName = isDoctor ? `Dr. ${baseName}` : baseName;
 
   return (
     <MainContainer>
@@ -57,14 +61,14 @@ const VacationDetailPage: React.FC = () => {
           { label: "Home", href: ROUTE_PATHS.HOME },
           { label: "Human Resources" },
           { label: "Vacation Manager", href: ROUTE_PATHS.ADMIN_VACATION_MANAGER },
-          { label: request.employeeName },
+          { label: displayName },
         ]}
       />
 
       <div className="container mx-auto px-5">
         <div className="w-full max-w-[1100px] mx-auto mt-6 mb-4">
           <div className="mb-4">
-            <GoBack />
+            <GoBackButton />
           </div>
           <h2 className="text-2xl font-bold text-secondary">
             Vacation Management - {displayName}
@@ -73,23 +77,27 @@ const VacationDetailPage: React.FC = () => {
 
         <VacationInfoCard
           request={request}
-          doctorName={request.employeeName}
-          employeeFunction={employee?.function}
+          doctorName={baseName}
+          employeeFunction={isDoctor ? "Doctor" : employee?.role}
           department={employee?.department}
-          doctorRole={employee?.function}
+          doctorRole={employee?.speciality}
           avatarUrl={employee?.profilePicture ?? undefined}
           status={request.status}
         />
 
-        <div className="w-full max-w-[1100px] mx-auto space-y-6 mt-6">
-          <h2 className="text-2xl font-bold text-secondary">
-            {displayName}'s Agenda
-          </h2>
-        </div>
+        {isDoctor && (
+          <>
+            <div className="w-full max-w-[1100px] mx-auto space-y-6 mt-6">
+              <h2 className="text-2xl font-bold text-secondary">
+                {displayName}'s Agenda
+              </h2>
+            </div>
 
-        <div className="w-full max-w-[1100px] mx-auto mt-4">
-          <AppointmentsCalendar doctorId={employee?.id} />
-        </div>
+            <div className="w-full max-w-[1100px] mx-auto mt-4">
+              <AppointmentsCalendar doctorId={employee?.id} />
+            </div>
+          </>
+        )}
       </div>
 
       <div className="container mx-auto px-20 py-8 space-y-10">

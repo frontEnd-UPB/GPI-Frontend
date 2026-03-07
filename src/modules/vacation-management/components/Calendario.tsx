@@ -142,21 +142,21 @@ export default function Calendario({ events }: CalendarioProps) {
   }
 
   return (
-    <div className="w-full max-w-[1500px] bg-white rounded-[19px] shadow-[0_0_20px_#00000014] p-6 mx-auto">
+    <div className="w-full max-w-[1500px] bg-card rounded-[19px] shadow-[0_0_20px_rgba(15,23,42,0.08)] p-6 mx-auto">
 
       {/* Header */}
       <div className="flex items-center justify-between mb-6">
         <div className="flex items-center gap-3">
           <Button variant="ghost" size="icon" className="rounded-full w-10 h-10" onClick={prevMonth}>
-            <ChevronLeft className="w-5 h-5 text-[#1F2B6C]" />
+            <ChevronLeft className="w-5 h-5 text-primary" />
           </Button>
 
-          <h2 className="text-[#1F2B6C] text-xl font-semibold w-[180px] text-center">
+          <h2 className="text-primary text-xl font-semibold w-[180px] text-center">
             {monthLabel}
           </h2>
 
           <Button variant="ghost" size="icon" className="rounded-full w-10 h-10" onClick={nextMonth}>
-            <ChevronRight className="w-5 h-5 text-[#1F2B6C]" />
+            <ChevronRight className="w-5 h-5 text-primary" />
           </Button>
         </div>
 
@@ -167,7 +167,7 @@ export default function Calendario({ events }: CalendarioProps) {
                 className="w-2 h-2 rounded-full"
                 style={{ backgroundColor: departmentColorMap[name] || "var(--chart-1)" }}
               />
-              <span className="text-xs text-[#757575] font-medium">
+              <span className="text-xs text-muted-foreground font-medium">
                 {name}
               </span>
             </div>
@@ -176,14 +176,14 @@ export default function Calendario({ events }: CalendarioProps) {
       </div>
 
       {/* Calendario */}
-      <div className="rounded-[15px] overflow-hidden border border-[#CECECE]">
+      <div className="rounded-[15px] overflow-hidden border border-border">
         <div className="grid grid-cols-7 auto-rows-[95px]">
 
           {/* Header días */}
           {["Su", "Mo", "Tu", "We", "Th", "Fr", "Sa"].map((day) => (
             <div
               key={day}
-              className="text-center py-3 text-[15px] font-medium text-[#757575] border-b border-r border-[#CECECE] last:border-r-0 bg-white"
+              className="text-center py-3 text-[15px] font-medium text-muted-foreground border-b border-r border-border last:border-r-0 bg-card"
             >
               {day}
             </div>
@@ -203,15 +203,15 @@ export default function Calendario({ events }: CalendarioProps) {
               <div
                 key={key}
                 className={`
-                  p-2 bg-white hover:bg-slate-50 transition-colors
-                  border-r border-b border-[#CECECE]
+                  p-2 bg-card hover:bg-muted transition-colors
+                  border-r border-b border-border
                   ${isLastColumn ? "border-r-0" : ""}
                   ${isLastRow ? "border-b-0" : ""}
                 `}
               >
                 <span
                   className={`text-[13px] font-medium ${
-                    isOtherMonth ? "text-[#CECECE]" : "text-[#757575]"
+                    isOtherMonth ? "text-muted-foreground/40" : "text-muted-foreground"
                   }`}
                 >
                   {date.getDate()}
@@ -236,7 +236,7 @@ export default function Calendario({ events }: CalendarioProps) {
 
                     {/* Si hay más de 2 */}
                     {dayEvents.length > 2 && (
-                      <span className="text-[11px] text-[#757575] font-medium">
+                      <span className="text-[11px] text-muted-foreground font-medium">
                         +{dayEvents.length - 2} more
                       </span>
                     )}

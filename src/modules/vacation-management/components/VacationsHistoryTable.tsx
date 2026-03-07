@@ -4,6 +4,7 @@ import { VACATION_STATUS } from "../../../core/constants";
 import { mockEmployees, type VacationRequest } from "../../../core/mocks/data";
 import { Modal } from "../../../ui/core/Modal";
 import { Button } from "../../../ui/core/Button";
+import { EmptyState } from "../../../core/components";
 import { VacationRequestDetails } from "./VacationRequestDetails";
 
 interface VacationsHistoryTableProps {
@@ -43,18 +44,27 @@ const VacationsHistoryTable: React.FC<VacationsHistoryTableProps> = ({
   const { requests, search, specialtyFilter } = useVacationRequests();
   const [selected, setSelected] = useState<VacationRequest | null>(null);
 
-  const { specialtyByEmployeeId, specialties } = useMemo(() => {
-    const map: Record<string, string> = {};
+  const { specialtyByEmployeeId, nameByEmployeeId, specialties } = useMemo(() => {
+    const specialtyMap: Record<string, string> = {};
+    const nameMap: Record<string, string> = {};
 
     mockEmployees.forEach((employee) => {
-      if (employee.department && !map[employee.id]) {
-        map[employee.id] = employee.department;
+      if (!nameMap[employee.id]) {
+        nameMap[employee.id] = `${employee.firstname} ${employee.lastname}`;
+      }
+
+      if (employee.department && !specialtyMap[employee.id]) {
+        specialtyMap[employee.id] = employee.department;
       }
     });
 
-    const uniqueSpecialties = Array.from(new Set(Object.values(map))).sort();
+    const uniqueSpecialties = Array.from(new Set(Object.values(specialtyMap))).sort();
 
-    return { specialtyByEmployeeId: map, specialties: uniqueSpecialties };
+    return {
+      specialtyByEmployeeId: specialtyMap,
+      nameByEmployeeId: nameMap,
+      specialties: uniqueSpecialties,
+    };
   }, []);
 
   const filteredAndSorted = useMemo(() => {
@@ -64,9 +74,10 @@ const VacationsHistoryTable: React.FC<VacationsHistoryTableProps> = ({
 
     if (search.trim()) {
       const term = search.toLowerCase();
-      result = result.filter((r) =>
-        r.employeeName.toLowerCase().includes(term)
-      );
+      result = result.filter((r) => {
+        const name = nameByEmployeeId[r.employeeId]?.toLowerCase() ?? "";
+        return name.includes(term);
+      });
     }
 
     if (specialtyFilter) {
@@ -87,7 +98,9 @@ const VacationsHistoryTable: React.FC<VacationsHistoryTableProps> = ({
       }
 
       if (sortKey === "employeeName") {
-        const compare = a.employeeName.localeCompare(b.employeeName);
+        const nameA = nameByEmployeeId[a.employeeId] ?? "";
+        const nameB = nameByEmployeeId[b.employeeId] ?? "";
+        const compare = nameA.localeCompare(nameB);
         return sortDirection === "asc" ? compare : -compare;
       }
 
@@ -155,7 +168,13 @@ const VacationsHistoryTable: React.FC<VacationsHistoryTableProps> = ({
 
           {/* BODY */}
           <div className="rounded-b-[20px] bg-card shadow-[0_0_50px_rgba(15,23,42,0.04)]">
-            {filteredAndSorted.map((request, index) => {
+            {filteredAndSorted.length === 0 ? (
+              <EmptyState
+                title="No vacation history found"
+                description="There are no past vacation requests matching the current filters."
+              />
+            ) : (
+            filteredAndSorted.map((request, index) => {
               const isEven = index % 2 === 0;
               const isLast = index === filteredAndSorted.length - 1;
               const styles = getStatusStyles(request.status);
@@ -173,7 +192,7 @@ const VacationsHistoryTable: React.FC<VacationsHistoryTableProps> = ({
                     } ${isLast ? "rounded-b-[20px]" : ""}`}
                   >
                     <div className="flex flex-[1] items-center justify-start pl-10 font-medium text-primary">
-                      {request.employeeName}
+                      {nameByEmployeeId[request.employeeId] ?? "Unknown employee"}
                     </div>
 
                     <div className="flex flex-[1.5] items-center justify-center text-primary">
@@ -200,7 +219,7 @@ const VacationsHistoryTable: React.FC<VacationsHistoryTableProps> = ({
                   {!isLast && <div className="h-px bg-border" />}
                 </div>
               );
-            })}
+            }))}
           </div>
         </div>
       </div>

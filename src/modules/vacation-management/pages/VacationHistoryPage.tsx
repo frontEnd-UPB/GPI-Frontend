@@ -1,5 +1,5 @@
 import React, { useMemo, useState } from "react";
-import { MainContainer, PageHeader } from "../../../core/components";
+import { MainContainer, PageHeader, GoBackButton } from "../../../core/components";
 import { ROUTE_PATHS } from "../../../routes/routes";
 import { useVacationRequests } from "../context/VacationRequestsContext";
 import VacationFilters from "../components/VacationFilters";
@@ -67,7 +67,11 @@ const InnerContent: React.FC<{
 
   return (
     <div className="container mx-auto px-5 py-8 space-y-8">
-      <Title />
+      <div className="w-full max-w-[1100px] mx-auto">
+        <GoBackButton />
+      </div>
+
+      <Title title="Requests History" />
 
       <VacationFilters
         search={search}
