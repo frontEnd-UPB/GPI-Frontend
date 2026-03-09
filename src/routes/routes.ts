@@ -20,6 +20,8 @@ export const ROUTE_PATHS = {
   HR: "/hr",
   ADMIN_STAFF_DIRECTORY: "/admin/staff-directory",
   ADMIN_VACATION_MANAGER: "/admin/vacation-manager",
+  ADMIN_VACATION_HISTORY: "/admin/vacation-history",
+  VACATION_MANAGER_DETAIL: "/vacation-manager",
   VACATIONS_ADMIN: "/vacations/admin",
 
   // Doctor
@@ -51,6 +53,8 @@ export const ROLE_ROUTE_ACCESS: Record<UserRole, RoutePath[]> = {
     ROUTE_PATHS.HR,
     ROUTE_PATHS.ADMIN_STAFF_DIRECTORY,
     ROUTE_PATHS.ADMIN_VACATION_MANAGER,
+    ROUTE_PATHS.ADMIN_VACATION_HISTORY,
+    ROUTE_PATHS.VACATION_MANAGER_DETAIL,
     ROUTE_PATHS.VACATIONS_ADMIN,
     ROUTE_PATHS.PATIENTS,
     ROUTE_PATHS.APPOINTMENTS,

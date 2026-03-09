@@ -12,7 +12,6 @@ export const EMPLOYEE_STATUS = {
 
 export const APPOINTMENT_STATUS = {
   SCHEDULED: "scheduled",
-  CONFIRMED: "confirmed",
   IN_PROGRESS: "in_progress",
   COMPLETED: "completed",
   CANCELLED: "cancelled",
@@ -24,12 +23,6 @@ export const VACATION_STATUS = {
   APPROVED: "approved",
   REJECTED: "rejected",
   CANCELLED: "cancelled",
-} as const;
-
-export const PATIENT_STATUS = {
-  ACTIVE: "active",
-  INACTIVE: "inactive",
-  DISCHARGED: "discharged",
 } as const;
 
 export const API_ENDPOINTS = {
@@ -82,3 +75,37 @@ export const DATE_FORMATS = {
   API: "YYYY-MM-DD",
   API_WITH_TIME: "YYYY-MM-DDTHH:mm:ss",
 } as const;
+
+// Simple helper to convert an API date (YYYY-MM-DD or YYYY-MM-DDTHH:mm:ss)
+// to the DISPLAY format configured above. Currently supports DD/MM/YYYY.
+export function formatDisplayDate(value: string): string {
+  if (!value) return value;
+
+  const datePart = value.split("T")[0];
+  const [year, month, day] = datePart.split("-");
+  if (!year || !month || !day) return value;
+
+  if (DATE_FORMATS.DISPLAY === "DD/MM/YYYY") {
+    return `${day.padStart(2, "0")}/${month.padStart(2, "0")}/${year}`;
+  }
+
+  return value;
+}
+
+// Helper to convert an API datetime (YYYY-MM-DDTHH:mm:ss)
+// to the DISPLAY_WITH_TIME format (e.g. DD/MM/YYYY HH:mm).
+export function formatDisplayDateTime(value: string): string {
+  if (!value) return value;
+
+  const [datePart, timePart = ""] = value.split("T");
+  const [year, month, day] = datePart.split("-");
+  if (!year || !month || !day) return value;
+
+  const [hour = "00", minute = "00"] = timePart.split(":");
+
+  if (DATE_FORMATS.DISPLAY_WITH_TIME === "DD/MM/YYYY HH:mm") {
+    return `${day.padStart(2, "0")}/${month.padStart(2, "0")}/${year} ${hour.padStart(2, "0")}:${minute.padStart(2, "0")}`;
+  }
+
+  return value;
+}

@@ -10,6 +10,7 @@ export interface ModalProps {
   children: React.ReactNode;
   footer?: React.ReactNode;
   size?: "sm" | "md" | "lg" | "xl";
+  headerVariant?: "default" | "primary";
 }
 
 const Modal: React.FC<ModalProps> = ({
@@ -19,6 +20,7 @@ const Modal: React.FC<ModalProps> = ({
   children,
   footer,
   size = "md",
+  headerVariant = "default",
 }) => {
   if (!open) return null;
 
@@ -46,10 +48,28 @@ const Modal: React.FC<ModalProps> = ({
       >
         {/* Header */}
         {title && (
-          <div className="flex items-center justify-between px-6 py-4 border-b border-border">
-            <h2 className="text-xl font-semibold text-foreground">{title}</h2>
-            <IconButton onClick={onClose} size="sm">
-              <X className="size-5 text-muted-foreground" />
+          <div
+            className={cn(
+              "flex items-center justify-between px-6 py-4 border-b border-border",
+              headerVariant === "primary" &&
+                "rounded-t-[14px] border-none bg-primary text-primary-foreground"
+            )}
+          >
+            <h2 className="text-xl font-semibold">{title}</h2>
+            <IconButton
+              onClick={onClose}
+              size="sm"
+              className={cn(
+                headerVariant === "primary" &&
+                  "hover:bg-primary/80"
+              )}
+            >
+              <X
+                className={cn(
+                  "size-5 text-muted-foreground",
+                  headerVariant === "primary" && "text-primary-foreground"
+                )}
+              />
             </IconButton>
           </div>
         )}

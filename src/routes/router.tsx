@@ -1,5 +1,5 @@
 import React from "react";
-import { BrowserRouter, Navigate, useRoutes } from "react-router-dom";
+import { BrowserRouter, Navigate, Outlet, useRoutes } from "react-router-dom";
 import { MainLayout } from "../core/components";
 import NotFoundPage from "../core/pages/NotFoundPage";
 import UnauthorizedPage from "../core/pages/UnauthorizedPage";
@@ -7,6 +7,8 @@ import ComponentsDemoPage from "../core/pages/ComponentsDemoPage";
 import StaffDirectoryPage from "../modules/staff-directory/pages/StaffDirectoryPage";
 import { EmptyState } from "../core/components";
 import VacationManagementPage from "../modules/vacation-management/pages/VacationManagementPage";
+import VacationHistoryPage from "../modules/vacation-management/pages/VacationHistoryPage";
+import VacationDetailPage from "../modules/vacation-management/pages/VacationDetailPage";
 import AdminVacationPage from "../modules/vacation-admin/pages/AdminVacationPage";
 import DoctorVacationPage from "../modules/vacation-doctor/pages/DoctorVacationPage";
 import HomePage from "../modules/home/pages/HomePage";
@@ -19,6 +21,13 @@ import ForgotPasswordPage from "../modules/authentication/pages/ForgotPasswordPa
 import { AdminDashboard, DoctorDashboard } from "../modules/home/pages";
 import { ProtectedRoute } from "./ProtectedRoute";
 import { ROUTE_PATHS } from "./routes";
+import { VacationRequestsProvider } from "../modules/vacation-management/context/VacationRequestsContext";
+
+const VacationManagementSection: React.FC = () => (
+  <VacationRequestsProvider>
+    <Outlet />
+  </VacationRequestsProvider>
+);
 
 
 const RoutesConfig: React.FC = () => {
@@ -80,7 +89,14 @@ const RoutesConfig: React.FC = () => {
             // Admin
             { path: "demo", element: <ComponentsDemoPage /> },
             { path: "admin/staff-directory", element: <StaffDirectoryPage /> },
-            { path: "admin/vacation-manager", element: <VacationManagementPage /> },
+            {
+              element: <VacationManagementSection />,
+              children: [
+                { path: "admin/vacation-manager", element: <VacationManagementPage /> },
+                { path: "vacation-manager/:id", element: <VacationDetailPage /> },
+                { path: "admin/vacation-history", element: <VacationHistoryPage /> },
+              ],
+            },
             { path: "vacations/admin", element: <AdminVacationPage /> },
 
             // Doctor

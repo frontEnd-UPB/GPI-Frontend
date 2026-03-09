@@ -1,24 +1,22 @@
 import React, { useMemo, useState } from "react";
-import { MainContainer, PageHeader } from "../../../core/components";
+import { MainContainer, PageHeader, GoBackButton } from "../../../core/components";
 import { ROUTE_PATHS } from "../../../routes/routes";
-import Calendario from "../components/Calendario";
 import { useVacationRequests } from "../context/VacationRequestsContext";
-import VacationRequestsTable from "../components/VacationRequestsTable";
 import VacationFilters from "../components/VacationFilters";
 import Title from "../components/Title";
+import VacationsHistoryTable from "../components/VacationsHistoryTable";
 import { mockEmployees } from "../../../core/mocks/data";
-import { useNavigate } from "react-router-dom";
 
-const VacationManagementPage: React.FC = () => {
-  const navigate = useNavigate();
-
+const VacationHistoryPage: React.FC = () => {
   const [sortConfig, setSortConfig] = useState<{
     key: "startDate" | "employeeName";
     direction: "asc" | "desc";
-  }>({
-    key: "startDate",
-    direction: "asc",
-  });
+  }>(
+    {
+      key: "startDate",
+      direction: "asc",
+    }
+  );
 
   const handleToggleSort = (key: "startDate" | "employeeName") => {
     setSortConfig((prev) => {
@@ -39,17 +37,17 @@ const VacationManagementPage: React.FC = () => {
   return (
     <MainContainer>
       <PageHeader
-        title="Vacation Management"
+        title="Requests History"
         breadcrumbs={[
           { label: "Home", href: ROUTE_PATHS.HOME },
           { label: "Human Resources" },
           { label: "Vacation Manager" },
+          { label: "Requests History" },
         ]}
       />
       <InnerContent
         sortConfig={sortConfig}
         onToggleSort={handleToggleSort}
-        onViewHistoryClick={() => navigate(ROUTE_PATHS.ADMIN_VACATION_HISTORY)}
       />
     </MainContainer>
   );
@@ -58,9 +56,8 @@ const VacationManagementPage: React.FC = () => {
 const InnerContent: React.FC<{
   sortConfig: { key: "startDate" | "employeeName"; direction: "asc" | "desc" };
   onToggleSort: (k: "startDate" | "employeeName") => void;
-  onViewHistoryClick: () => void;
-}> = ({ sortConfig, onToggleSort, onViewHistoryClick }) => {
-  const { search, setSearch, specialtyFilter, setSpecialtyFilter, calendarEvents } = useVacationRequests();
+}> = ({ sortConfig, onToggleSort }) => {
+  const { search, setSearch, specialtyFilter, setSpecialtyFilter } = useVacationRequests();
 
   const departments = useMemo(
     () =>
@@ -70,7 +67,9 @@ const InnerContent: React.FC<{
 
   return (
     <div className="container mx-auto px-5 py-8 space-y-8">
-      <Title onViewHistoryClick={onViewHistoryClick} />
+      <GoBackButton />
+
+      <Title title="Requests History" />
 
       <VacationFilters
         search={search}
@@ -80,11 +79,7 @@ const InnerContent: React.FC<{
         onSpecialtyChange={setSpecialtyFilter}
       />
 
-      <div className="flex flex-col items-center justify-center">
-        <Calendario events={calendarEvents} />
-      </div>
-
-      <VacationRequestsTable
+      <VacationsHistoryTable
         sortKey={sortConfig.key}
         sortDirection={sortConfig.direction}
         onSortChange={onToggleSort}
@@ -93,4 +88,4 @@ const InnerContent: React.FC<{
   );
 };
 
-export default VacationManagementPage;
+export default VacationHistoryPage;
