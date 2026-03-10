@@ -1,0 +1,1 @@
+export { default as EmployeeVacationPage } from "./pages/EmployeeVacationPage";
