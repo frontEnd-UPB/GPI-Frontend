@@ -48,6 +48,7 @@ export interface VacationRequest {
   requestDate: string;
   comment: string | null;
   attachmentUrl: string | null;
+  attachmentName?: string | null;
 }
 
 export const mockEmployees: Employee[] = [
@@ -309,11 +310,55 @@ export const mockVacationRequests: VacationRequest[] = [
     status: VACATION_STATUS.PENDING,
     requestDate: "2026-02-15",
     comment:
-      "I need to take some time off to take care of family matters and spend time with my relatives who will be visiting during this period. This vacation will help me rest, reconnect with my family, and return to work with renewed energy and focus.",
-    attachmentUrl: "https://example.com/docs/medical-leave-daniel-thomas.pdf",
+      "I need to take some time off to take care of family matters and spend time with my relatives who will be visiting during this period.",
+    rejectionReason: null,
+    attachmentUrl: "https://example.com/docs/family-vacation-request.pdf",
   },
+
   {
     id: "2",
+    employeeId: "1",
+    startDate: "2026-04-10",
+    endDate: "2026-04-14",
+    reason: "Personal travel",
+    status: VACATION_STATUS.APPROVED,
+    requestDate: "2026-03-20",
+    comment:
+      "I will be traveling out of the city for a few days and would like to schedule my vacation accordingly.",
+    rejectionReason: null,
+    attachmentUrl: "https://example.com/docs/travel-plan.pdf",
+  },
+
+  {
+    id: "3",
+    employeeId: "1",
+    startDate: "2026-05-03",
+    endDate: "2026-05-06",
+    reason: "Medical appointment",
+    status: VACATION_STATUS.REJECTED,
+    requestDate: "2026-04-10",
+    comment:
+      "I requested these days off to attend several medical appointments that require travel.",
+    rejectionReason:
+      "The requested dates overlap with a critical project delivery and staffing levels cannot support the absence.",
+    attachmentUrl: "https://example.com/docs/medical-appointment.pdf",
+  },
+
+  {
+    id: "4",
+    employeeId: "1",
+    startDate: "2026-06-15",
+    endDate: "2026-06-20",
+    reason: "Trip with friends",
+    status: VACATION_STATUS.CANCELLED,
+    requestDate: "2026-05-01",
+    comment:
+      "Originally planned a short trip with friends, but the trip has been canceled so the vacation request is withdrawn.",
+    rejectionReason: null,
+    attachmentUrl: null,
+  },
+  {
+    id: "5",
     employeeId: "2",
     startDate: "2026-03-10",
     endDate: "2026-03-15",
@@ -324,7 +369,7 @@ export const mockVacationRequests: VacationRequest[] = [
     attachmentUrl: null,
   },
   {
-    id: "3",
+    id: "6",
     employeeId: "5",
     startDate: "2026-02-26",
     endDate: "2026-03-02",
@@ -335,7 +380,7 @@ export const mockVacationRequests: VacationRequest[] = [
     attachmentUrl: "https://example.com/docs/medical-leave-daniel-thomas.pdf",
   },
   {
-    id: "4",
+    id: "7",
     employeeId: "2",
     startDate: "2026-03-20",
     endDate: "2026-03-25",
@@ -357,7 +402,7 @@ export const mockVacationRequests: VacationRequest[] = [
     attachmentUrl: null,
   },
   {
-    id: "6",
+    id: "8",
     employeeId: "7",
     startDate: "2026-03-15",
     endDate: "2026-03-18",
@@ -369,7 +414,7 @@ export const mockVacationRequests: VacationRequest[] = [
     attachmentUrl: null,
   },
   {
-    id: "7",
+    id: "9",
     employeeId: "3",
     startDate: "2026-03-22",
     endDate: "2026-03-24",
@@ -391,7 +436,7 @@ export const mockVacationRequests: VacationRequest[] = [
     attachmentUrl: null,
   },
   {
-    id: "9",
+    id: "10",
     employeeId: "9",
     startDate: "2026-03-26",
     endDate: "2026-03-30",
@@ -402,7 +447,7 @@ export const mockVacationRequests: VacationRequest[] = [
     attachmentUrl: null,
   },
   {
-    id: "10",
+    id: "11",
     employeeId: "6",
     startDate: "2026-03-05",
     endDate: "2026-03-08",
@@ -413,7 +458,7 @@ export const mockVacationRequests: VacationRequest[] = [
     attachmentUrl: "https://example.com/docs/cardiology-conference-mark-wilson.pdf",
   },
   {
-    id: "11",
+    id: "12",
     employeeId: "7",
     startDate: "2026-03-25",
     endDate: "2026-03-29",
@@ -424,7 +469,7 @@ export const mockVacationRequests: VacationRequest[] = [
     attachmentUrl: null,
   },
   {
-    id: "12",
+    id: "13",
     employeeId: "8",
     startDate: "2026-02-18",
     endDate: "2026-02-22",

@@ -145,6 +145,8 @@ const ProfileMenu: React.FC<ProfileMenuProps> = ({
   const [open, setOpen] = useState(false);
   const config = roleConfig[role];
   const RoleIcon = config.icon;
+  const safeUserName = userName?.trim() || "User";
+  const userInitial = safeUserName.charAt(0).toUpperCase();
 
   return (
     <div className="relative">
@@ -155,9 +157,9 @@ const ProfileMenu: React.FC<ProfileMenuProps> = ({
         }}
         className="flex items-center gap-3 hover:bg-primary/80 rounded-lg px-3 py-2 transition-colors"
       >
-        <Avatar src={userAvatar} alt={userName} fallback={userName[0]} />
+        <Avatar src={userAvatar} alt={safeUserName} fallback={userInitial} />
         <div className="flex flex-col items-start">
-          <span className="text-sm font-medium leading-tight">{userName}</span>
+          <span className="text-sm font-medium leading-tight">{safeUserName}</span>
           <div className="mt-1">
             <span
               className={cn(

@@ -30,7 +30,22 @@ const createMockAuthService = (): AuthService => {
       const stored = window.localStorage.getItem("meddical:user");
       if (!stored) return null;
       try {
-        return JSON.parse(stored) as AuthUser;
+        const parsed = JSON.parse(stored) as Partial<AuthUser> & {
+          firstname?: string;
+          lastname?: string;
+        };
+
+        const first = parsed.firstname?.trim() ?? "";
+        const last = parsed.lastname?.trim() ?? "";
+        const fallbackName = `${first} ${last}`.trim() || "User";
+
+        return {
+          id: parsed.id ?? "",
+          name: parsed.name?.trim() || fallbackName,
+          email: parsed.email ?? "",
+          role: (parsed.role as UserRole) ?? "doctor",
+          profilePicture: parsed.profilePicture ?? null,
+        };
       } catch {
         return null;
       }

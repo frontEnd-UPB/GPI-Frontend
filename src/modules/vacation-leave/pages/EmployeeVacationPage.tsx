@@ -9,6 +9,7 @@ import VacationRequestButton from "../components/VacationRequestButton";
 import VacationStatusTable from "../components/VacationStatusTable";
 import VacationRequestModal from "../components/VacationRequestModal";
 import type { VacationRequest } from "../../../core/mocks/data";
+import type { VacationSubmitData } from "../hooks/vacationRequestForm.types";
 import { useAuth } from "../../../context/AuthContext";
 import { ErrorMessage } from "../../../core/components/feedback/ErrorMessage";
 import { Loader } from "../../../core/components/feedback/Loader";
@@ -30,8 +31,8 @@ export const EmployeeVacationPage: React.FC = () => {
   const {
     requests,
     loading: requestsLoading,
+    actionLoading,
     error: requestsError,
-    refresh: refreshRequests,
     cancel,
     update,
     addLocally,
@@ -49,10 +50,23 @@ export const EmployeeVacationPage: React.FC = () => {
   const [selectedVacation, setSelectedVacation] =
     useState<VacationRequest | null>(null);
   const [openModal, setOpenModal] = useState(false);
+  const [requestFormOpen, setRequestFormOpen] = useState(false);
 
   const handleView = (vacation: VacationRequest) => {
     setSelectedVacation(vacation);
     setOpenModal(true);
+  };
+
+  const handleCreateRequest = async (data: VacationSubmitData) => {
+    const createdRequest = await submit({
+      startDate: data.startDate!,
+      endDate: data.endDate!,
+      reason: data.type,
+      comment: data.comment,
+      attachment: data.attachment,
+    });
+
+    return createdRequest !== null;
   };
 
   const handleCancelRequest = async (id: string) => {
@@ -60,46 +74,54 @@ export const EmployeeVacationPage: React.FC = () => {
     if (updated && selectedVacation?.id === updated.id) {
       setSelectedVacation(updated);
     }
+
+    return updated !== null;
   };
 
-  const handleResendRequest = async (
+  const handleUpdateRequest = async (
     id: string,
+    updatedStartDate: Date,
+    updatedEndDate: Date,
     updatedReason: string,
-    updatedComment: string
+    updatedComment: string,
+    updatedAttachment?: File | null,
+    removeAttachment?: boolean
   ) => {
     const updated = await update(id, {
+      startDate: updatedStartDate,
+      endDate: updatedEndDate,
       reason: updatedReason,
       comment: updatedComment,
+      attachment: updatedAttachment,
+      removeAttachment,
     });
 
     if (updated && selectedVacation?.id === updated.id) {
       setSelectedVacation(updated);
     }
+
+    if (updated) {
+      refetchBalance();
+    }
+
+    return updated !== null;
   };
 
-  const isLoading = balanceLoading || requestsLoading || submitLoading;
+  const isLoading =
+    balanceLoading || requestsLoading || submitLoading || actionLoading;
 
   const hasNoRequests = !requestsLoading && requests.length === 0;
 
-  const { pageTitle, roleLabel } = useMemo(() => {
+  const pageTitle = useMemo(() => {
     if (user?.role === USER_ROLES.ADMIN) {
-      return {
-        pageTitle: "Admin Vacations",
-        roleLabel: "Admin",
-      };
+      return "Request Vacations";
     }
 
     if (user?.role === USER_ROLES.DOCTOR) {
-      return {
-        pageTitle: "Doctor Vacations",
-        roleLabel: "Doctor",
-      };
+      return "Request Vacations";
     }
 
-    return {
-      pageTitle: "Vacations",
-      roleLabel: "Employee",
-    };
+    return "Vacations";
   }, [user?.role]);
 
   return (
@@ -108,8 +130,8 @@ export const EmployeeVacationPage: React.FC = () => {
         title={pageTitle}
         breadcrumbs={[
           { label: "Home", href: ROUTE_PATHS.HOME },
-          { label: "Vacations" },
-          { label: roleLabel },
+          { label: "My Profile" },
+          { label: "Request Vacations" },
         ]}
       />
 
@@ -137,16 +159,11 @@ export const EmployeeVacationPage: React.FC = () => {
         <VacationBalanceCard balance={balance ?? undefined} />
 
         <VacationRequestButton
-          onSubmit={(data) =>
-            submit({
-              startDate: data.startDate!,
-              endDate: data.endDate!,
-              reason: data.type,
-              comment: data.comment,
-              attachment: data.attachment,
-            })
-          }
+          onSubmit={handleCreateRequest}
           availableDays={balance?.available}
+          open={requestFormOpen}
+          onOpenChange={setRequestFormOpen}
+          isSubmitting={submitLoading}
         />
 
         {hasNoRequests ? (
@@ -156,13 +173,7 @@ export const EmployeeVacationPage: React.FC = () => {
             action={
               <Button
                 variant="secondary"
-                onClick={() => {
-                  // Programmatically open the form by interacting with the button
-                  const trigger = document.querySelector<
-                    HTMLButtonElement
-                  >("[data-vacation-request-trigger]");
-                  trigger?.click();
-                }}
+                onClick={() => setRequestFormOpen(true)}
               >
                 Request vacation leave
               </Button>
@@ -176,8 +187,10 @@ export const EmployeeVacationPage: React.FC = () => {
           open={openModal}
           onClose={() => setOpenModal(false)}
           vacation={selectedVacation}
+          availableDays={balance?.available}
+          isProcessing={actionLoading}
           onCancelRequest={handleCancelRequest}
-          onResendRequest={handleResendRequest}
+          onUpdateRequest={handleUpdateRequest}
         />
       </div>
     </MainContainer>

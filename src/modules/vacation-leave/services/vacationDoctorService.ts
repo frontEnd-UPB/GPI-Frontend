@@ -11,6 +11,33 @@ import { VACATION_STATUS } from "../../../core/constants";
 
 const USE_MOCKS = true;
 
+function toLocalIsoDate(date: Date): string {
+  const year = date.getFullYear();
+  const month = String(date.getMonth() + 1).padStart(2, "0");
+  const day = String(date.getDate()).padStart(2, "0");
+  return `${year}-${month}-${day}`;
+}
+
+function buildAttachment(file?: File | null) {
+  if (!file) {
+    return {
+      attachmentUrl: null,
+      attachmentName: null,
+    };
+  }
+
+  return {
+    attachmentUrl: URL.createObjectURL(file),
+    attachmentName: file.name,
+  };
+}
+
+function revokeAttachmentUrl(attachmentUrl?: string | null) {
+  if (attachmentUrl?.startsWith("blob:")) {
+    URL.revokeObjectURL(attachmentUrl);
+  }
+}
+
 export async function getVacationBalance(
   employeeId: string
 ): Promise<VacationBalance | null> {
@@ -58,22 +85,25 @@ export async function submitVacationRequest(
 
   await new Promise((resolve) => setTimeout(resolve, 600));
 
-  const { startDate, endDate, reason, comment } = submitData;
+  const { startDate, endDate, reason, comment, attachment } = submitData;
 
   if (!startDate || !endDate) {
     throw new Error("Start date and end date are required.");
   }
 
+  const nextAttachment = buildAttachment(attachment);
+
   const newRequest: VacationRequest = {
     id: String(Date.now()),
     employeeId,
-    startDate: startDate.toISOString().split("T")[0],
-    endDate: endDate.toISOString().split("T")[0],
+    startDate: toLocalIsoDate(startDate),
+    endDate: toLocalIsoDate(endDate),
     reason,
     status: VACATION_STATUS.PENDING,
-    requestDate: new Date().toISOString().split("T")[0],
+    requestDate: toLocalIsoDate(new Date()),
     comment: comment ?? null,
-    attachmentUrl: null,
+    attachmentUrl: nextAttachment.attachmentUrl,
+    attachmentName: nextAttachment.attachmentName,
   };
 
   mockVacationRequests.push(newRequest);
@@ -82,8 +112,12 @@ export async function submitVacationRequest(
 }
 
 export interface UpdateVacationRequestData {
+  startDate?: Date;
+  endDate?: Date;
   reason: string;
   comment?: string;
+  attachment?: File | null;
+  removeAttachment?: boolean;
 }
 
 export async function updateVacationRequest(
@@ -103,12 +137,34 @@ export async function updateVacationRequest(
   if (requestIndex === -1) return null;
 
   const existing = mockVacationRequests[requestIndex];
+  const shouldReplaceAttachment = Boolean(updates.attachment);
+  const shouldRemoveAttachment = updates.removeAttachment === true;
+  const nextAttachment = shouldReplaceAttachment
+    ? buildAttachment(updates.attachment)
+    : shouldRemoveAttachment
+      ? { attachmentUrl: null, attachmentName: null }
+      : {
+          attachmentUrl: existing.attachmentUrl,
+          attachmentName: existing.attachmentName ?? null,
+        };
+
+  if ((shouldReplaceAttachment || shouldRemoveAttachment) && existing.attachmentUrl) {
+    revokeAttachmentUrl(existing.attachmentUrl);
+  }
 
   const updated: VacationRequest = {
     ...existing,
+    startDate: updates.startDate
+      ? toLocalIsoDate(updates.startDate)
+      : existing.startDate,
+    endDate: updates.endDate
+      ? toLocalIsoDate(updates.endDate)
+      : existing.endDate,
     reason: updates.reason,
     comment: updates.comment ?? existing.comment,
     status: VACATION_STATUS.PENDING,
+    attachmentUrl: nextAttachment.attachmentUrl,
+    attachmentName: nextAttachment.attachmentName,
   };
 
   mockVacationRequests[requestIndex] = updated;

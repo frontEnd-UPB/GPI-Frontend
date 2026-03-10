@@ -1,205 +1,239 @@
 import { useEffect, useState } from "react";
+import { parseISO } from "date-fns";
+import { useForm } from "react-hook-form";
+import { X } from "lucide-react";
 import { Modal } from "../../../ui/core/Modal";
-import StatusBadge from "./StatusBadge";
-import DateRangeDisplay from "./DateRangeDisplay";
-import type { VacationRequest } from "../../../core/mocks/data";
-import { VACATION_STATUS, getVacationDaysBetween, formatDisplayDate } from "../../../core/constants";
-import { Input } from "../../../ui/input";
-import { Textarea } from "../../../ui/textarea";
+import { IconButton } from "../../../ui/core/IconButton";
+import { Form } from "../../../ui/form";
 import { Button } from "../../../ui/button";
+import { StatusBadge } from "../../../core/components/StatusBadge";
+import type { VacationRequest } from "../../../core/mocks/data";
+import { useVacationRequestValidation } from "../hooks/useVacationRequestValidation";
+import type { VacationFormValues } from "../hooks/vacationRequestForm.types";
+import DateRangeFields from "./form/DateRangeFields";
+import TypeSelector from "./form/TypeSelector";
+import CommentField from "./form/CommentField";
+import FileAttachmentField from "./form/FileAttachmentField";
 
 interface VacationRequestModalProps {
   open: boolean;
   onClose: () => void;
   vacation: VacationRequest | null;
-  onCancelRequest: (id: string) => void;
-  onResendRequest: (
+  availableDays?: number | null;
+  isProcessing?: boolean;
+  onCancelRequest: (id: string) => Promise<boolean>;
+  onUpdateRequest: (
     id: string,
+    updatedStartDate: Date,
+    updatedEndDate: Date,
     updatedReason: string,
-    updatedComment: string
-  ) => void;
+    updatedComment: string,
+    updatedAttachment?: File | null,
+    removeAttachment?: boolean
+  ) => Promise<boolean>;
 }
 
 export default function VacationRequestModal({
   open,
   onClose,
   vacation,
+  availableDays,
+  isProcessing = false,
   onCancelRequest,
-  onResendRequest,
+  onUpdateRequest,
 }: VacationRequestModalProps) {
-  const [editedReason, setEditedReason] = useState("");
-  const [editedComment, setEditedComment] = useState("");
   const [isEditing, setIsEditing] = useState(false);
+  const [existingAttachmentName, setExistingAttachmentName] = useState<
+    string | undefined
+  >(undefined);
+
+  const form = useForm<VacationFormValues>({
+    defaultValues: {
+      startDate: null,
+      endDate: null,
+      type: "",
+      comment: "",
+    },
+  });
+
+  const {
+    attachment,
+    fileError,
+    fileInputRef,
+    handleFileChange,
+    handleFileRemove,
+    resetAttachmentState,
+    validateFormValues,
+  } = useVacationRequestValidation({
+    availableDays,
+    onValidFileSelected: () => setExistingAttachmentName(undefined),
+    onFileRemoved: () => setExistingAttachmentName(undefined),
+  });
 
   useEffect(() => {
-    if (vacation) {
-      setEditedReason(vacation.reason);
-      setEditedComment(vacation.comment ?? "");
+    if (open && vacation) {
+      form.reset({
+        startDate: parseISO(vacation.startDate),
+        endDate: parseISO(vacation.endDate),
+        type: vacation.reason,
+        comment: vacation.comment ?? "",
+      });
+      setExistingAttachmentName(
+        vacation.attachmentName ??
+          (vacation.attachmentUrl
+            ? vacation.attachmentUrl.split("/").pop() ?? undefined
+            : undefined)
+      );
+      resetAttachmentState();
       setIsEditing(false);
     }
-  }, [vacation]);
+  }, [open, vacation, form, resetAttachmentState]);
+
+  useEffect(() => {
+    if (!open) {
+      setIsEditing(false);
+      setExistingAttachmentName(undefined);
+      resetAttachmentState();
+    }
+  }, [open, resetAttachmentState]);
 
   if (!vacation) return null;
 
-  const isPending = vacation.status === VACATION_STATUS.PENDING;
-  const isRejected = vacation.status === VACATION_STATUS.REJECTED;
+  const isPending = vacation.status === "pending";
+  const isRejected = vacation.status === "rejected";
+  const rejectionReason = vacation.rejectionReason ?? "Reason not specified.";
+  const canEdit = isPending;
+  const isReadOnly = !canEdit || !isEditing;
+  const shouldRemoveExistingAttachment =
+    Boolean(vacation.attachmentUrl) && !existingAttachmentName && !attachment;
 
-  const handleCancel = () => {
-    onCancelRequest(vacation.id);
-    onClose();
+  const handleCancel = async () => {
+    const didCancel = await onCancelRequest(vacation.id);
+
+    if (didCancel) {
+      onClose();
+    }
   };
 
-  const handleResend = () => {
-    onResendRequest(vacation.id, editedReason, editedComment);
-    onClose();
+  const handleSaveChanges = form.handleSubmit(async (data) => {
+    if (!data.startDate || !data.endDate) return;
+    if (!validateFormValues(form, data)) return;
+
+    const didUpdate = await onUpdateRequest(
+      vacation.id,
+      data.startDate,
+      data.endDate,
+      data.type,
+      data.comment,
+      attachment,
+      shouldRemoveExistingAttachment
+    );
+
+    if (didUpdate) {
+      onClose();
+    }
+  });
+
+  const handleStartEdit = () => {
+    if (!canEdit || isProcessing) return;
+    setIsEditing(true);
   };
 
   return (
-    <Modal open={open} onClose={onClose} title="Vacation Leave Request" size="xl">
-
-      {/* Header actions */}
-      {isPending && !isEditing && (
-        <div className="flex justify-end mb-md">
-          <Button
-            type="button"
-            variant="outline"
-            size="sm"
-            onClick={() => setIsEditing(true)}
-          >
-            Edit request
-          </Button>
-        </div>
-      )}
-
-      {/* Date Range */}
-      <DateRangeDisplay
-        startDate={vacation.startDate}
-        endDate={vacation.endDate}
-      />
-
-      {/* Type + Status */}
-      <div className="grid grid-cols-2 gap-lg mb-xl">
-        <div>
-          <p className="text-xs font-semibold text-primary mb-xs uppercase tracking-wide">
-            Type
-          </p>
-          {isPending && isEditing ? (
-            <Input
-              value={editedReason}
-              onChange={(e) => setEditedReason(e.target.value)}
-              className="w-full"
-            />
-          ) : (
-            <p className="text-sm text-foreground">{vacation.reason}</p>
-          )}
+    <Modal open={open} onClose={onClose} size="xl" unstyled>
+      <div
+        className="rounded-3xl overflow-hidden shadow-md border border-border bg-card w-full"
+        onClick={(e) => e.stopPropagation()}
+      >
+        <div className="bg-primary px-12 py-5 flex items-center justify-between">
+          <h2 className="text-primary-foreground text-2xl font-semibold tracking-tight">
+            Vacation Leave Request
+          </h2>
+            <IconButton onClick={onClose} size="sm" disabled={isProcessing}>
+            <X className="size-5 text-primary-foreground" />
+          </IconButton>
         </div>
 
-        <div>
-          <p className="text-xs font-semibold text-primary mb-xs uppercase tracking-wide">
-            Status
-          </p>
-          <StatusBadge status={vacation.status} />
-        </div>
-      </div>
-
-      {/* Days */}
-      <div className="grid grid-cols-2 gap-lg mb-xl">
-        <div>
-          <p className="text-xs font-semibold text-primary mb-xs uppercase tracking-wide">
-            Days Requested
-          </p>
-          <p className="text-sm text-foreground">
-            {getVacationDaysBetween(vacation.startDate, vacation.endDate)} day
-            {getVacationDaysBetween(vacation.startDate, vacation.endDate) !== 1
-              ? "s"
-              : ""}
-          </p>
-        </div>
-        <div>
-          <p className="text-xs font-semibold text-primary mb-xs uppercase tracking-wide">
-            Requested On
-          </p>
-          <p className="text-sm text-foreground">
-            {formatDisplayDate(vacation.requestDate)}
-          </p>
-        </div>
-      </div>
-
-      {/* Comment */}
-      <div className="mb-xl">
-        <p className="text-xs font-semibold text-primary mb-xs uppercase tracking-wide">
-          Comment
-        </p>
-        {isPending && isEditing ? (
-          <Textarea
-            value={editedComment}
-            onChange={(e) => setEditedComment(e.target.value)}
-            className="w-full min-h-[80px] resize-none text-sm"
-          />
-        ) : (
-          <Textarea
-            value={vacation.comment ?? ""}
-            readOnly
-            className="w-full min-h-[80px] resize-none text-sm bg-background"
-          />
-        )}
-      </div>
-
-      {/* Pending Buttons */}
-      {isPending && (
-        <div className="flex flex-wrap gap-sm mt-lg">
-          {isEditing ? (
-            <>
-              <Button
-                type="button"
-                className="flex-1"
-                onClick={handleResend}
-              >
-                Save &amp; resend
-              </Button>
-              <Button
-                type="button"
-                variant="outline"
-                className="flex-1"
-                onClick={() => {
-                  setIsEditing(false);
-                  if (vacation) {
-                    setEditedReason(vacation.reason);
-                    setEditedComment(vacation.comment ?? "");
-                  }
-                }}
-              >
-                Cancel edit
-              </Button>
-              <Button
-                type="button"
-                variant="destructive"
-                className="w-full"
-                onClick={handleCancel}
-              >
-                Cancel request
-              </Button>
-            </>
-          ) : (
-            <Button
-              type="button"
-              variant="destructive"
-              className="w-full"
-              onClick={handleCancel}
+        <Form {...form}>
+            <form
+              onSubmit={handleSaveChanges}
+              noValidate
+              className="px-12 py-10 flex flex-col gap-4"
             >
-              Cancel request
-            </Button>
-          )}
-        </div>
-      )}
+            <DateRangeFields control={form.control} disabled={isReadOnly} />
 
-      {/* Rejected message */}
-      {isRejected && (
-        <div className="bg-destructive/10 text-destructive p-md rounded-md text-sm">
-          <span className="font-semibold">Rejection reason:</span>{" "}
-          {vacation.rejectionReason || "No rejection reason provided."}
-        </div>
-      )}
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-6 items-start">
+              <TypeSelector control={form.control} readOnly={isReadOnly} />
+
+              <div>
+                <p className="text-sm font-semibold text-primary mb-1">Status</p>
+                <div className="scale-125 origin-top-left py-2">
+                  <StatusBadge status={vacation.status} />
+                </div>
+              </div>
+            </div>
+
+            <CommentField control={form.control} readOnly={isReadOnly} />
+
+            <div className="flex flex-col gap-1">
+              <FileAttachmentField
+                attachment={attachment}
+                existingFileName={existingAttachmentName}
+                fileError={fileError}
+                fileInputRef={fileInputRef}
+                onChange={handleFileChange}
+                onRemove={handleFileRemove}
+                disabled={!isEditing || isProcessing}
+              />
+            </div>
+
+            {canEdit && (
+              <div className="flex gap-4 mt-2">
+                {!isEditing ? (
+                  <Button
+                    type="button"
+                    onClick={(e) => {
+                      e.preventDefault();
+                      e.stopPropagation();
+                      handleStartEdit();
+                    }}
+                    disabled={isProcessing}
+                    className="rounded-full px-10 py-2 text-primary-foreground bg-secondary hover:bg-secondary/90 transition"
+                  >
+                    Edit
+                  </Button>
+                ) : (
+                  <>
+                    <Button
+                      type="submit"
+                      disabled={isProcessing}
+                      className="flex-1 rounded-full bg-success text-primary-foreground py-4 text-base font-semibold hover:bg-success/90 transition"
+                    >
+                      {isProcessing ? "Saving..." : "Save Changes"}
+                    </Button>
+                    <Button
+                      type="button"
+                      variant="outline"
+                      onClick={handleCancel}
+                      disabled={isProcessing}
+                      className="rounded-full px-10 py-2 text-base"
+                    >
+                      {isProcessing ? "Processing..." : "Cancel Request"}
+                    </Button>
+                  </>
+                )}
+              </div>
+            )}
+
+            {isRejected && (
+              <div className="bg-status-rejected-foreground border border-status-rejected rounded-2xl px-6 py-4 text-sm">
+                <p className="font-bold text-status-rejected mb-1">Rejection Reason</p>
+                <p className="text-status-rejected">{rejectionReason}</p>
+              </div>
+            )}
+          </form>
+        </Form>
+      </div>
     </Modal>
   );
 }

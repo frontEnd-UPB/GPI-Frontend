@@ -1,4 +1,3 @@
-import { FiInfo } from "react-icons/fi";
 import { Skeleton } from "../../../ui/skeleton";
 import type { VacationBalance } from "../../../core/constants";
 

@@ -10,6 +10,7 @@ import {
 interface UseEmployeeVacationRequestsResult {
   requests: VacationRequest[];
   loading: boolean;
+  actionLoading: boolean;
   error: string | null;
   refresh: () => void;
   cancel: (id: string) => Promise<VacationRequest | null>;
@@ -25,10 +26,16 @@ export function useEmployeeVacationRequests(
 ): UseEmployeeVacationRequestsResult {
   const [requests, setRequests] = useState<VacationRequest[]>([]);
   const [loading, setLoading] = useState(true);
+  const [actionLoading, setActionLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
 
   const load = useCallback(async () => {
-    if (!employeeId) return;
+    if (!employeeId) {
+      setRequests([]);
+      setError(null);
+      setLoading(false);
+      return;
+    }
 
     setLoading(true);
     setError(null);
@@ -54,6 +61,9 @@ export function useEmployeeVacationRequests(
   };
 
   const cancel = async (id: string): Promise<VacationRequest | null> => {
+    setActionLoading(true);
+    setError(null);
+
     try {
       const updated = await cancelVacationRequest(id);
       if (!updated) return null;
@@ -70,6 +80,8 @@ export function useEmployeeVacationRequests(
           : "Failed to cancel vacation request.";
       setError(message);
       return null;
+    } finally {
+      setActionLoading(false);
     }
   };
 
@@ -77,6 +89,9 @@ export function useEmployeeVacationRequests(
     id: string,
     updates: UpdateVacationRequestData
   ): Promise<VacationRequest | null> => {
+    setActionLoading(true);
+    setError(null);
+
     try {
       const updated = await updateVacationRequest(id, updates);
       if (!updated) return null;
@@ -93,6 +108,8 @@ export function useEmployeeVacationRequests(
           : "Failed to update vacation request.";
       setError(message);
       return null;
+    } finally {
+      setActionLoading(false);
     }
   };
 
@@ -100,5 +117,14 @@ export function useEmployeeVacationRequests(
     setRequests((prev) => [...prev, request]);
   };
 
-  return { requests, loading, error, refresh, cancel, update, addLocally };
+  return {
+    requests,
+    loading,
+    actionLoading,
+    error,
+    refresh,
+    cancel,
+    update,
+    addLocally,
+  };
 }

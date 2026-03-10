@@ -12,6 +12,8 @@ export interface DatePickerProps {
   disabled?: boolean;
   className?: string;
   valueClassName?: string;
+  showIcon?: boolean;
+  placeholderClassName?: string;
 }
 
 const DatePicker: React.FC<DatePickerProps> = ({
@@ -21,6 +23,8 @@ const DatePicker: React.FC<DatePickerProps> = ({
   disabled,
   className,
   valueClassName,
+  showIcon = true,
+  placeholderClassName,
 }) => {
   const [open, setOpen] = React.useState(false);
 
@@ -41,14 +45,14 @@ const DatePicker: React.FC<DatePickerProps> = ({
             "flex h-10 w-full items-center justify-between rounded-[10px] border bg-input-background px-4 py-2 text-base text-left transition-colors",
             "border-border text-foreground",
             !value && "text-muted-foreground",
-            disabled && "opacity-50 cursor-not-allowed",
+          disabled && "cursor-not-allowed pointer-events-none",
             className
           )}
         >
-          <span className={value ? valueClassName : ""}>
+          <span className={value ? valueClassName : placeholderClassName}>
             {value ? format(value, "dd/MM/yyyy") : placeholder}
           </span>
-          <CalendarIcon className="size-4 text-primary" />
+          {showIcon && <CalendarIcon className="size-4 text-primary" />}
         </button>
       </PopoverTrigger>
       <PopoverContent
