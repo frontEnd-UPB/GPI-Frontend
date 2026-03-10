@@ -37,6 +37,7 @@ export default function VacationRequestButton({
         <Button
           type="button"
           onClick={handleOpen}
+          data-vacation-request-trigger
           className="rounded-full font-bold tracking-wide px-xxxl py-xxl flex justify-center items-center w-full sm:w-auto bg-brand text-white text-base"
         >
           + Request Vacation Leave

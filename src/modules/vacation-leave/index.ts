@@ -1,1 +1,1 @@
-export { default as DoctorVacationPage } from "./pages/DoctorVacationPage";
+export { default as EmployeeVacationPage } from "./pages/EmployeeVacationPage";

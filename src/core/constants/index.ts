@@ -1,5 +1,14 @@
 export { USER_ROLES } from "./roles";
-export { AUTH_STORAGE_KEYS, type AuthStorageKey } from "./auth-storage";
+export {
+  type VacationBalance,
+  VACATION_ATTACHMENT_ALLOWED_FILE_TYPES,
+  VACATION_ATTACHMENT_MAX_FILE_SIZE_MB,
+  VACATION_ATTACHMENT_MAX_FILE_SIZE_BYTES,
+  getYearsOfService,
+  getAnnualVacationEntitlement,
+  getVacationDaysBetween,
+  computeVacationBalanceForEmployee,
+} from "./vacations";
 
 export const AUTH_DEBUG = true as const;
 
@@ -76,8 +85,6 @@ export const DATE_FORMATS = {
   API_WITH_TIME: "YYYY-MM-DDTHH:mm:ss",
 } as const;
 
-// Simple helper to convert an API date (YYYY-MM-DD or YYYY-MM-DDTHH:mm:ss)
-// to the DISPLAY format configured above. Currently supports DD/MM/YYYY.
 export function formatDisplayDate(value: string): string {
   if (!value) return value;
 
@@ -92,8 +99,6 @@ export function formatDisplayDate(value: string): string {
   return value;
 }
 
-// Helper to convert an API datetime (YYYY-MM-DDTHH:mm:ss)
-// to the DISPLAY_WITH_TIME format (e.g. DD/MM/YYYY HH:mm).
 export function formatDisplayDateTime(value: string): string {
   if (!value) return value;
 

@@ -1,6 +1,7 @@
 import { format, parseISO } from "date-fns";
 import type { VacationRequest } from "../../../core/mocks/data";
 import StatusBadge from "./StatusBadge";
+import { Button } from "../../../ui/button";
 
 interface VacationStatusTableProps {
   vacations: VacationRequest[];
@@ -46,12 +47,15 @@ export default function VacationStatusTable({
                 <StatusBadge status={vacation.status} />
               </td>
               <td className="py-lg px-xl">
-                <button
+                <Button
+                  type="button"
+                  variant="link"
+                  size="sm"
                   onClick={() => onView(vacation)}
-                  className="bg-transparent border-0 text-primary font-semibold text-sm cursor-pointer underline p-0 hover:text-brand"
+                  className="p-0 h-auto"
                 >
                   View
-                </button>
+                </Button>
               </td>
             </tr>
           ))}

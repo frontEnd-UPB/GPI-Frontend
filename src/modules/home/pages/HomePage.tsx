@@ -129,7 +129,7 @@ const HomePage: React.FC = () => {
                           <TableCell>
                             <div className="flex items-center gap-3">
                               <div className="size-10 rounded-full bg-accent flex items-center justify-center text-ring font-medium">
-                                {emp.name[0]}
+                                {emp.name?.[0] ?? "?"}
                               </div>
                               <div>
                                 <p className="font-medium text-foreground">

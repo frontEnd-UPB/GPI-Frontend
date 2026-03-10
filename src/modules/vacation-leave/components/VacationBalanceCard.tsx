@@ -1,96 +1,111 @@
-import { FiInfo, FiCheckCircle } from "react-icons/fi";
-import { MdOutlineCancel } from "react-icons/md";
+import { FiInfo } from "react-icons/fi";
 import { Skeleton } from "../../../ui/skeleton";
+import type { VacationBalance } from "../../../core/constants";
 
 const VACATION_INDICATORS = [
   {
     key: "assigned",
-    label: "Assigned Days",
+    label: "Assigned",
     iconName: "info",
-    colorToken: "info",
+    colorToken: "primary",
   },
   {
     key: "used",
-    label: "Days Used",
+    label: "Used",
     iconName: "cancel",
-    colorToken: "error",
+    colorToken: "destructive",
   },
   {
     key: "available",
-    label: "Days Available",
+    label: "Available",
     iconName: "check",
     colorToken: "success",
   },
 ] as const;
 
 const ICON_MAP = {
-  info: <FiInfo size={28} />,
-  cancel: <MdOutlineCancel size={28} />,
-  check: <FiCheckCircle size={28} />,
+  info: (
+    <span className="material-symbols-rounded text-[26px] leading-none">
+      info
+    </span>
+  ),
+  cancel: (
+    <span className="material-symbols-rounded text-[26px] leading-none">
+      cancel
+    </span>
+  ),
+  check: (
+    <span className="material-symbols-rounded text-[26px] leading-none">
+      check_circle
+    </span>
+  ),
 };
 
-/** Maps each colorToken to Tailwind utility classes driven by theme CSS vars */
 const COLOR_CLASSES = {
-  info: {
-    container: "bg-info/10 text-info",
-    value: "text-info",
+  primary: {
+    container: "bg-secondary-foreground text-secondary",
+    value: "text-primary",
   },
-  error: {
-    container: "bg-destructive/10 text-destructive",
+  destructive: {
+    container: "bg-destructive-foreground text-destructive",
     value: "text-destructive",
   },
   success: {
-    container: "bg-success/10 text-success",
+    container: "bg-status-approved-foreground text-success",
     value: "text-success",
   },
 } as const;
 
-type VacationBalance = {
-  assigned?: number | null;
-  used?: number | null;
-  available?: number | null;
-};
-
 type VacationBalanceCardProps = {
-  balance?: VacationBalance;
+  balance?: VacationBalance | null;
 };
 
 export default function VacationBalanceCard({ balance }: VacationBalanceCardProps) {
   return (
-    <div className="flex justify-center w-full">
-      <div className="w-full flex flex-col border border-border bg-card shadow-sm rounded-2xl py-xl px-xxxl">
-        <h2 className="font-bold mb-5 text-2xl md:text-4xl text-brand">
+    <div className="w-full flex justify-center">
+      <div className="w-full max-w-5xl bg-card border border-border rounded-4xl shadow-sm px-10 py-8 flex flex-col gap-4">
+
+        <h2 className="text-3xl font-bold text-secondary tracking-tight">
           Vacation Balance
         </h2>
 
-        <div className="flex flex-col md:flex-row items-center md:justify-evenly gap-xxxl">
+        <div className="flex items-center justify-center gap-20 md:gap-28 flex-wrap">
+
           {VACATION_INDICATORS.map((indicator) => {
-            const { container, value: valueClass } = COLOR_CLASSES[indicator.colorToken];
-            const value = balance?.[indicator.key];
+            const { container, value } = COLOR_CLASSES[indicator.colorToken];
+            const val = balance?.[indicator.key];
 
             return (
-              <div key={indicator.key} className="flex items-center gap-lg">
+              <div
+                key={indicator.key}
+                className="flex items-center gap-5"
+              >
                 <div
-                  className={`flex items-center justify-center w-10 h-10 sm:w-14 sm:h-14 flex-shrink-0 rounded-xl ${container}`}
+                  className={`flex h-[53px] w-[53px] items-center justify-center rounded-2xl ${container}`}
                 >
                   {ICON_MAP[indicator.iconName]}
                 </div>
 
-                <div className="flex flex-col gap-xs">
-                  <span className="text-muted-foreground text-base">
+                <div className="flex flex-col leading-tight">
+                  <span className="text-sm text-muted-foreground">
                     {indicator.label}
                   </span>
-                  {value !== null && value !== undefined ? (
-                    <span className={`text-xl font-bold ${valueClass}`}>
-                      {value} Days
+
+                  {val !== null && val !== undefined ? (
+                    <span className={`text-xl font-semibold ${value}`}>
+                      {val}{" "}
+                      <span className="font-normal">
+                        Days
+                      </span>
                     </span>
                   ) : (
-                    <Skeleton className="w-[80px] h-[24px] mt-1" />
+                    <Skeleton className="h-[22px] w-[70px] mt-1" />
                   )}
                 </div>
               </div>
             );
           })}
+
         </div>
       </div>
     </div>

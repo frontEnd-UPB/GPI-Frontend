@@ -18,19 +18,19 @@
   --primary-foreground: #ffffff; /* theme.colors.textOnPrimary */
 
   --secondary: #159EEC; /* theme.colors.secondary */
-  --secondary-foreground: #ffffff;
+  --secondary-foreground: #F0F7FF;
 
   --muted: #E0EFFF; /* primaryLight como color suave */
-  --muted-foreground: #6b7280; /* textSecondary */
+  --muted-foreground: #595959; /* textSecondary */
 
   --accent: #e3f2fd;
   --accent-foreground: #111827;
 
-  --destructive: #e53935; /* theme.colors.error */
-  --destructive-foreground: #ffffff;
+  --destructive: #FF383C; /* theme.colors.error */
+  --destructive-foreground: #FFEBEB;
 
   /* Estados adicionales alineados con core/theme */
-  --success: #4caf50; /* theme.colors.success */
+  --success: #34C759; /* theme.colors.success */
   --warning: #FFCC00; /* theme.colors.warning */
   --info: #159EEC; /* theme.colors.info */
 

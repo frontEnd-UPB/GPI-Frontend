@@ -1,6 +1,6 @@
 import { useState, useEffect } from "react";
 import { getVacationBalance } from "../services/vacationDoctorService";
-import type { VacationBalance } from "../../../core/mocks/data";
+import type { VacationBalance } from "../../../core/constants";
 
 interface UseVacationBalanceResult {
   balance: VacationBalance | null;
@@ -9,7 +9,7 @@ interface UseVacationBalanceResult {
   refetch: () => void;
 }
 
-export function useVacationBalance(doctorId: string): UseVacationBalanceResult {
+export function useVacationBalance(employeeId: string): UseVacationBalanceResult {
   const [balance, setBalance] = useState<VacationBalance | null>(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
@@ -21,7 +21,7 @@ export function useVacationBalance(doctorId: string): UseVacationBalanceResult {
       try {
         setLoading(true);
         setError(null);
-        const data = await getVacationBalance(doctorId);
+        const data = await getVacationBalance(employeeId);
         if (!cancelled) {
           setBalance(data ?? null);
         }
@@ -40,12 +40,12 @@ export function useVacationBalance(doctorId: string): UseVacationBalanceResult {
     return () => {
       cancelled = true;
     };
-  }, [doctorId]);
+  }, [employeeId]);
 
   const refetch = () => {
     setBalance(null);
     setLoading(true);
-    getVacationBalance(doctorId)
+    getVacationBalance(employeeId)
       .then((data) => setBalance(data ?? null))
       .catch((err: unknown) =>
         setError(err instanceof Error ? err.message : "Unknown error")

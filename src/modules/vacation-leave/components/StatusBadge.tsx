@@ -1,12 +1,17 @@
 import type { VacationRequest } from "../../../core/mocks/data";
+import { VACATION_STATUS } from "../../../core/constants";
 
 type VacationStatus = VacationRequest["status"];
 
 const STATUS_CLASSES: Record<VacationStatus, string> = {
-  pending:  "bg-warning/15 text-warning",
-  approved: "bg-success/15 text-secondary",
-  rejected: "bg-destructive/15 text-destructive",
-  canceled: "bg-info/15 text-info",
+  [VACATION_STATUS.PENDING]:
+    "bg-status-pending-foreground text-status-pending",
+  [VACATION_STATUS.APPROVED]:
+    "bg-status-approved-foreground text-status-approved",
+  [VACATION_STATUS.REJECTED]:
+    "bg-status-rejected-foreground text-status-rejected",
+  [VACATION_STATUS.CANCELLED]:
+    "bg-status-canceled-foreground text-status-canceled",
 };
 
 interface StatusBadgeProps {

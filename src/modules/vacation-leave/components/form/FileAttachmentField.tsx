@@ -1,5 +1,8 @@
 import type { RefObject } from "react";
-import { ALLOWED_FILE_TYPES, MAX_FILE_SIZE_MB } from "../../../../core/mocks/data";
+import {
+  VACATION_ATTACHMENT_ALLOWED_FILE_TYPES,
+  VACATION_ATTACHMENT_MAX_FILE_SIZE_MB,
+} from "../../../../core/constants";
 import { Input } from "../../../../ui/input";
 import { FormItem, FormLabel, FormMessage } from "../../../../ui/form";
 
@@ -28,7 +31,7 @@ export default function FileAttachmentField({
       <Input
         ref={fileInputRef}
         type="file"
-        accept={ALLOWED_FILE_TYPES.join(",")}
+        accept={VACATION_ATTACHMENT_ALLOWED_FILE_TYPES.join(",")}
         onChange={onChange}
         className={`border-muted-foreground ${attachment ? "text-foreground" : "text-muted-foreground"}`}
       />
@@ -38,7 +41,7 @@ export default function FileAttachmentField({
       )}
 
       <p className="text-disabled text-xs mt-xs">
-        Allowed: {ALLOWED_FILE_TYPES.join(", ")} — Max {MAX_FILE_SIZE_MB}MB
+        Allowed: {VACATION_ATTACHMENT_ALLOWED_FILE_TYPES.join(", ")} — Max {VACATION_ATTACHMENT_MAX_FILE_SIZE_MB}MB
       </p>
     </FormItem>
   );

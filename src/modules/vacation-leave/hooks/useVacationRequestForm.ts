@@ -1,16 +1,15 @@
 import { useRef, useState } from "react";
 import { useForm } from "react-hook-form";
 import {
-  VacationReason,
-  ALLOWED_FILE_TYPES,
-  MAX_FILE_SIZE_MB,
-  MAX_FILE_SIZE_BYTES,
-} from "../../../core/mocks/data";
+  VACATION_ATTACHMENT_ALLOWED_FILE_TYPES,
+  VACATION_ATTACHMENT_MAX_FILE_SIZE_MB,
+  VACATION_ATTACHMENT_MAX_FILE_SIZE_BYTES,
+} from "../../../core/constants";
 
 export interface VacationFormValues {
   startDate: Date | null;
   endDate: Date | null;
-  type: VacationReason;
+  type: string;
   comment: string;
 }
 
@@ -31,7 +30,7 @@ export function useVacationRequestForm(
     defaultValues: {
       startDate: null,
       endDate: null,
-      type: VacationReason.Vacations,
+      type: "",
       comment: "",
     },
   });
@@ -41,16 +40,18 @@ export function useVacationRequestForm(
     setFileError("");
 
     if (file) {
-      const extension = "." + file.name.split(".").pop()?.toLowerCase();
-      if (!ALLOWED_FILE_TYPES.includes(extension)) {
+      const extension = ("." + file.name.split(".").pop()?.toLowerCase()) as (typeof VACATION_ATTACHMENT_ALLOWED_FILE_TYPES)[number];
+      if (!VACATION_ATTACHMENT_ALLOWED_FILE_TYPES.includes(extension)) {
         setFileError(
-          `Invalid file type. Allowed: ${ALLOWED_FILE_TYPES.join(", ")}`
+          `Invalid file type. Allowed: ${VACATION_ATTACHMENT_ALLOWED_FILE_TYPES.join(", ")}`
         );
         e.target.value = "";
         return;
       }
-      if (file.size > MAX_FILE_SIZE_BYTES) {
-        setFileError(`File too large. Maximum size: ${MAX_FILE_SIZE_MB}MB`);
+      if (file.size > VACATION_ATTACHMENT_MAX_FILE_SIZE_BYTES) {
+        setFileError(
+          `File too large. Maximum size: ${VACATION_ATTACHMENT_MAX_FILE_SIZE_MB}MB`
+        );
         e.target.value = "";
         return;
       }

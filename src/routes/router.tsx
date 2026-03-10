@@ -7,8 +7,7 @@ import ComponentsDemoPage from "../core/pages/ComponentsDemoPage";
 import StaffDirectoryPage from "../modules/staff-directory/pages/StaffDirectoryPage";
 import { EmptyState } from "../core/components";
 import VacationManagementPage from "../modules/vacation-management/pages/VacationManagementPage";
-import AdminVacationPage from "../modules/vacation-leave/pages/AdminVacationPage";
-import DoctorVacationPage from "../modules/vacation-leave/pages/DoctorVacationPage";
+import EmployeeVacationPage from "../modules/vacation-leave/pages/EmployeeVacationPage";
 import HomePage from "../modules/home/pages/HomePage";
 import { ProtectedRoute } from "./ProtectedRoute";
 import { ROUTE_PATHS } from "./routes";
@@ -49,10 +48,8 @@ const RoutesConfig: React.FC = () => {
             { path: "demo", element: <ComponentsDemoPage /> },
             { path: "admin/staff-directory", element: <StaffDirectoryPage /> },
             { path: "admin/vacation-manager", element: <VacationManagementPage /> },
-            { path: "vacations/admin", element: <AdminVacationPage /> },
-
-            // Doctor
-            { path: "vacations/doctor", element: <DoctorVacationPage /> },
+            { path: "vacations/admin", element: <EmployeeVacationPage /> },
+            { path: "vacations/doctor", element: <EmployeeVacationPage /> },
 
             // Common links in NavBars (placeholders until modules exist)
             {

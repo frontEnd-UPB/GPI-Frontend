@@ -1,5 +1,5 @@
 import type { Control } from "react-hook-form";
-import { VacationReason } from "../../../../core/mocks/data";
+import { Input } from "../../../../ui/input";
 import {
   FormControl,
   FormField,
@@ -7,13 +7,6 @@ import {
   FormLabel,
   FormMessage,
 } from "../../../../ui/form";
-import {
-  Select,
-  SelectContent,
-  SelectItem,
-  SelectTrigger,
-  SelectValue,
-} from "../../../../ui/select";
 import type { VacationFormValues } from "../../hooks/useVacationRequestForm";
 
 interface TypeSelectorProps {
@@ -28,22 +21,15 @@ export default function TypeSelector({ control }: TypeSelectorProps) {
       render={({ field }) => (
         <FormItem className="mb-xl">
           <FormLabel className="text-sm font-bold text-primary">
-            Type
+            Type of absence
           </FormLabel>
-          <Select value={field.value} onValueChange={field.onChange}>
-            <FormControl>
-              <SelectTrigger className="border-muted-foreground">
-                <SelectValue placeholder="Select type" />
-              </SelectTrigger>
-            </FormControl>
-            <SelectContent>
-              {Object.values(VacationReason).map((type) => (
-                <SelectItem key={type} value={type}>
-                  {type}
-                </SelectItem>
-              ))}
-            </SelectContent>
-          </Select>
+          <FormControl>
+            <Input
+              placeholder="e.g. Family vacation, Medical leave"
+              className="border-muted-foreground"
+              {...field}
+            />
+          </FormControl>
           <FormMessage />
         </FormItem>
       )}
