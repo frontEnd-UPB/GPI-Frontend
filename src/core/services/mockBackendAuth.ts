@@ -1,6 +1,6 @@
 import { mockEmployees } from "../mocks/data";
 import type { Employee } from "../mocks/data";
-import { API_ENDPOINTS } from "../constants";
+import { API_ENDPOINTS, AUTH_DEBUG } from "../constants";
 import type {
   ForgotPasswordSource,
   ForgotPasswordRequestResult,
@@ -80,7 +80,9 @@ export const mockBackendAuth = {
     }
 
     const token = "mock-jwt-token-" + Date.now();
-    console.log(`[MOCK AUTH] POST ${API_ENDPOINTS.AUTH.LOGIN} -> 200`);
+    if (AUTH_DEBUG) {
+      console.log(`[MOCK AUTH] POST ${API_ENDPOINTS.AUTH.LOGIN} -> 200`);
+    }
 
     return { employee, token };
   },
