@@ -33,7 +33,7 @@ export const useForgotPassword = () => {
         console.log("[FORGOT PASSWORD] request result", result);
       }
 
-      if (!result.success || !result.token) {
+      if (!result.success) {
         setState({
           loading: false,
           error: result.message,
@@ -47,10 +47,10 @@ export const useForgotPassword = () => {
         loading: false,
         error: null,
         successMessage: result.message,
-        token: result.token,
+        token: result.token ?? null,
       });
 
-      return result.token;
+      return result.token ?? null;
     } catch {
       setState({
         loading: false,
