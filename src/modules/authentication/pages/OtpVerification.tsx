@@ -155,6 +155,9 @@ const OtpVerificationPage: React.FC = () => {
               <p className="text-xs text-secondary">
                 Check your email to see the verification code
               </p>
+              <p className="text-[11px] text-secondary mt-2">
+                If an account exists for that email, a verification code was sent.
+              </p>
             </div>
 
             <div className="flex justify-center mb-8 w-full">

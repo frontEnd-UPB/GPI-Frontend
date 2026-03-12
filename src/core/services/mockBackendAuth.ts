@@ -98,10 +98,13 @@ export const mockBackendAuth = {
       (emp) => emp.email.toLowerCase() === normalizedEmail
     );
 
+    const neutralMessage =
+      "If an account exists for that email, you will receive reset instructions shortly.";
+
     if (!employee) {
       return {
-        success: false,
-        message: "No account was found with that email.",
+        success: true,
+        message: neutralMessage,
       };
     }
 
@@ -125,7 +128,7 @@ export const mockBackendAuth = {
 
     return {
       success: true,
-      message: "Gmail enviado. Revisa tu bandeja para continuar.",
+      message: neutralMessage,
       token,
     };
   },
@@ -136,7 +139,7 @@ export const mockBackendAuth = {
     if (!token.trim()) {
       return {
         success: false,
-        message: "Invalid reset link.",
+        message: "Reset link is invalid or expired.",
       };
     }
 
@@ -147,21 +150,21 @@ export const mockBackendAuth = {
     if (!request) {
       return {
         success: false,
-        message: "Invalid reset link.",
+        message: "Reset link is invalid or expired.",
       };
     }
 
     if (request.used) {
       return {
         success: false,
-        message: "This reset link was already used.",
+        message: "Reset link is invalid or expired.",
       };
     }
 
     if (request.expiresAt <= now) {
       return {
         success: false,
-        message: "This reset link has expired.",
+        message: "Reset link is invalid or expired.",
       };
     }
 
@@ -187,7 +190,7 @@ export const mockBackendAuth = {
     if (requestIndex === -1) {
       return {
         success: false,
-        message: "Invalid reset link.",
+        message: "Reset link is invalid or expired.",
       };
     }
 
@@ -196,14 +199,14 @@ export const mockBackendAuth = {
     if (request.used) {
       return {
         success: false,
-        message: "This reset link was already used.",
+        message: "Reset link is invalid or expired.",
       };
     }
 
     if (request.expiresAt <= now) {
       return {
         success: false,
-        message: "This reset link has expired.",
+        message: "Reset link is invalid or expired.",
       };
     }
 

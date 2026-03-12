@@ -17,6 +17,8 @@ const AdminLoginPage: React.FC = () => {
   const { user, loading: authLoading } = useAuth();
   const { signIn: hookSignIn, signInLoading: loading } = useSignIn();
 
+  const hideLoginCard = import.meta.env.VITE_HIDE_LOGIN_CARD === "true";
+
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [error, setError] = useState<string | null>(null);
@@ -69,6 +71,7 @@ const AdminLoginPage: React.FC = () => {
           leftOverlay={
             <LoginCard
               disabled={loading}
+              hidden={hideLoginCard}
               onSelectUser={(selectedEmail, selectedPassword) => {
                 setEmail(selectedEmail);
                 setPassword(selectedPassword);

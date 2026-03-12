@@ -117,6 +117,14 @@ const ForgotPasswordPage: React.FC = () => {
               </>
             )}
 
+            {successMessage && !validationError && !error && (
+              <div className="mt-3 text-center">
+                <p className="text-xs text-primary-foreground">
+                  {successMessage}
+                </p>
+              </div>
+            )}
+
             {/* Submit */}
             <div className="mt-6 flex justify-center">
               <Button 

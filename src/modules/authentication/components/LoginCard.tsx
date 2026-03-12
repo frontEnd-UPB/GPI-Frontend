@@ -6,11 +6,16 @@ import { Shield, Stethoscope } from "lucide-react";
 interface LoginCardProps {
   onSelectUser: (email: string, password: string) => void;
   disabled?: boolean;
+  hidden?: boolean;
 }
 
-export const LoginCard: React.FC<LoginCardProps> = ({ onSelectUser, disabled }) => {
+export const LoginCard: React.FC<LoginCardProps> = ({ onSelectUser, disabled, hidden }) => {
   const adminUser = mockEmployees.find((emp) => emp.role === "admin");
   const doctorUser = mockEmployees.find((emp) => emp.role === "doctor");
+
+  if (hidden) {
+    return null;
+  }
 
   return (
     <div className="w-[260px] bg-card rounded-xl shadow-lg border border-border p-4 space-y-3">
