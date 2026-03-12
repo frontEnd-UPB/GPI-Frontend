@@ -10,7 +10,8 @@ export interface ModalProps {
   children: React.ReactNode;
   footer?: React.ReactNode;
   size?: "sm" | "md" | "lg" | "xl";
-  headerVariant?: "default" | "primary";
+  /** When true, only overlay & positioning are provided; caller handles card layout */
+  unstyled?: boolean;
 }
 
 const Modal: React.FC<ModalProps> = ({
@@ -20,7 +21,7 @@ const Modal: React.FC<ModalProps> = ({
   children,
   footer,
   size = "md",
-  headerVariant = "default",
+  unstyled = false,
 }) => {
   if (!open) return null;
 
@@ -28,7 +29,7 @@ const Modal: React.FC<ModalProps> = ({
     sm: "max-w-sm",
     md: "max-w-md",
     lg: "max-w-lg",
-    xl: "max-w-xl",
+    xl: "max-w-4xl",
   };
 
   return (
@@ -42,43 +43,27 @@ const Modal: React.FC<ModalProps> = ({
       {/* Modal Content */}
       <div
         className={cn(
-          "relative bg-card text-card-foreground rounded-[14px] shadow-lg border border-border w-full mx-4",
-          sizeClasses[size]
+          "relative w-full mx-4",
+          sizeClasses[size],
+          !unstyled &&
+            "bg-card text-card-foreground rounded-[14px] shadow-lg border border-border"
         )}
       >
-        {/* Header */}
-        {title && (
-          <div
-            className={cn(
-              "flex items-center justify-between px-6 py-4 border-b border-border",
-              headerVariant === "primary" &&
-                "rounded-t-[14px] border-none bg-primary text-primary-foreground"
-            )}
-          >
-            <h2 className="text-xl font-semibold">{title}</h2>
-            <IconButton
-              onClick={onClose}
-              size="sm"
-              className={cn(
-                headerVariant === "primary" &&
-                  "hover:bg-primary/80"
-              )}
-            >
-              <X
-                className={cn(
-                  "size-5 text-muted-foreground",
-                  headerVariant === "primary" && "text-primary-foreground"
-                )}
-              />
+        {/* Header (for styled variant) */}
+        {!unstyled && title && (
+          <div className="flex items-center justify-between px-6 py-4 border-b border-border">
+            <h2 className="text-xl font-semibold text-foreground">{title}</h2>
+            <IconButton onClick={onClose} size="sm">
+              <X className="size-5 text-muted-foreground" />
             </IconButton>
           </div>
         )}
 
         {/* Body */}
-        <div className="px-6 py-4">{children}</div>
+        <div className={unstyled ? "" : "px-6 py-4"}>{children}</div>
 
-        {/* Footer */}
-        {footer && (
+        {/* Footer (for styled variant) */}
+        {!unstyled && footer && (
           <div className="flex items-center justify-end gap-3 px-6 py-4 border-t border-border">
             {footer}
           </div>

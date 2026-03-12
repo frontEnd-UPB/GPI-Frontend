@@ -1,7 +1,17 @@
 export { USER_ROLES } from "./roles";
 export { AUTH_STORAGE_KEYS, type AuthStorageKey } from "./auth-storage";
+export {
+  type VacationBalance,
+  VACATION_ATTACHMENT_ALLOWED_FILE_TYPES,
+  VACATION_ATTACHMENT_MAX_FILE_SIZE_MB,
+  VACATION_ATTACHMENT_MAX_FILE_SIZE_BYTES,
+  getYearsOfService,
+  getAnnualVacationEntitlement,
+  getVacationDaysBetween,
+  computeVacationBalanceForEmployee,
+} from "./vacations";
 
-export const AUTH_DEBUG = true as const;
+export const AUTH_DEBUG = false as const;
 
 export const EMPLOYEE_STATUS = {
   ONLINE: "online",
