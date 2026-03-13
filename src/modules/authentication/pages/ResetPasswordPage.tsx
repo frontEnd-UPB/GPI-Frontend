@@ -117,15 +117,18 @@ const ResetPasswordPage: React.FC = () => {
 
       <BlurredBackground>
         <ThemedContainer>
-          <form className="login-form mt-[-150px]" onSubmit={handleSubmit}>
-            <div className="mb-10">
-              <h4 className="text-3xl text-primary-foreground font-bold mb-1">
+          <form
+            className="login-form mx-auto flex w-full max-w-md flex-col text-primary-foreground"
+            onSubmit={handleSubmit}
+          >
+            <div className="mb-8 sm:mb-10">
+              <h4 className="mb-1 text-2xl font-bold sm:text-3xl">
                 Set New Password
               </h4>
               <p className="text-xs text-secondary">Enter your new password.</p>
             </div>
 
-            <p className="text-sm text-primary-foreground font-semibold mt-1 mb-2">
+            <p className="mb-2 mt-1 text-sm font-semibold">
               New Password
             </p>
             <PasswordInputWithEye
@@ -134,10 +137,11 @@ const ResetPasswordPage: React.FC = () => {
               value={newPassword}
               onChange={(e) => setNewPassword(e.target.value)}
               disabled={!isTokenValid || loading || checkingToken}
+              className="w-full"
               required
             />
 
-            <p className="text-sm text-primary-foreground font-semibold mt-4 mb-2">
+            <p className="mb-2 mt-4 text-sm font-semibold">
               Confirm Password
             </p>
             <PasswordInputWithEye
@@ -146,6 +150,7 @@ const ResetPasswordPage: React.FC = () => {
               value={confirmPassword}
               onChange={(e) => setConfirmPassword(e.target.value)}
               disabled={!isTokenValid || loading || checkingToken}
+              className="w-full"
               required
             />
 
@@ -169,7 +174,7 @@ const ResetPasswordPage: React.FC = () => {
               <Button
                 type="submit"
                 disabled={!isTokenValid || loading || checkingToken}
-                className="z-10 bg-secondary hover:bg-secondary/90 text-secondary-foreground font-semibold w-3/4"
+                className="z-10 w-full bg-secondary font-semibold text-secondary-foreground hover:bg-secondary/90 sm:w-3/4"
               >
                 {loading ? "Saving..." : "Save New Password"}
               </Button>

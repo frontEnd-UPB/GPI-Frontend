@@ -144,11 +144,11 @@ const OtpVerificationPage: React.FC = () => {
       <BlurredBackground>
         <ThemedContainer>
           <form
-            className="otp-form text-primary-foreground mt-[-150px] flex flex-col items-center"
+            className="otp-form mx-auto flex w-full max-w-md flex-col items-center text-primary-foreground"
             onSubmit={handleSubmit}
           >
             <div className="mb-8 w-full text-left">
-              <h1 className="text-3xl font-bold mb-0.5">
+              <h1 className="mb-0.5 text-2xl font-bold sm:text-3xl">
                 OTP Verification
               </h1>
 
@@ -160,19 +160,19 @@ const OtpVerificationPage: React.FC = () => {
               </p>
             </div>
 
-            <div className="flex justify-center mb-8 w-full">
+            <div className="mb-8 flex w-full justify-center overflow-x-auto">
               <InputOTP value={otp} onChange={handleOtpChange} maxLength={4}>
-                <InputOTPGroup className="gap-4">
+                <InputOTPGroup className="gap-2 sm:gap-4">
                   {[...Array(4)].map((_, i) => (
                     <InputOTPSlot
                       key={i}
                       index={i}
                       className="
-                        w-10 h-10
+                        h-10 w-10 sm:h-12 sm:w-12
                         rounded-full
                         bg-white
                         border border-input
-                        text-lg
+                        text-base sm:text-lg
                         font-semibold
                         text-primary
                       "
@@ -188,7 +188,7 @@ const OtpVerificationPage: React.FC = () => {
               <Button
                 type="submit"
                 disabled={isVerified}
-                className={`w-[220px] rounded-xl font-semibold flex items-center justify-center gap-2 transition-all
+                className={`w-full max-w-[220px] rounded-xl font-semibold flex items-center justify-center gap-2 transition-all
                 ${
                   isVerified
                     ? "bg-success text-white"
