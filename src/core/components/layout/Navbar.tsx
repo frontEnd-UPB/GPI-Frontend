@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useEffect, useRef, useState } from "react";
 import { Link, useLocation } from "react-router-dom";
 import { Shield, Stethoscope, Search, ChevronDown } from "lucide-react";
 import { cn } from "../../../ui/utils";
@@ -86,6 +86,8 @@ const HumanResourcesDropdown: React.FC<HumanResourcesDropdownProps> = ({
   isActive,
 }) => {
   const location = useLocation();
+  const [isOpen, setIsOpen] = useState(false);
+  const dropdownRef = useRef<HTMLDivElement | null>(null);
 
   const isHrActive =
     isActive ||
@@ -93,10 +95,38 @@ const HumanResourcesDropdown: React.FC<HumanResourcesDropdownProps> = ({
     location.pathname.startsWith(ROUTE_PATHS.ADMIN_STAFF_DIRECTORY) ||
     location.pathname.startsWith(ROUTE_PATHS.ADMIN_VACATION_MANAGER);
 
+  useEffect(() => {
+    const handleClickOutside = (event: MouseEvent) => {
+      if (!dropdownRef.current?.contains(event.target as Node)) {
+        setIsOpen(false);
+      }
+    };
+
+    document.addEventListener("mousedown", handleClickOutside);
+
+    return () => {
+      document.removeEventListener("mousedown", handleClickOutside);
+    };
+  }, []);
+
+  const handleToggle = () => {
+    setIsOpen((prev) => !prev);
+  };
+
+  const handleClose = () => {
+    setIsOpen(false);
+  };
+
   return (
-    <div className="relative group">
+    <div
+      ref={dropdownRef}
+      className="relative group"
+      onMouseEnter={() => setIsOpen(true)}
+      onMouseLeave={() => setIsOpen(false)}
+    >
       <button
         type="button"
+        onClick={handleToggle}
         className={cn(
           "flex items-center gap-1 text-base transition-colors focus:outline-none",
           isHrActive
@@ -111,16 +141,25 @@ const HumanResourcesDropdown: React.FC<HumanResourcesDropdownProps> = ({
       {/* Zona invisible que mantiene el hover en el espacio entre el texto y el menú */}
       <div className="absolute left-0 right-0 top-full h-10" />
 
-      <div className="pointer-events-none opacity-0 translate-y-1 group-hover:opacity-100 group-hover:pointer-events-auto group-hover:translate-y-0 transition-all duration-150 absolute left-0 top-full mt-10 w-56 rounded-2xl bg-primary text-primary-foreground shadow-lg py-2">
+      <div
+        className={cn(
+          "absolute left-0 top-full mt-10 w-56 rounded-2xl bg-primary text-primary-foreground shadow-lg py-2 transition-all duration-150",
+          isOpen
+            ? "pointer-events-auto opacity-100 translate-y-0"
+            : "pointer-events-none opacity-0 translate-y-1"
+        )}
+      >
         <Link
           to={ROUTE_PATHS.HR}
           className="block px-4 py-2 text-sm hover:bg-primary/80 rounded-t-2xl"
+          onClick={handleClose}
         >
           Staff Directory
         </Link>
         <Link
           to={ROUTE_PATHS.ADMIN_VACATION_MANAGER}
           className="block px-4 py-2 text-sm hover:bg-primary/80 rounded-b-2xl"
+          onClick={handleClose}
         >
           Vacation Manager
         </Link>

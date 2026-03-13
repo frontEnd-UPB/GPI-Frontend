@@ -1,90 +1,176 @@
-import React, { Suspense, lazy } from "react";
-import { BrowserRouter, Navigate, useRoutes } from "react-router-dom";
-import { MainLayout } from "../core/components";
+import React from "react";
+import {
+  BrowserRouter,
+  Navigate,
+  Outlet,
+  useRoutes,
+  type RouteObject,
+} from "react-router-dom";
+import { EmptyState, MainLayout } from "../core/components";
 import NotFoundPage from "../core/pages/NotFoundPage";
 import UnauthorizedPage from "../core/pages/UnauthorizedPage";
 import ComponentsDemoPage from "../core/pages/ComponentsDemoPage";
 import StaffDirectoryPage from "../modules/staff-directory/pages/StaffDirectoryPage";
-import { EmptyState } from "../core/components";
-import VacationManagementPage from "../modules/vacation-management/pages/VacationManagementPage";
-import EmployeeVacationPage from "../modules/vacation-leave/pages/EmployeeVacationPage";
+import VacationManagementPage from "../modules/vacation/vacation-management/pages/VacationManagementPage";
+import VacationHistoryPage from "../modules/vacation/vacation-management/pages/VacationHistoryPage";
+import VacationDetailPage from "../modules/vacation/vacation-management/pages/VacationDetailPage";
+import EmployeeVacationPage from "../modules/vacation/vacation-leave/pages/EmployeeVacationPage";
 import HomePage from "../modules/home/pages/HomePage";
+import AdminLoginPage from "../modules/authentication/pages/AdminLoginPage";
+import SignUpPage from "../modules/authentication/pages/SignUpPage";
+import PacientLoginPge from "../modules/authentication/pages/PacientLoginPage";
+import ResetPasswordPage from "../modules/authentication/pages/ResetPasswordPage";
+import OtpVerification from "../modules/authentication/pages/OtpVerification";
+import ForgotPasswordPage from "../modules/authentication/pages/ForgotPasswordPage";
+import { AdminDashboard, DoctorDashboard } from "../modules/home/pages";
 import { ProtectedRoute } from "./ProtectedRoute";
 import { ROUTE_PATHS } from "./routes";
+import { VacationRequestsProvider } from "../modules/vacation/vacation-management/context/VacationRequestsContext";
 
-const LoginPage = lazy(() => import("../modules/authentication/pages/LoginPage"));
-
-const LoginRoute: React.FC = () => (
-  <Suspense fallback={null}>
-    <LoginPage />
-  </Suspense>
+const VacationManagementSection: React.FC = () => (
+  <VacationRequestsProvider>
+    <Outlet />
+  </VacationRequestsProvider>
 );
 
+const comingSoon = (title: string, description = "Module not implemented yet.") => (
+  <EmptyState title={title} description={description} />
+);
+
+const vacationManagementRoutes: RouteObject[] = [
+  {
+    path: ROUTE_PATHS.ADMIN_VACATION_MANAGER,
+    element: <VacationManagementPage />,
+  },
+  {
+    path: `${ROUTE_PATHS.VACATION_MANAGER_DETAIL}/:id`,
+    element: <VacationDetailPage />,
+  },
+  {
+    path: ROUTE_PATHS.ADMIN_VACATION_HISTORY,
+    element: <VacationHistoryPage />,
+  },
+];
+
+const appRoutes: RouteObject[] = [
+  {
+    index: true,
+    element: <HomePage />,
+  },
+  {
+    path: ROUTE_PATHS.HR.slice(1),
+    element: <Navigate to={ROUTE_PATHS.ADMIN_STAFF_DIRECTORY} replace />,
+  },
+
+  {
+    path: ROUTE_PATHS.DEMO.slice(1),
+    element: <ComponentsDemoPage />,
+  },
+
+  {
+    path: ROUTE_PATHS.ADMIN_STAFF_DIRECTORY.slice(1),
+    element: <StaffDirectoryPage />,
+  },
+  {
+    path: ROUTE_PATHS.VACATIONS_ADMIN.slice(1),
+    element: <EmployeeVacationPage />,
+  },
+  {
+    path: ROUTE_PATHS.VACATIONS_DOCTOR.slice(1),
+    element: <EmployeeVacationPage />,
+  },
+  {
+    element: <VacationManagementSection />,
+    children: vacationManagementRoutes.map((route) => ({
+      ...route,
+      path: route.path?.slice(1),
+    })),
+  },
+
+  {
+    path: ROUTE_PATHS.AGENDA.slice(1),
+    element: comingSoon("Agenda"),
+  },
+  {
+    path: ROUTE_PATHS.PATHOLOGY_RESULTS.slice(1),
+    element: comingSoon("Pathology Results"),
+  },
+  {
+    path: ROUTE_PATHS.PATIENTS.slice(1),
+    element: comingSoon("Patients"),
+  },
+  {
+    path: ROUTE_PATHS.APPOINTMENTS.slice(1),
+    element: comingSoon("Appointments"),
+  },
+  {
+    path: ROUTE_PATHS.BILLING.slice(1),
+    element: comingSoon("Billing"),
+  },
+  {
+    path: ROUTE_PATHS.INVENTORY.slice(1),
+    element: comingSoon("Inventory"),
+  },
+];
+
+const routes: RouteObject[] = [
+  {
+    path: ROUTE_PATHS.LOGIN,
+    element: <AdminLoginPage />,
+  },
+  {
+    path: ROUTE_PATHS.SIGN_UP,
+    element: <SignUpPage />,
+  },
+  {
+    path: ROUTE_PATHS.RESET_PASSWORD,
+    element: <ResetPasswordPage />,
+  },
+  {
+    path: ROUTE_PATHS.PATIENT_LOGIN,
+    element: <PacientLoginPge />,
+  },
+  {
+    path: ROUTE_PATHS.OTP_VERIFICATION,
+    element: <OtpVerification />,
+  },
+  {
+    path: ROUTE_PATHS.FORGOT_PASSWORD,
+    element: <ForgotPasswordPage />,
+  },
+  {
+    path: "/HomePage",
+    element: <Navigate to={ROUTE_PATHS.HOME} replace />,
+  },
+  {
+    element: <ProtectedRoute />,
+    children: [
+      {
+        path: ROUTE_PATHS.UNAUTHORIZED,
+        element: <UnauthorizedPage />,
+      },
+      {
+        path: ROUTE_PATHS.ADMIN_DASHBOARD,
+        element: <AdminDashboard />,
+      },
+      {
+        path: ROUTE_PATHS.DOCTOR_DASHBOARD,
+        element: <DoctorDashboard />,
+      },
+      {
+        element: <MainLayout />,
+        children: appRoutes,
+      },
+    ],
+  },
+  {
+    path: "*",
+    element: <NotFoundPage />,
+  },
+];
+
 const RoutesConfig: React.FC = () => {
-  const element = useRoutes([
-    {
-      path: ROUTE_PATHS.LOGIN,
-      element: <LoginRoute />,
-    },
-    {
-      element: <ProtectedRoute />,
-      children: [
-        {
-          path: ROUTE_PATHS.UNAUTHORIZED,
-          element: <UnauthorizedPage />,
-        },
-        {
-          element: <MainLayout />,
-          children: [
-            { index: true, element: <HomePage /> },
-
-            // NavBar compatibility / legacy shortcuts
-            {
-              path: "hr",
-              element: <Navigate to={ROUTE_PATHS.ADMIN_STAFF_DIRECTORY} replace />,
-            },
-
-            // Admin
-            { path: "demo", element: <ComponentsDemoPage /> },
-            { path: "admin/staff-directory", element: <StaffDirectoryPage /> },
-            { path: "admin/vacation-manager", element: <VacationManagementPage /> },
-            { path: "vacations/admin", element: <EmployeeVacationPage /> },
-            { path: "vacations/doctor", element: <EmployeeVacationPage /> },
-
-            // Common links in NavBars (placeholders until modules exist)
-            {
-              path: "agenda",
-              element: <EmptyState title="Agenda" description="Module not implemented yet." />,
-            },
-            {
-              path: "pathology-results",
-              element: <EmptyState title="Pathology Results" description="Module not implemented yet." />,
-            },
-            {
-              path: "patients",
-              element: <EmptyState title="Patients" description="Module not implemented yet." />,
-            },
-            {
-              path: "appointments",
-              element: <EmptyState title="Appointments" description="Module not implemented yet." />,
-            },
-            {
-              path: "billing",
-              element: <EmptyState title="Billing" description="Module not implemented yet." />,
-            },
-            {
-              path: "inventory",
-              element: <EmptyState title="Inventory" description="Module not implemented yet." />,
-            },
-          ],
-        },
-      ],
-    },
-    {
-      path: "*",
-      element: <NotFoundPage />,
-    },
-  ]);
+  const element = useRoutes(routes);
 
   return element;
 };

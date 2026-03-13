@@ -1,110 +1,102 @@
-import React, { createContext, useContext, useEffect, useState, ReactNode } from "react";
-import type { UserRole } from "../core/constants/roles";
+import React, { createContext, useContext, useState, useEffect, ReactNode } from "react";
+import type { AuthContextValue, AuthUser, SignInCredentials } from "../core/types/auth";
+import { AUTH_STORAGE_KEYS, AUTH_DEBUG } from "../core/constants";
+import { authModuleService } from "../modules/authentication/services/authModuleService";
 
-export interface AuthUser {
-  id: string;
-  name: string;
-  email: string;
-  role: UserRole;
-  profilePicture: string | null;
-}
-
-export interface AuthContextValue {
-  user: AuthUser | null;
-  loading: boolean;
-  signIn: (token: string) => Promise<void>;
-  signOut: () => void;
-}
-
+// Create context with undefined default
 const AuthContext = createContext<AuthContextValue | undefined>(undefined);
 
-export interface AuthService {
-  getCurrentUser: () => Promise<AuthUser | null>;
-  signIn: (token: string) => Promise<AuthUser>;
-  signOut: () => Promise<void>;
+// Provider props
+interface AuthProviderProps {
+  children: ReactNode;
 }
 
-const createMockAuthService = (): AuthService => {
-  return {
-    async getCurrentUser() {
-      const stored = window.localStorage.getItem("meddical:user");
-      if (!stored) return null;
-      try {
-        const parsed = JSON.parse(stored) as Partial<AuthUser> & {
-          firstname?: string;
-          lastname?: string;
-        };
-
-        const first = parsed.firstname?.trim() ?? "";
-        const last = parsed.lastname?.trim() ?? "";
-        const fallbackName = `${first} ${last}`.trim() || "User";
-
-        return {
-          id: parsed.id ?? "",
-          name: parsed.name?.trim() || fallbackName,
-          email: parsed.email ?? "",
-          role: (parsed.role as UserRole) ?? "doctor",
-          profilePicture: parsed.profilePicture ?? null,
-        };
-      } catch {
-        return null;
-      }
-    },
-    async signIn(token: string) {
-      // En modo mock interpretamos el token como JSON de AuthUser
-      const parsed = JSON.parse(token) as AuthUser;
-      window.localStorage.setItem("meddical:user", JSON.stringify(parsed));
-      return parsed;
-    },
-    async signOut() {
-      window.localStorage.removeItem("meddical:user");
-    },
-  };
-};
-
-const defaultAuthService = createMockAuthService();
-
-export const AuthProvider: React.FC<{ children: ReactNode; authService?: AuthService }> = ({
-  children,
-  authService = defaultAuthService,
-}) => {
+export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
   const [user, setUser] = useState<AuthUser | null>(null);
   const [loading, setLoading] = useState(true);
 
+  // Check for existing session on mount
   useEffect(() => {
-    let active = true;
-    (async () => {
-      const current = await authService.getCurrentUser();
-      if (!active) return;
-      setUser(current);
-      setLoading(false);
-    })();
-    return () => {
-      active = false;
+    const checkSession = async () => {
+      try {
+        const userData = await authModuleService.getCurrentUser();
+        if (userData) {
+          setUser(userData);
+          if (AUTH_DEBUG) console.log("Sesión restaurada para:", userData.email);
+        } else {
+          if (AUTH_DEBUG) console.log("ℹNo hay sesión activa");
+        }
+      } catch (error) {
+        console.error(" Error al restaurar sesión:", error);
+      } finally {
+        setLoading(false);
+      }
     };
-  }, [authService]);
 
-  const signIn = async (token: string) => {
-    const nextUser = await authService.signIn(token);
-    setUser(nextUser);
+    checkSession();
+  }, []);
+
+  // SignIn function
+  const signIn = async (credentials: SignInCredentials): Promise<AuthUser> => {
+    if (AUTH_DEBUG) console.log("signIn llamado con:", credentials.email);
+    setLoading(true);
+    try {
+      const response = await authModuleService.signIn(credentials.email, credentials.password);
+      const authUser = response.user;
+      setUser(authUser);
+      // se coloca en el contexto el usuario obtenido del servicio
+      // lo guarda en localStorage, si se recarga el useEffect del contexto restaura la sesión
+      if (AUTH_DEBUG) console.log(" Usuario después de signIn:", response.user.email);
+      return authUser;
+    } catch (error) {
+      if (AUTH_DEBUG) console.error(" signIn falló:", error);
+      throw error;
+    } finally {
+      setLoading(false);
+    }
   };
 
   const signOut = async () => {
-    await authService.signOut();
-    setUser(null);
+    if (AUTH_DEBUG) console.log("signOut llamado - usuario actual:", user?.email || "ninguno");
+    setLoading(true);
+    
+    try {
+      await authModuleService.signOut();
+      if (AUTH_DEBUG) console.log(" signOut llamado - usuario actual:", user?.email || "ninguno");
+      setUser(null);
+      if (AUTH_DEBUG) {
+        console.log(" signOut completado - usuario eliminado del contexto");
+        console.log("localStorage user:", localStorage.getItem(AUTH_STORAGE_KEYS.USER));
+      }
+      
+    } catch (error) {
+      if (AUTH_DEBUG) console.error("Error en signOut:", error);
+      setUser(null);
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  // Context value
+  const value: AuthContextValue = {
+    user,
+    loading,
+    signIn,
+    signOut
   };
 
   return (
-    <AuthContext.Provider value={{ user, loading, signIn, signOut }}>
+    <AuthContext.Provider value={value}>
       {children}
     </AuthContext.Provider>
   );
 };
 
-export const useAuth = (): AuthContextValue => {
-  const ctx = useContext(AuthContext);
-  if (!ctx) {
-    throw new Error("useAuth must be used within AuthProvider");
+// Custom hook for using auth context
+export const useAuth = () => {
+  const context = useContext(AuthContext);
+  if (!context) {
+    throw new Error("useAuth must be used within an AuthProvider");
   }
-  return ctx;
+  return context;
 };
