@@ -28,8 +28,8 @@ const Footer: React.FC<FooterProps> = ({
         <div className="size-full rounded-full bg-info" />
       </div>
 
-      <div className="container mx-auto px-5 py-16 relative z-10">
-        <div className="grid grid-cols-4 gap-12">
+      <div className="container relative z-10 mx-auto px-4 py-12 sm:px-5 sm:py-16">
+        <div className="grid grid-cols-1 gap-8 sm:grid-cols-2 sm:gap-10 xl:grid-cols-4 xl:gap-12">
           {/* Brand Section */}
           <div>
             <h3 className="text-3xl font-bold mb-4">
@@ -94,12 +94,12 @@ const Footer: React.FC<FooterProps> = ({
         </div>
 
         {/* Bottom Section */}
-        <div className="mt-12 pt-8 border-t border-muted/20">
-          <div className="flex items-center justify-between">
-            <p className="text-sm">
+        <div className="mt-12 border-t border-muted/20 pt-8">
+          <div className="flex flex-col gap-4 md:flex-row md:items-center md:justify-between">
+            <p className="text-sm text-center md:text-left">
               © 2021 Hospital's name All Rights Reserved by PNTEC-LTD
             </p>
-            <div className="flex items-center gap-4">
+            <div className="flex items-center justify-center gap-4 md:justify-end">
               <a
                 href="#"
                 className="p-2 rounded-full bg-muted/10 hover:bg-muted/20 transition-colors"
