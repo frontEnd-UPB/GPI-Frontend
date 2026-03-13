@@ -217,7 +217,7 @@
       "responses": [
         {
           "uuid": "a1b2c3d4-0003-0003-0003-000000000003",
-          "body": "{\n  \"id\": \"99\",\n  \"employee_id\": \"1\",\n  \"start_date\": \"2026-07-01\",\n  \"end_date\": \"2026-07-05\",\n  \"reason\": \"Summer vacation\",\n  \"status\": \"pending\",\n  \"request_date\": \"2026-06-01\",\n  \"comment\": null,\n  \"rejection_reason\": null,\n  \"attachment_url\": null,\n  \"attachment_name\": null\n}",
+          "body": "{\n  \"id\": \"{{faker 'string.uuid'}}\",\n  \"employee_id\": \"{{body 'employeeId'}}\",\n  \"start_date\": \"{{body 'startDate'}}\",\n  \"end_date\": \"{{body 'endDate'}}\",\n  \"reason\": \"{{body 'reason'}}\",\n  \"status\": \"pending\",\n  \"request_date\": \"{{now 'YYYY-MM-DD'}}\",\n  \"comment\": {{#if (body 'comment')}}\"{{body 'comment'}}\"{{else}}null{{/if}},\n  \"rejection_reason\": null,\n  \"attachment_url\": null,\n  \"attachment_name\": null\n}",
           "latency": 0,
           "statusCode": 201,
           "label": "Created",
@@ -253,7 +253,7 @@
       "responses": [
         {
           "uuid": "a1b2c3d4-0003-0003-0003-000000000004",
-          "body": "{\n  \"id\": \"{{urlParam 'id'}}\",\n  \"employee_id\": \"1\",\n  \"start_date\": \"2026-07-10\",\n  \"end_date\": \"2026-07-15\",\n  \"reason\": \"Updated reason\",\n  \"status\": \"pending\",\n  \"request_date\": \"2026-06-01\",\n  \"comment\": \"Updated comment.\",\n  \"rejection_reason\": null,\n  \"attachment_url\": null,\n  \"attachment_name\": null\n}",
+          "body": "{\n  \"id\": \"{{urlParam 'id'}}\",\n  \"employee_id\": \"1\",\n  \"start_date\": \"{{body 'startDate'}}\",\n  \"end_date\": \"{{body 'endDate'}}\",\n  \"reason\": \"{{body 'reason'}}\",\n  \"status\": \"pending\",\n  \"request_date\": \"2026-06-01\",\n  \"comment\": {{#if (body 'comment')}}\"{{body 'comment'}}\"{{else}}null{{/if}},\n  \"rejection_reason\": null,\n  \"attachment_url\": null,\n  \"attachment_name\": null\n}",
           "latency": 0,
           "statusCode": 200,
           "label": "Updated",
