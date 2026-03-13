@@ -13,13 +13,12 @@ function ThemedContainer({ children, className, leftOverlay }: ThemedContainerPr
   return (
     <div
       className={cn(
-        "bg-primary text-card-foreground flex flex-col md:flex-row rounded-xl shadow-lg overflow-hidden", // theme classes
-        "max-w-3xl w-full h-[650px] z-10", 
+        "bg-primary text-card-foreground relative z-10 flex w-full max-w-4xl flex-col overflow-hidden rounded-xl shadow-lg md:flex-row md:min-h-[620px]",
         className
       )}
     >
       {/* PARTE IZQUIERDA DEL CONTAINER CON LA IMAGEN */}
-      <div className="hidden md:block bg-background w-1/2 relative">
+      <div className="relative hidden bg-background md:block md:w-1/2">
         <img
           src={welcomeImage}
           alt="Welcome"
@@ -35,7 +34,7 @@ function ThemedContainer({ children, className, leftOverlay }: ThemedContainerPr
         )}
       </div>
       {/* PARTE DERECHA DEL CONTAINER QUE CONTENDRÁ EL FORMS */}
-      <div className="flex-1 flex items-center justify-center p-12 ">
+      <div className="flex min-w-0 flex-1 items-center justify-center px-5 py-8 sm:px-8 sm:py-10 md:px-12 md:py-12">
         {children}
       </div>
     </div>

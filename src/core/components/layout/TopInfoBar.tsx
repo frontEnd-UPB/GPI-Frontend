@@ -14,16 +14,16 @@ const TopInfoBar: React.FC<TopInfoBarProps> = ({
 }) => {
   return (
     <div className="bg-card border-b border-border">
-      <div className="container mx-auto px-5 py-4">
-        <div className="flex items-center justify-between">
+      <div className="container mx-auto px-4 py-4 sm:px-5">
+        <div className="flex flex-col gap-4 lg:flex-row lg:items-center lg:justify-between">
           {/* Logo */}
-          <div className="text-2xl font-bold font-heading">
+          <div className="text-center text-2xl font-bold font-heading lg:text-left">
             <span className="text-primary">MED</span>
             <span className="text-info">DICAL</span>
           </div>
 
           {/* Info Items */}
-          <div className="flex items-center gap-8">
+          <div className="grid grid-cols-1 gap-3 sm:grid-cols-2 xl:flex xl:items-center xl:gap-8">
             {/* Emergency */}
             <div className="flex items-center gap-3">
               <div className="flex items-center justify-center size-10 rounded-full bg-muted">
@@ -55,7 +55,7 @@ const TopInfoBar: React.FC<TopInfoBarProps> = ({
             </div>
 
             {/* Location */}
-            <div className="flex items-center gap-3">
+            <div className="flex items-center gap-3 sm:col-span-2 xl:col-span-1">
               <div className="flex items-center justify-center size-10 rounded-full bg-muted">
                 <MapPin className="size-5 text-primary" />
               </div>

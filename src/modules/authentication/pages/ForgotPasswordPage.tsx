@@ -84,10 +84,13 @@ const ForgotPasswordPage: React.FC = () => {
       <TopInfoBar />
       <BlurredBackground>
         <ThemedContainer>
-          <form className="forgot-password-form mt-[-200px]" onSubmit={handleSubmit}>
+          <form
+            className="forgot-password-form mx-auto flex w-full max-w-md flex-col text-primary-foreground"
+            onSubmit={handleSubmit}
+          >
             {/* Header */}
             <div className="mb-5">
-              <h4 className="text-3xl text-primary-foreground font-bold mb-1">
+              <h4 className="mb-1 text-2xl font-bold sm:text-3xl">
                 Forgot Password?
               </h4>
               <p className="text-xs text-secondary">
@@ -106,7 +109,7 @@ const ForgotPasswordPage: React.FC = () => {
               value={email}
               onChange={(e) => handleEmailChange(e.target.value)}
               required
-              className="w-75"
+              className="w-full"
             />
             
             {/* Error Message */}
@@ -130,7 +133,7 @@ const ForgotPasswordPage: React.FC = () => {
               <Button 
                 type="submit" 
                 disabled={loading}
-                className="w-3/4 mx-auto z-10 bg-secondary hover:secondary-foreground hover:bg-secondary/90 font-semibold"
+                className="mx-auto z-10 w-full bg-secondary font-semibold hover:secondary-foreground hover:bg-secondary/90 sm:w-3/4"
               >
                 {loading ? "Sending..." : "Submit"}
               </Button>
