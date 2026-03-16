@@ -46,6 +46,17 @@ export const API_ENDPOINTS = {
     REFRESH: "/api/auth/refresh",
     PROFILE: "/api/auth/profile",
   },
+  // Endpoints del contrato con backend.
+  // Se agregan sin reemplazar la estructura AUTH actual para priorizar la arquitectura vigente del frontend.
+  AUTH_CONTRACT: {
+    LOGIN_PATIENT: "/login/patient",
+    LOGIN_STAFF: "/login/staff",
+    FORGOT_PASSWORD: "/forgot_password",
+    REGISTER: "/register",
+    VERIFY: "/verify",
+    RESET_PASSWORD: "/reset_password",
+    REGISTER_USER: "/register_user",
+  },
   EMPLOYEES: {
     LIST: "/api/employees",
     DETAIL: (id: string) => `/api/employees/${id}`,
