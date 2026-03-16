@@ -1,0 +1,334 @@
+{
+  "uuid": "9fa40bdd-c36c-4a4a-a74f-f14a8b6ecf16",
+  "lastMigration": 33,
+  "name": "Clinic Mock API (copy)",
+  "endpointPrefix": "",
+  "latency": 0,
+  "port": 3002,
+  "hostname": "",
+  "data": [
+    {
+      "uuid": "7e38fec3-fd13-4b73-8112-49752c778539",
+      "name": "employees",
+      "value": "{\r\n  \"1\": {\r\n    \"id\": \"1\",\r\n    \"firstname\": \"Esthera\",\r\n    \"lastname\": \"Jackson\",\r\n    \"email\": \"esthera@example.com\",\r\n    \"password\": \"Password123!\",\r\n    \"phone\": \"+1 234 567 8900\",\r\n    \"start_date\": \"2021-06-14\",\r\n    \"status\": \"ONLINE\",\r\n    \"speciality\": \"Administration\",\r\n    \"department\": \"Organization\",\r\n    \"profilePicture\": null,\r\n    \"role\": \"admin\"\r\n  },\r\n  \"2\": {\r\n    \"id\": \"2\",\r\n    \"firstname\": \"Alexa\",\r\n    \"lastname\": \"Liras\",\r\n    \"email\": \"alexa@example.com\",\r\n    \"password\": \"Password123!\",\r\n    \"phone\": \"+1 234 567 8901\",\r\n    \"start_date\": \"2021-06-14\",\r\n    \"status\": \"OFFLINE\",\r\n    \"speciality\": \"Pediatrics\",\r\n    \"department\": \"Pediatrics\",\r\n    \"profilePicture\": null,\r\n    \"role\": \"doctor\"\r\n  },\r\n  \"3\": {\r\n    \"id\": \"3\",\r\n    \"firstname\": \"Laurent\",\r\n    \"lastname\": \"Michael\",\r\n    \"email\": \"laurent@example.com\",\r\n    \"password\": \"Password123!\",\r\n    \"phone\": \"+1 234 567 8902\",\r\n    \"start_date\": \"2021-06-14\",\r\n    \"status\": \"ONLINE\",\r\n    \"speciality\": \"Management\",\r\n    \"department\": \"Administrative\",\r\n    \"profilePicture\": null,\r\n    \"role\": \"admin\"\r\n  },\r\n  \"4\": {\r\n    \"id\": \"4\",\r\n    \"firstname\": \"Daniel\",\r\n    \"lastname\": \"Thomas\",\r\n    \"email\": \"daniel@example.com\",\r\n    \"password\": \"Password123!\",\r\n    \"phone\": \"+1 234 567 8904\",\r\n    \"start_date\": \"2021-06-14\",\r\n    \"status\": \"VACATION\",\r\n    \"speciality\": \"Neurology\",\r\n    \"department\": \"Neurology\",\r\n    \"profilePicture\": null,\r\n    \"role\": \"doctor\"\r\n  },\r\n  \"5\": {\r\n    \"id\": \"5\",\r\n    \"firstname\": \"Mark\",\r\n    \"lastname\": \"Wilson\",\r\n    \"email\": \"mark@example.com\",\r\n    \"password\": \"Password123!\",\r\n    \"phone\": \"+1 234 567 8905\",\r\n    \"start_date\": \"2021-06-14\",\r\n    \"status\": \"OFFLINE\",\r\n    \"speciality\": \"Cardiology\",\r\n    \"department\": \"Cardiology\",\r\n    \"profilePicture\": null,\r\n    \"role\": \"doctor\"\r\n  }\r\n}",
+      "id": "swp8",
+      "documentation": ""
+    },
+    {
+      "uuid": "4f07b750-645c-4ca3-8306-8107b992882b",
+      "name": "patients",
+      "value": "[\n]",
+      "id": "swp8",
+      "documentation": ""
+    },
+    {
+      "uuid": "8dc5a282-9069-42e3-9953-e4990e69a9ff",
+      "name": "appointments",
+      "value": "[\n]",
+      "id": "swp8",
+      "documentation": ""
+    }
+  ],
+  "routes": [
+    {
+      "uuid": "d563de83-fda8-4ba9-9852-58665dc6af65",
+      "documentation": "Login",
+      "method": "post",
+      "endpoint": "api/v1/auth/login",
+      "responses": [
+        {
+          "uuid": "2e8035f5-b2d6-4f61-84a3-e41bde1a2018",
+          "statusCode": 200,
+          "label": "Success",
+          "headers": [
+            {
+              "key": "Content-Type",
+              "value": "application/json"
+            }
+          ],
+          "body": "{\r\n  \"id\": \"{{#each (dataRaw 'employees')}}{{#if (eq this.email (body 'email'))}}{{#if (eq this.password (body 'password'))}}{{this.id}}{{/if}}{{/if}}{{/each}}\",\r\n  \"name\": \"{{#each (dataRaw 'employees')}}{{#if (eq this.email (body 'email'))}}{{#if (eq this.password (body 'password'))}}{{this.firstname}} {{this.lastname}}{{/if}}{{/if}}{{/each}}\",\r\n  \"role\": \"{{#each (dataRaw 'employees')}}{{#if (eq this.email (body 'email'))}}{{#if (eq this.password (body 'password'))}}{{this.role}}{{/if}}{{/if}}{{/each}}\"\r\n}",
+          "latency": 500,
+          "bodyType": "INLINE",
+          "filePath": "",
+          "databucketID": "",
+          "sendFileAsBody": false,
+          "rules": [
+            {
+              "target": "templating",
+              "modifier": "{{#each (dataRaw 'employees')}}{{#if (and (eq this.email (body 'email')) (eq this.password (body 'password')))}}true{{/if}}{{/each}}",
+              "value": "",
+              "invert": false,
+              "operator": "equals"
+            }
+          ],
+          "rulesOperator": "AND",
+          "disableTemplating": false,
+          "fallbackTo404": false,
+          "default": false,
+          "crudKey": "id",
+          "callbacks": []
+        },
+        {
+          "uuid": "7372e9e1-bb5b-4c6d-8a58-da94a0f8a808",
+          "statusCode": 401,
+          "label": "Invalid credentials",
+          "headers": [
+            {
+              "key": "Content-Type",
+              "value": "application/json"
+            }
+          ],
+          "body": "{\r\n  \"success\": false,\r\n  \"message\": \"Invalid credentials\"\r\n}",
+          "latency": 500,
+          "bodyType": "INLINE",
+          "filePath": "",
+          "databucketID": "",
+          "sendFileAsBody": false,
+          "rules": [],
+          "rulesOperator": "OR",
+          "disableTemplating": false,
+          "fallbackTo404": false,
+          "default": true,
+          "crudKey": "id",
+          "callbacks": []
+        }
+      ],
+      "type": "http",
+      "responseMode": null,
+      "streamingMode": null,
+      "streamingInterval": 0
+    },
+    {
+      "uuid": "360d487d-e5ef-49be-9b18-4cce030f7db1",
+      "documentation": "Current user",
+      "method": "get",
+      "endpoint": "api/v1/auth/me",
+      "responses": [
+        {
+          "uuid": "33c88ffb-0dd9-4b1e-bb86-008c77e5ca40",
+          "statusCode": 200,
+          "label": "Current user",
+          "headers": [
+            {
+              "key": "Content-Type",
+              "value": "application/json"
+            }
+          ],
+          "body": "{\r\n\"id\":\"{{header 'x-user-id'}}\",\r\n\"name\":\"{{data 'employees' (header 'x-user-id') 'firstname'}} {{data 'employees' (header 'x-user-id') 'lastname'}}\",\r\n\"role\":\"{{data 'employees' (header 'x-user-id') 'role'}}\"\r\n}",
+          "latency": 0,
+          "bodyType": "INLINE",
+          "filePath": "",
+          "databucketID": "",
+          "sendFileAsBody": false,
+          "rules": [],
+          "rulesOperator": "OR",
+          "disableTemplating": false,
+          "fallbackTo404": false,
+          "default": false,
+          "crudKey": "id",
+          "callbacks": []
+        }
+      ],
+      "type": "http",
+      "responseMode": null,
+      "streamingMode": null,
+      "streamingInterval": 0
+    },
+    {
+      "uuid": "f2d57c80-d4b9-46a1-b9ca-6b34eb5cecc5",
+      "type": "http",
+      "documentation": "",
+      "method": "post",
+      "endpoint": "debug-login",
+      "responses": [
+        {
+          "uuid": "2c671fef-b48f-42e0-9bbc-7d8ee66a3fbd",
+          "body": "{\r\n  \"email\": \"{{body 'email'}}\",\r\n  \"password\": \"{{body 'password'}}\",\r\n  \"match_result\": \"{{#each (dataRaw 'employees') as |emp id|}}{{#if (and (eq emp.email (body 'email')) (eq emp.password (body 'password')))}}MATCH_FOUND{{/if}}{{/each}}\",\r\n  \"role_found\": \"{{#each (dataRaw 'employees') as |emp id|}}{{#if (and (eq emp.email (body 'email')) (eq emp.password (body 'password')))}}{{emp.role}}{{/if}}{{/each}}\",\r\n  \"rule_output\": \"{{#each (dataRaw 'employees') as |emp id|}}{{#if (and (eq emp.email (body 'email')) (eq emp.password (body 'password')))}}true{{/if}}{{/each}}\"\r\n}",
+          "latency": 0,
+          "statusCode": 200,
+          "label": "",
+          "headers": [
+            {
+              "key": "Content-Type",
+              "value": "application/json"
+            }
+          ],
+          "bodyType": "INLINE",
+          "filePath": "",
+          "databucketID": "",
+          "sendFileAsBody": false,
+          "rules": [
+            {
+              "target": "templating",
+              "modifier": "{{#each (dataRaw 'employees') as |emp id|}}{{#if (and (eq emp.email (body 'email')) (eq emp.password (body 'password')))}}true{{/if}}{{/each}}",
+              "value": "true",
+              "invert": false,
+              "operator": "regex"
+            }
+          ],
+          "rulesOperator": "OR",
+          "disableTemplating": false,
+          "fallbackTo404": false,
+          "default": true,
+          "crudKey": "id",
+          "callbacks": []
+        }
+      ],
+      "responseMode": null,
+      "streamingMode": null,
+      "streamingInterval": 0
+    },
+    {
+      "uuid": "98b4232f-8930-449f-9df6-7e2540aee225",
+      "type": "http",
+      "documentation": "",
+      "method": "post",
+      "endpoint": "",
+      "responses": [
+        {
+          "uuid": "4347aafa-496b-4978-b446-08f312554902",
+          "body": "{}",
+          "latency": 0,
+          "statusCode": 200,
+          "label": "",
+          "headers": [],
+          "bodyType": "INLINE",
+          "filePath": "",
+          "databucketID": "",
+          "sendFileAsBody": false,
+          "rules": [],
+          "rulesOperator": "OR",
+          "disableTemplating": false,
+          "fallbackTo404": false,
+          "default": true,
+          "crudKey": "id",
+          "callbacks": []
+        }
+      ],
+      "responseMode": null,
+      "streamingMode": null,
+      "streamingInterval": 0
+    },
+    {
+      "uuid": "ba254d60-25e0-4d5a-b7ac-bc69209c5087",
+      "documentation": "Login",
+      "method": "post",
+      "endpoint": "api/v1/auth/login2",
+      "responses": [
+        {
+          "uuid": "16c04eb0-4265-4c10-aa81-64b8e606474f",
+          "statusCode": 200,
+          "label": "Success",
+          "headers": [
+            {
+              "key": "Content-Type",
+              "value": "application/json"
+            },
+            {
+              "key": "Content-Type",
+              "value": "application/javascript"
+            },
+            {
+              "key": "Content-Type",
+              "value": "application/typescript"
+            }
+          ],
+          "body": "{\r\n  \"id\": \"{{#each (dataRaw 'employees')}}{{#if (eq this.email (body 'email'))}}{{#if (eq this.password (body 'password'))}}{{this.id}}{{/if}}{{/if}}{{/each}}\",\r\n  \"name\": \"{{#each (dataRaw 'employees')}}{{#if (eq this.email (body 'email'))}}{{#if (eq this.password (body 'password'))}}{{this.firstname}} {{this.lastname}}{{/if}}{{/if}}{{/each}}\",\r\n  \"role\": \"{{#each (dataRaw 'employees')}}{{#if (eq this.email (body 'email'))}}{{#if (eq this.password (body 'password'))}}{{this.role}}{{/if}}{{/if}}{{/each}}\"\r\n}",
+          "latency": 500,
+          "bodyType": "INLINE",
+          "filePath": "",
+          "databucketID": "",
+          "sendFileAsBody": false,
+          "rules": [
+            {
+              "target": "templating",
+              "modifier": "{{#each (dataRaw 'employees')}}{{#if (and (eq this.email (body 'email')) (eq this.password (body 'password')))}}true{{/if}}{{/each}}",
+              "value": "",
+              "invert": false,
+              "operator": "equals"
+            }
+          ],
+          "rulesOperator": "AND",
+          "disableTemplating": false,
+          "fallbackTo404": false,
+          "default": false,
+          "crudKey": "id",
+          "callbacks": []
+        },
+        {
+          "uuid": "16df6002-6c64-4803-8a3b-0ef399007366",
+          "statusCode": 401,
+          "label": "Invalid credentials",
+          "headers": [
+            {
+              "key": "Content-Type",
+              "value": "application/json"
+            }
+          ],
+          "body": "{\r\n  \"success\": false,\r\n  \"message\": \"Invalid credentials\"\r\n}",
+          "latency": 500,
+          "bodyType": "INLINE",
+          "filePath": "",
+          "databucketID": "",
+          "sendFileAsBody": false,
+          "rules": [],
+          "rulesOperator": "OR",
+          "disableTemplating": false,
+          "fallbackTo404": false,
+          "default": true,
+          "crudKey": "id",
+          "callbacks": []
+        }
+      ],
+      "type": "http",
+      "responseMode": null,
+      "streamingMode": null,
+      "streamingInterval": 0
+    }
+  ],
+  "rootChildren": [
+    {
+      "type": "route",
+      "uuid": "d563de83-fda8-4ba9-9852-58665dc6af65"
+    },
+    {
+      "type": "route",
+      "uuid": "360d487d-e5ef-49be-9b18-4cce030f7db1"
+    },
+    {
+      "type": "route",
+      "uuid": "f2d57c80-d4b9-46a1-b9ca-6b34eb5cecc5"
+    },
+    {
+      "type": "route",
+      "uuid": "98b4232f-8930-449f-9df6-7e2540aee225"
+    },
+    {
+      "type": "route",
+      "uuid": "ba254d60-25e0-4d5a-b7ac-bc69209c5087"
+    }
+  ],
+  "folders": [],
+  "proxyMode": false,
+  "proxyHost": "",
+  "proxyRemovePrefix": false,
+  "tlsOptions": {
+    "enabled": false,
+    "type": "CERT",
+    "pfxPath": "",
+    "certPath": "",
+    "keyPath": "",
+    "caPath": "",
+    "passphrase": ""
+  },
+  "cors": true,
+  "headers": [
+    {
+      "key": "x-user-id",
+      "value": ""
+    }
+  ],
+  "proxyReqHeaders": [],
+  "proxyResHeaders": [],
+  "callbacks": []
+}
