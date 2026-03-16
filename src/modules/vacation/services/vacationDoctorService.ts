@@ -1,146 +1,280 @@
 import { type VacationRequest } from "../../../core/mocks/data";
-import { type VacationBalance } from "../../../core/constants";
 
-const API_BASE = "http://localhost:3001";
+const API_BASE = "http://localhost:3002";
 
-function toLocalIsoDate(date: Date): string {
-  const year = date.getFullYear();
-  const month = String(date.getMonth() + 1).padStart(2, "0");
-  const day = String(date.getDate()).padStart(2, "0");
-  return `${year}-${month}-${day}`;
+/* =========================
+   BACKEND TYPES
+========================= */
+
+interface BackendVacationRequest {
+  start_date: string;
+  end_date: string;
+  comment: string | null;
+  reason: string | null;
+  status: string;
+  id: number;
+  staff_id: number;
+  requestDate?: string;
+  attachmentUrl?: string | null;
 }
+
+/* =========================
+   STATUS MAPPERS
+========================= */
+
+function mapBackendStatus(status: string) {
+  switch (status) {
+    case "accepted":
+      return "approved";
+
+    case "pending":
+      return "pending";
+
+    case "rejected":
+      return "rejected";
+
+    case "cancelled":
+      return "cancelled";
+
+    default:
+      return "pending";
+  }
+}
+
+function mapFrontendStatus(status: string) {
+  switch (status) {
+    case "approved":
+      return "accepted";
+
+    case "pending":
+      return "pending";
+
+    case "rejected":
+      return "rejected";
+
+    case "cancelled":
+      return "cancelled";
+
+    default:
+      return "pending";
+  }
+}
+
+/* =========================
+   MAPPER BACKEND → FRONTEND
+========================= */
+
+function mapBackendToFrontend(
+  data: BackendVacationRequest
+): VacationRequest {
+
+  return {
+    id: String(data.id),
+    employeeId: String(data.staff_id),
+    startDate: data.start_date,
+    endDate: data.end_date,
+    reason: data.reason ?? "",
+    status: mapBackendStatus(data.status),
+    requestDate: data.requestDate ?? new Date().toISOString().slice(0, 10),
+    comment: data.comment ?? null,
+    attachmentUrl: data.attachmentUrl ?? null
+  };
+}
+
+/* =========================
+   GET VACATION REQUESTS
+========================= */
+
+export async function listEmployeeVacationRequests(
+  employeeId: string
+): Promise<VacationRequest[]> {
+
+  const response = await fetch(
+    `${API_BASE}/human-resources/vacation-managment`
+  );
+
+  if (!response.ok) {
+    throw new Error("Failed to load vacation requests");
+  }
+
+  const data: BackendVacationRequest[] = await response.json();
+
+  return data
+    .filter((req) => String(req.staff_id) === employeeId)
+    .map(mapBackendToFrontend);
+}
+
+/* =========================
+   GET ONE REQUEST
+========================= */
+
+export async function getVacationRequest(
+  requestId: string
+): Promise<VacationRequest> {
+
+  const response = await fetch(
+    `${API_BASE}/myprofile/requestvacation/${requestId}`
+  );
+
+  if (!response.ok) {
+    throw new Error("Failed to load vacation request");
+  }
+
+  const data: BackendVacationRequest = await response.json();
+
+  return mapBackendToFrontend(data);
+}
+
+/* =========================
+   SUBMIT VACATION REQUEST
+========================= */
 
 export interface SubmitVacationData {
   startDate: Date;
   endDate: Date;
   reason: string;
   comment?: string;
-  attachment?: File | null;
 }
 
-export interface UpdateVacationRequestData {
-  startDate?: Date;
-  endDate?: Date;
-  reason: string;
-  comment?: string;
-  attachment?: File | null;
-  removeAttachment?: boolean;
+function toLocalIsoDate(date: Date): string {
+  return date.toISOString().split("T")[0];
 }
-
-/* ================================
-   GET VACATION BALANCE
-================================ */
-
-export async function getVacationBalance(
-  employeeId: string
-): Promise<VacationBalance | null> {
-
-  const response = await fetch(`${API_BASE}/vacations/balance/${employeeId}`);
-
-  if (!response.ok) {
-    throw new Error("Failed to load vacation balance");
-  }
-
-  return await response.json();
-}
-
-/* ================================
-   GET EMPLOYEE VACATION REQUESTS
-================================ */
-
-export async function listEmployeeVacationRequests(
-  employeeId: string
-): Promise<VacationRequest[]> {
-
-  const response = await fetch(`${API_BASE}/vacations/${employeeId}`);
-
-  if (!response.ok) {
-    throw new Error("Failed to load vacation requests");
-  }
-
-  return await response.json();
-}
-
-/* ================================
-   SUBMIT VACATION REQUEST
-================================ */
 
 export async function submitVacationRequest(
   employeeId: string,
   submitData: SubmitVacationData
 ): Promise<VacationRequest> {
 
-  const response = await fetch(`${API_BASE}/vacations`, {
-    method: "POST",
-    headers: {
-      "Content-Type": "application/json",
-    },
-    body: JSON.stringify({
-      employeeId,
-      startDate: toLocalIsoDate(submitData.startDate),
-      endDate: toLocalIsoDate(submitData.endDate),
-      reason: submitData.reason,
-      comment: submitData.comment ?? null,
-    }),
-  });
+  const response = await fetch(
+    `${API_BASE}/myprofile/requestvacation?staff_id=${employeeId}`,
+    {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json"
+      },
+      body: JSON.stringify({
+        start_date: toLocalIsoDate(submitData.startDate),
+        end_date: toLocalIsoDate(submitData.endDate),
+        comment: submitData.comment ?? null,
+        status: "pending"
+      })
+    }
+  );
 
   if (!response.ok) {
-    throw new Error("Failed to submit vacation request");
+    throw new Error("Failed to create vacation request");
   }
 
-  return await response.json();
+  const data: BackendVacationRequest = await response.json();
+
+  return mapBackendToFrontend(data);
 }
 
-/* ================================
+/* =========================
    UPDATE VACATION REQUEST
-================================ */
+========================= */
 
 export async function updateVacationRequest(
   requestId: string,
-  updates: UpdateVacationRequestData
-): Promise<VacationRequest | null> {
+  reason: string,
+  status: string
+): Promise<VacationRequest> {
 
-  const response = await fetch(`${API_BASE}/vacations/${requestId}`, {
-    method: "PATCH",
-    headers: {
-      "Content-Type": "application/json",
-    },
-    body: JSON.stringify({
-      startDate: updates.startDate
-        ? toLocalIsoDate(updates.startDate)
-        : undefined,
-      endDate: updates.endDate
-        ? toLocalIsoDate(updates.endDate)
-        : undefined,
-      reason: updates.reason,
-      comment: updates.comment ?? null,
-    }),
-  });
+  const response = await fetch(
+    `${API_BASE}/human-resources/vacation-managment/${requestId}`,
+    {
+      method: "PATCH",
+      headers: {
+        "Content-Type": "application/json"
+      },
+      body: JSON.stringify({
+        reason,
+        status: mapFrontendStatus(status)
+      })
+    }
+  );
 
   if (!response.ok) {
-    throw new Error("Failed to update vacation request");
+    throw new Error("Failed to update request");
   }
 
-  return await response.json();
+  const data: BackendVacationRequest = await response.json();
+
+  return mapBackendToFrontend(data);
 }
 
-/* ================================
+/* =========================
+   GET VACATION BALANCE
+========================= */
+
+export interface VacationBalance {
+  employeeId: string;
+  usedDays: number;
+  remainingDays: number;
+  totalDays: number;
+}
+
+function getDaysBetween(start: string, end: string) {
+  const startDate = new Date(start);
+  const endDate = new Date(end);
+
+  const diffTime = endDate.getTime() - startDate.getTime();
+
+  return Math.floor(diffTime / (1000 * 60 * 60 * 24)) + 1;
+}
+
+export async function getVacationBalance(
+  employeeId: string
+): Promise<VacationBalance> {
+
+  const requests = await listEmployeeVacationRequests(employeeId);
+
+  const approvedRequests = requests.filter(
+    (r) => r.status === "approved"
+  );
+
+  const usedDays = approvedRequests.reduce((total, req) => {
+    return total + getDaysBetween(req.startDate, req.endDate);
+  }, 0);
+
+  const totalDays = 15; // puedes cambiar esto si tu lógica es diferente
+
+  return {
+    employeeId,
+    usedDays,
+    remainingDays: totalDays - usedDays,
+    totalDays
+  };
+}
+
+/* =========================
    CANCEL VACATION REQUEST
-================================ */
+========================= */
 
 export async function cancelVacationRequest(
   requestId: string
-): Promise<VacationRequest | null> {
+): Promise<VacationRequest> {
 
-  const response = await fetch(`${API_BASE}/vacations/${requestId}/cancel`, {
-    method: "PATCH",
-  });
+  const response = await fetch(
+    `${API_BASE}/human-resources/vacation-managment/${requestId}`,
+    {
+      method: "PATCH",
+      headers: {
+        "Content-Type": "application/json"
+      },
+      body: JSON.stringify({
+        status: "cancelled"
+      })
+    }
+  );
 
   if (!response.ok) {
     throw new Error("Failed to cancel vacation request");
   }
 
-  return await response.json();
+  const data: BackendVacationRequest = await response.json();
+
+  return mapBackendToFrontend(data);
 }
 
 
