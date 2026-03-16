@@ -1,6 +1,6 @@
 import { createAuthUser, type AuthUser } from "../../../core/types/auth";
 import { AUTH_STORAGE_KEYS } from "../../../core/constants";
-import { mockBackendAuth } from "../../../core/services/mockBackendAuth";
+import { authApi } from "./authApi";
 
 // This service simulates authentication logic. In a real application, this would involve API calls to a backend server.
 export interface AuthResponse {
@@ -13,13 +13,13 @@ export const authModuleService = {
    * Authenticate user with email and password
    */
   signIn: async (email: string, password: string): Promise<AuthResponse> => {
-    const { employee, token } = await mockBackendAuth.signInEmployee(email, password);
+    const { token, user } = await authApi.signIn(email, password);
     const authUser = createAuthUser({
-      id: employee.id,
-      email: employee.email,
-      name: `${employee.firstname} ${employee.lastname}`.trim(),
-      role: employee.role,
-      profilePicture: employee.profilePicture,
+      id: user.id,
+      email: user.email,
+      name: user.name,
+      role: user.role,
+      profilePicture: user.profilePicture,
     }, { lastLogin: new Date().toISOString() });
     // se guarda en localStorage para persistencia de sesión
     localStorage.setItem(AUTH_STORAGE_KEYS.USER, JSON.stringify(authUser));

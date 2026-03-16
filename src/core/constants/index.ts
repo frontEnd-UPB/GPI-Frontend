@@ -13,6 +13,10 @@ export {
 
 export const AUTH_DEBUG = false as const;
 
+export const API_BASE_URL = import.meta.env.DEV //true if in development mode, false in production
+  ? ""
+  : (import.meta.env.VITE_API_BASE_URL ?? "").replace(/\/+$/, "");  ///DOESNT WORK IN PRODUCTION due to cors, THOUGH
+
 export const EMPLOYEE_STATUS = {
   ONLINE: "online",
   OFFLINE: "offline",
