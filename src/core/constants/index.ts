@@ -13,6 +13,10 @@ export {
 
 export const AUTH_DEBUG = false as const;
 
+export const API_BASE_URL = import.meta.env.DEV //true if in development mode, false in production
+  ? ""
+  : (import.meta.env.VITE_API_BASE_URL ?? "").replace(/\/+$/, "");  ///DOESNT WORK IN PRODUCTION due to cors, THOUGH
+
 export const EMPLOYEE_STATUS = {
   ONLINE: "online",
   OFFLINE: "offline",
@@ -41,6 +45,17 @@ export const API_ENDPOINTS = {
     LOGOUT: "/api/auth/logout",
     REFRESH: "/api/auth/refresh",
     PROFILE: "/api/auth/profile",
+  },
+  // Endpoints del contrato con backend.
+  // Se agregan sin reemplazar la estructura AUTH actual para priorizar la arquitectura vigente del frontend.
+  AUTH_CONTRACT: {
+    LOGIN_PATIENT: "/login/patient",
+    LOGIN_STAFF: "/login/staff",
+    FORGOT_PASSWORD: "/forgot_password",
+    REGISTER: "/register",
+    VERIFY: "/verify",
+    RESET_PASSWORD: "/reset_password",
+    REGISTER_USER: "/register_user",
   },
   EMPLOYEES: {
     LIST: "/api/employees",
