@@ -19,6 +19,16 @@ export interface HttpRequestOptions
   skipAuth?: boolean;
 }
 
+export type QueryParamValue =
+  | string
+  | number
+  | boolean
+  | null
+  | undefined
+  | Array<string | number | boolean>;
+
+export type QueryParams = Record<string, QueryParamValue>;
+
 function isSerializableJsonBody(body: HttpRequestOptions["body"]): boolean {
   if (body == null) return false;
   if (typeof body === "string") return false;
@@ -41,6 +51,29 @@ async function parseResponseBody(response: Response): Promise<unknown> {
 
   const text = await response.text();
   return text ? text : null;
+}
+
+function buildUrl(endpoint: string, query?: QueryParams): string {
+  const baseUrl = endpoint;
+  if (!query) return baseUrl;
+
+  const params = new URLSearchParams();
+
+  Object.entries(query).forEach(([key, value]) => {
+    if (value == null) return;
+
+    if (Array.isArray(value)) {
+      value.forEach((item) => {
+        params.append(key, String(item));
+      });
+      return;
+    }
+
+    params.append(key, String(value));
+  });
+
+  const queryString = params.toString();
+  return queryString ? `${baseUrl}?${queryString}` : baseUrl;
 }
 
 export async function httpRequest<T>(
@@ -95,3 +128,68 @@ export async function httpRequest<T>(
 
   return responseBody as T;
 }
+
+interface ApiRequestOptions extends Omit<HttpRequestOptions, "method"> {
+  query?: QueryParams;
+}
+
+interface ApiClient {
+  request<T>(method: string, endpoint: string, options?: ApiRequestOptions): Promise<T>;
+  get<T>(endpoint: string, options?: Omit<ApiRequestOptions, "body">): Promise<T>;
+  post<T>(endpoint: string, body?: HttpRequestOptions["body"], options?: Omit<ApiRequestOptions, "body">): Promise<T>;
+  put<T>(endpoint: string, body?: HttpRequestOptions["body"], options?: Omit<ApiRequestOptions, "body">): Promise<T>;
+  patch<T>(endpoint: string, body?: HttpRequestOptions["body"], options?: Omit<ApiRequestOptions, "body">): Promise<T>;
+  delete<T>(endpoint: string, options?: ApiRequestOptions): Promise<T>;
+}
+
+export const apiClient: ApiClient = {
+  request<T>(method: string, endpoint: string, options: ApiRequestOptions = {}) {
+    const { query, ...rest } = options;
+    const url = buildUrl(endpoint, query);
+    return httpRequest<T>(url, {
+      ...rest,
+      method,
+    });
+  },
+
+  get<T>(endpoint: string, options: Omit<ApiRequestOptions, "body"> = {}) {
+    return this.request<T>("GET", endpoint, options);
+  },
+
+  post<T>(
+    endpoint: string,
+    body?: HttpRequestOptions["body"],
+    options: Omit<ApiRequestOptions, "body"> = {}
+  ) {
+    return this.request<T>("POST", endpoint, {
+      ...options,
+      body,
+    });
+  },
+
+  put<T>(
+    endpoint: string,
+    body?: HttpRequestOptions["body"],
+    options: Omit<ApiRequestOptions, "body"> = {}
+  ) {
+    return this.request<T>("PUT", endpoint, {
+      ...options,
+      body,
+    });
+  },
+
+  patch<T>(
+    endpoint: string,
+    body?: HttpRequestOptions["body"],
+    options: Omit<ApiRequestOptions, "body"> = {}
+  ) {
+    return this.request<T>("PATCH", endpoint, {
+      ...options,
+      body,
+    });
+  },
+
+  delete<T>(endpoint: string, options: ApiRequestOptions = {}) {
+    return this.request<T>("DELETE", endpoint, options);
+  },
+};

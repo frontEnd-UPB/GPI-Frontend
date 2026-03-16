@@ -1,6 +1,6 @@
 import { API_ENDPOINTS, USER_ROLES } from "../../../core/constants";
 import type { UserRole } from "../../../core/constants/roles";
-import { httpRequest } from "../../../core/services/httpClient";
+import { apiClient } from "../../../core/services/httpClient";
 import type { AuthUserPayload } from "../../../core/types/auth";
 
 interface LoginResponseDto {
@@ -43,14 +43,14 @@ function mapLoginResponse(email: string, response: LoginResponseDto): SignInResu
 
 export const authApi = {
 	async signIn(email: string, password: string): Promise<SignInResult> {
-		const response = await httpRequest<LoginResponseDto>(API_ENDPOINTS.AUTH.LOGIN, {
-			method: "POST",
-			skipAuth: true,
-			body: {
+		const response = await apiClient.post<LoginResponseDto>(
+			API_ENDPOINTS.AUTH.LOGIN,
+			{
 				email: email.trim(),
 				password,
 			},
-		});
+			{ skipAuth: true }
+		);
 
 		return mapLoginResponse(email, response);
 	},
