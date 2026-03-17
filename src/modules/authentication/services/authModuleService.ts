@@ -73,12 +73,10 @@ export const authModuleService = {
       // Si falla el refresh inicial, se mantiene la sesión base para no bloquear login.
     }
 
-    const session: AuthSession = {
+    return {
       token,
       user: authUser,
-    };
-
-    return session;
+    } satisfies AuthSession;
   },
 
   /**
@@ -101,7 +99,7 @@ export const authModuleService = {
       clearSessionStorage();
       return null;
     }
-
+    //for testing GET
     try {
       const currentUser = await authApi.getCurrentUserById(localUser.id);
       const refreshedUser = createAuthUser(currentUser, {

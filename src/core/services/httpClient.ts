@@ -29,6 +29,28 @@ export type QueryParamValue =
 
 export type QueryParams = Record<string, QueryParamValue>;
 
+export type AuthTokenResolver = () => string | null | undefined;
+
+let authTokenResolver: AuthTokenResolver | null = null;
+
+export function setAuthTokenResolver(resolver: AuthTokenResolver): void {
+  console.log("TOKEN DESDE MEMORIA:", resolver());
+  authTokenResolver = resolver;
+}
+
+export function clearAuthTokenResolver(): void {
+  authTokenResolver = null;
+}
+
+function resolveAuthToken(): string | null {
+  const sessionToken = authTokenResolver?.();
+  if (typeof sessionToken === "string" && sessionToken.trim().length > 0) {
+    return sessionToken;
+  }
+
+  return localStorage.getItem(AUTH_STORAGE_KEYS.TOKEN);
+}
+
 function isSerializableJsonBody(body: HttpRequestOptions["body"]): boolean {
   if (body == null) return false;
   if (typeof body === "string") return false;
@@ -114,7 +136,7 @@ export async function httpRequest<T>(
   const requestHeaders = new Headers(headers);
 
   if (!skipAuth) {
-    const token = localStorage.getItem(AUTH_STORAGE_KEYS.TOKEN);
+    const token = resolveAuthToken();
     if (token && !requestHeaders.has("Authorization")) {
       requestHeaders.set("Authorization", `Bearer ${token}`);
     }

@@ -1,6 +1,7 @@
 import React, { createContext, useContext, useState, useEffect, ReactNode } from "react";
 import type { AuthContextValue, AuthUser, SignInCredentials } from "../core/types/auth";
 import { AUTH_STORAGE_KEYS, AUTH_DEBUG } from "../core/constants";
+import { clearAuthTokenResolver, setAuthTokenResolver } from "../core/services/httpClient";
 import { authModuleService } from "../modules/authentication/services/authModuleService";
 
 // Create context with undefined default
@@ -13,7 +14,16 @@ interface AuthProviderProps {
 
 export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
   const [user, setUser] = useState<AuthUser | null>(null);
+  const [sessionToken, setSessionToken] = useState<string | null>(null);
   const [loading, setLoading] = useState(true);
+
+  useEffect(() => {
+    setAuthTokenResolver(() => sessionToken);
+
+    return () => {
+      clearAuthTokenResolver();
+    };
+  }, [sessionToken]);
 
   // Check for existing session on mount
   useEffect(() => {
@@ -21,12 +31,15 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
       try {
         const userData = await authModuleService.getCurrentUser();
         if (userData) {
+          setSessionToken(localStorage.getItem(AUTH_STORAGE_KEYS.TOKEN));
           setUser(userData);
           if (AUTH_DEBUG) console.log("Sesión restaurada para:", userData.email);
         } else {
+          setSessionToken(null);
           if (AUTH_DEBUG) console.log("ℹNo hay sesión activa");
         }
       } catch (error) {
+        setSessionToken(null);
         console.error(" Error al restaurar sesión:", error);
       } finally {
         setLoading(false);
@@ -43,6 +56,7 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
     try {
       const session = await authModuleService.signIn(credentials.email, credentials.password);
       const authUser = session.user;
+      setSessionToken(session.token);
       setUser(authUser);
       // se coloca en el contexto el usuario obtenido del servicio
       // lo guarda en localStorage, si se recarga el useEffect del contexto restaura la sesión
@@ -62,6 +76,7 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
     
     try {
       await authModuleService.signOut();
+      setSessionToken(null);
       if (AUTH_DEBUG) console.log(" signOut llamado - usuario actual:", user?.email || "ninguno");
       setUser(null);
       if (AUTH_DEBUG) {
