@@ -41,12 +41,12 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
     if (AUTH_DEBUG) console.log("signIn llamado con:", credentials.email);
     setLoading(true);
     try {
-      const response = await authModuleService.signIn(credentials.email, credentials.password);
-      const authUser = response.user;
+      const session = await authModuleService.signIn(credentials.email, credentials.password);
+      const authUser = session.user;
       setUser(authUser);
       // se coloca en el contexto el usuario obtenido del servicio
       // lo guarda en localStorage, si se recarga el useEffect del contexto restaura la sesión
-      if (AUTH_DEBUG) console.log(" Usuario después de signIn:", response.user.email);
+      if (AUTH_DEBUG) console.log(" Usuario después de signIn:", session.user.email);
       return authUser;
     } catch (error) {
       if (AUTH_DEBUG) console.error(" signIn falló:", error);

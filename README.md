@@ -77,6 +77,11 @@ La sesión se representa con:
 - `role` (tipo `UserRole`)
 - `profilePicture` (string | null)
 
+Modelo de sesión asociado:
+
+- `AuthSession` (`token` + `user`) en [src/core/types/auth.ts](src/core/types/auth.ts)
+- `authModuleService.signIn` retorna `AuthSession` para separar identidad (`AuthUser`) de datos de sesión (`token`)
+
 ### 4.2) `AuthProvider`
 
 Expone el contexto:
@@ -151,6 +156,19 @@ Para evitar confusión con documentación anterior, en esta rama aplica lo sigui
 - `authApi` usa endpoints `/api/auth/login` y `/api/employees/:id` (Mockoon en puerto 3001).
 - El flujo de recuperación (Forgot + OTP + Reset) sigue separado del login staff y se ejecuta con `mockBackendAuth`.
 - `LoginPage.tsx` existe en el módulo, pero no representa el flujo principal de autenticación staff en esta rama.
+
+### 4.8) Estado Story 1.4 (modelo de usuario autenticado)
+
+Estado actual: **completada**.
+
+Evidencia en código:
+
+- Modelo autenticado tipado: `AuthUser` en [src/core/types/auth.ts](src/core/types/auth.ts)
+- Payload canónico para DTOs: `AuthUserPayload` en [src/core/types/auth.ts](src/core/types/auth.ts)
+- Modelo de sesión separado: `AuthSession` en [src/core/types/auth.ts](src/core/types/auth.ts)
+- Consumo en servicio: [src/modules/authentication/services/authModuleService.ts](src/modules/authentication/services/authModuleService.ts)
+- Consumo en contexto (estado global de usuario): [src/context/AuthContext.tsx](src/context/AuthContext.tsx)
+- Validación de rehidratación: `isAuthUser` en [src/core/types/auth.ts](src/core/types/auth.ts)
 
 ### 4.6) Contrato de autenticación con backend (Story 1.1)
 

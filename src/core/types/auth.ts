@@ -1,4 +1,10 @@
-import type { UserRole } from "../constants/roles";
+import { ROLES, type UserRole } from "../constants/roles";
+
+export interface AuthUserMetadata {
+  lastLogin?: string;
+  lastSync?: string;
+  sessionSource?: "login" | "session-restore";
+}
 
 export interface AuthUser {
   id: string;
@@ -6,7 +12,12 @@ export interface AuthUser {
   name: string;
   role: UserRole;
   profilePicture: string | null;
-  metadata?: Record<string, unknown>;
+  metadata?: AuthUserMetadata;
+}
+
+export interface AuthSession {
+  token: string;
+  user: AuthUser;
 }
 
 // El payload representa datos canónicos del usuario sin incluir metadata, 
@@ -18,11 +29,34 @@ export type AuthUserPayload = Omit<AuthUser, "metadata">;
 // y si se usa createAuthUser ({ id, email... }) se obtiene un AuthUser sin metadata
 export const createAuthUser = (
   payload: AuthUserPayload,
-  metadata?: Record<string, unknown>
+  metadata?: AuthUserMetadata
 ): AuthUser => ({
   ...payload,
   ...(metadata ? { metadata } : {}),
 });
+
+export const isAuthUser = (value: unknown): value is AuthUser => {
+  if (!value || typeof value !== "object") return false;
+
+  const candidate = value as Partial<AuthUser>;
+  const hasValidRole =
+    typeof candidate.role === "string" &&
+    (ROLES as readonly string[]).includes(candidate.role);
+  const hasValidProfilePicture =
+    candidate.profilePicture === null || typeof candidate.profilePicture === "string";
+  const hasValidMetadata =
+    candidate.metadata === undefined ||
+    (typeof candidate.metadata === "object" && candidate.metadata !== null);
+
+  return (
+    typeof candidate.id === "string" &&
+    typeof candidate.email === "string" &&
+    typeof candidate.name === "string" &&
+    hasValidRole &&
+    hasValidProfilePicture &&
+    hasValidMetadata
+  );
+};
 
 export interface SignInCredentials {
   email: string;

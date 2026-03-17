@@ -11,15 +11,9 @@
  * - Token is synthetic ("mockoon-session-${userId}") to simulate JWT behavior
  * - Future: Can be replaced with real authApi endpoints when backend is ready
  */
-import { createAuthUser, type AuthUser } from "../../../core/types/auth";
+import { createAuthUser, isAuthUser, type AuthSession, type AuthUser } from "../../../core/types/auth";
 import { AUTH_STORAGE_KEYS } from "../../../core/constants";
 import { authApi } from "./authApi";
-
-// This service simulates authentication logic. In a real application, this would involve API calls to a backend server.
-export interface AuthResponse {
-  token: string;
-  user: AuthUser;
-}
 
 function clearSessionStorage(): void {
   localStorage.removeItem(AUTH_STORAGE_KEYS.USER);
@@ -28,19 +22,8 @@ function clearSessionStorage(): void {
 
 function parseStoredUser(stored: string): AuthUser | null {
   try {
-    const parsed = JSON.parse(stored) as Partial<AuthUser> | null;
-    if (!parsed || typeof parsed !== "object") return null;
-
-    if (
-      typeof parsed.id !== "string" ||
-      typeof parsed.email !== "string" ||
-      typeof parsed.name !== "string" ||
-      typeof parsed.role !== "string"
-    ) {
-      return null;
-    }
-
-    return parsed as AuthUser;
+    const parsed: unknown = JSON.parse(stored);
+    return isAuthUser(parsed) ? parsed : null;
   } catch {
     return null;
   }
@@ -57,7 +40,7 @@ export const authModuleService = {
    * 
    * Future: Will call authApi.signIn() pointing to real backend endpoint
    */
-  signIn: async (email: string, password: string): Promise<AuthResponse> => {
+  signIn: async (email: string, password: string): Promise<AuthSession> => {
     const { token, user } = await authApi.signIn(email, password);
     const baseAuthUser = createAuthUser({
       id: user.id,
@@ -65,7 +48,10 @@ export const authModuleService = {
       name: user.name,
       role: user.role,
       profilePicture: user.profilePicture,
-    }, { lastLogin: new Date().toISOString() });
+    }, {
+      lastLogin: new Date().toISOString(),
+      sessionSource: "login",
+    });
 
     // se guarda una sesión base y luego se intenta enriquecer con datos actuales del backend
     localStorage.setItem(AUTH_STORAGE_KEYS.USER, JSON.stringify(baseAuthUser));
@@ -87,10 +73,12 @@ export const authModuleService = {
       // Si falla el refresh inicial, se mantiene la sesión base para no bloquear login.
     }
 
-    return {
+    const session: AuthSession = {
       token,
       user: authUser,
     };
+
+    return session;
   },
 
   /**
@@ -119,6 +107,7 @@ export const authModuleService = {
       const refreshedUser = createAuthUser(currentUser, {
         ...(localUser.metadata ?? {}),
         lastSync: new Date().toISOString(),
+        sessionSource: "session-restore",
       });
 
       localStorage.setItem(AUTH_STORAGE_KEYS.USER, JSON.stringify(refreshedUser));
