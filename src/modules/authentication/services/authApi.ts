@@ -1,6 +1,6 @@
 import { API_ENDPOINTS, USER_ROLES } from "../../../core/constants";
+import { ApiError, apiClient } from "../../../core/services/httpClient";
 import type { UserRole } from "../../../core/constants/roles";
-import { apiClient } from "../../../core/services/httpClient";
 import type { AuthUserPayload } from "../../../core/types/auth";
 
 interface LoginResponseDto {
@@ -12,6 +12,15 @@ interface LoginResponseDto {
 interface SignInResult {
 	token: string;
 	user: AuthUserPayload;
+}
+
+interface EmployeeResponseDto {
+	id: string;
+	firstname: string;
+	lastname: string;
+	email: string;
+	role: string;
+	profilePicture?: string | null;
 }
 
 function isUserRole(role: string): role is UserRole {
@@ -41,6 +50,28 @@ function mapLoginResponse(email: string, response: LoginResponseDto): SignInResu
 	};
 }
 
+function mapEmployeeResponse(response: EmployeeResponseDto): AuthUserPayload {
+	const normalizedRole = response.role.trim().toLowerCase();
+	const fullName = `${response.firstname ?? ""} ${response.lastname ?? ""}`.trim();
+
+	if (!response.id || !response.email || !fullName || !isUserRole(normalizedRole)) {
+		throw new Error("Current user response is missing required user fields.");
+	}
+
+	return {
+		id: response.id,
+		email: response.email.trim().toLowerCase(),
+		name: fullName,
+		role: normalizedRole,
+		profilePicture: response.profilePicture ?? null,
+	};
+}
+
+function isAuthError(error: unknown): boolean {
+	if (!(error instanceof ApiError)) return false;
+	return error.status === 401 || error.status === 404;
+}
+
 export const authApi = {
 	async signIn(email: string, password: string): Promise<SignInResult> {
 		const response = await apiClient.post<LoginResponseDto>(
@@ -53,5 +84,14 @@ export const authApi = {
 		);
 
 		return mapLoginResponse(email, response);
+	},
+
+	async getCurrentUserById(id: string): Promise<AuthUserPayload> {
+		const response = await apiClient.get<EmployeeResponseDto>(API_ENDPOINTS.EMPLOYEES.DETAIL(id));
+		return mapEmployeeResponse(response);
+	},
+
+	isCurrentUserAuthError(error: unknown): boolean {
+		return isAuthError(error);
 	},
 };
