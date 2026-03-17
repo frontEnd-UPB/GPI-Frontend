@@ -1,3 +1,16 @@
+/**
+ * FE-140: Auth Service Integration
+ * 
+ * This module provides authentication orchestration following a layered architecture:
+ * UI (pages) → hooks (useForgotPassword, useResetPassword) → authModuleService → mockBackendAuth/authApi
+ * 
+ * IMPLEMENTATION NOTES:
+ * - Originally designed to work with mockdata from data.ts
+ * - Now uses mockBackendAuth.ts which maintains the same contract but is more flexible
+ * - Stores user and token in localStorage for session persistence
+ * - Token is synthetic ("mockoon-session-${userId}") to simulate JWT behavior
+ * - Future: Can be replaced with real authApi endpoints when backend is ready
+ */
 import { createAuthUser, type AuthUser } from "../../../core/types/auth";
 import { AUTH_STORAGE_KEYS } from "../../../core/constants";
 import { authApi } from "./authApi";
@@ -35,7 +48,14 @@ function parseStoredUser(stored: string): AuthUser | null {
 
 export const authModuleService = {
   /**
-   * Authenticate user with email and password
+   * FE-140: Authenticate user with email and password
+   * 
+   * Flow:
+   * 1. Calls mockBackendAuth.signInEmployee() to retrieve employee data and generate token
+   * 2. Transforms employee response to AuthUser format with metadata (lastLogin)
+   * 3. Persists user and token to localStorage for session restoration
+   * 
+   * Future: Will call authApi.signIn() pointing to real backend endpoint
    */
   signIn: async (email: string, password: string): Promise<AuthResponse> => {
     const { token, user } = await authApi.signIn(email, password);
@@ -74,7 +94,15 @@ export const authModuleService = {
   },
 
   /**
-   * Get currently logged in user
+   * FE-140: Retrieve currently logged in user from session storage
+   * 
+   * Flow:
+   * 1. Reads localStorage for persisted user (meddical:user key)
+   * 2. Parses JSON and returns user object, or null if not found
+   * 
+   * Security Note:
+   * - Does NOT validate against backend; assumes localStorage is trusted
+   * - Future: Can add backend refresh logic (getCurrentUserById) to validate session
    */
   getCurrentUser: async (): Promise<AuthUser | null> => {
     const stored = localStorage.getItem(AUTH_STORAGE_KEYS.USER);
@@ -107,7 +135,10 @@ export const authModuleService = {
   },
 
   /**
-   * Sign out current user
+   * FE-140: Sign out current user by clearing session storage
+   * 
+   * Removes both user profile and authentication token from localStorage.
+   * Simulates 300ms delay to mimic network latency.
    */
   signOut: async (): Promise<void> => {
     await new Promise(resolve => setTimeout(resolve, 300));

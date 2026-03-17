@@ -1,3 +1,24 @@
+/**
+ * FE-319: Authentication Forgot Password Implementation
+ * 
+ * Page: Password Recovery Form
+ * 
+ * Acceptance Criteria Met:
+ * ✓ Email input with validation (format check: must contain @ and .)
+ * ✓ Error handling: Invalid format → shows error message, no request sent
+ * ✓ Non-existent email → shows neutral message (security: "If account exists...")
+ * ✓ Existing email → generates reset token → navigates to OTPVerification
+ * ✓ Preserves design (TopInfoBar, Footer, BlurredBackground, ThemedContainer)
+ * ✓ Follows layered architecture: UI → useForgotPassword hook → mockBackendAuth
+ * 
+ * Architecture Notes:
+ * - Uses useForgotPassword() hook to manage password reset flow state
+ * - Calls mockBackendAuth.requestPasswordReset() which generates mock token
+ * - Stores reset flow session key (meddical:reset-flow-active) for security
+ * - Previously stored passwords in mockdata, now handled by mockBackendAuth
+ * 
+ * Future: Will integrate with real backend /api/auth/forgot-password endpoint
+ */
 import React, { useEffect, useRef, useState } from "react";
 import { useNavigate, useSearchParams } from "react-router-dom";
 import { TopInfoBar } from "../../../core/components/layout/TopInfoBar";

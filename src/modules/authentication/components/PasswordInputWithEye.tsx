@@ -1,3 +1,16 @@
+/**
+ * FE-164: Shared Authentication Component — PasswordInputWithEye
+ * 
+ * Reusable password input with optional visibility toggle, used across:
+ * - ResetPasswordPage (new password, confirm password fields)
+ * - SignUpPage (password fields)
+ * - Any password-reset flow
+ * 
+ * Features:
+ * - Toggles input type between "password" and "text" via Eye icon button
+ * - Maintains core Input styling with password-specific UX patterns
+ * - Accessible with proper aria-label for visibility button
+ */
 import React, { useState } from "react";
 import { Input, type InputProps } from "../../../core/components";
 import { cn } from "../../../ui/utils";

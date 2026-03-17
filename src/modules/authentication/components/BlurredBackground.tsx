@@ -1,3 +1,16 @@
+/**
+ * FE-164: Shared Authentication Component — BlurredBackground
+ * 
+ * Reusable layout wrapper used across multiple authentication pages:
+ * - ForgotPasswordPage
+ * - ResetPasswordPage
+ * - OtpVerification
+ * 
+ * Provides:
+ * - Background image with blur overlay for visual hierarchy
+ * - Responsive flex layout centering child content
+ * - Consistent styling across password recovery flow
+ */
 import React from "react";
 import bgImage from "../assets/auth_bg_image.png";
 

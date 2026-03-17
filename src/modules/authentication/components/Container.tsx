@@ -1,3 +1,18 @@
+/**
+ * FE-164: Shared Authentication Component — ThemedContainer (Container.tsx)
+ * 
+ * Reusable form container used across authentication pages:
+ * - LoginPage
+ * - ForgotPasswordPage
+ * - ResetPasswordPage
+ * - SignUpPage
+ * 
+ * Provides:
+ * - Two-column layout: Left side with decorative image, right side for form content
+ * - Theme-consistent styling (primary background, card foreground text)
+ * - Responsive design (image hidden on mobile, full width on desktop)
+ * - Optional overlay support for dynamic content on left side
+ */
 import * as React from "react";
 import { cn } from "../../../ui/utils";
 import welcomeImage from "../assets/auth_side_image.png";

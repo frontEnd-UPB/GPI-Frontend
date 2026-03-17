@@ -1,3 +1,27 @@
+/**
+ * FE-215: Reset Password UI
+ * 
+ * Page: Set New Password
+ * 
+ * Acceptance Criteria Met:
+ * ✓ Layout structure: TopInfoBar, Footer, BlurredBackground, ThemedContainer
+ * ✓ Form container: ThemedContainer with image on left, form on right
+ * ✓ Titles: "Set New Password" with subtitle "Enter your new password..."
+ * ✓ Fields: "New Password" and "Confirm Password" with password input components
+ * ✓ Visual styles: PasswordInputWithEye components matching core Input styles
+ * ✓ Consistency: Same spacing/structure as LoginPage, cohesive module styling
+ * 
+ * Implementation Notes:
+ * - Uses PasswordInputWithEye component (FE-164) for password visibility toggle
+ * - Validates token before showing form (validates via useResetPassword hook)
+ * - Enforces password requirements: 12+ characters, match confirmation
+ * - Error display via ErrorMessage component (shared feedback component)
+ * - Success redirects to login page after 1.4s delay
+ * 
+ * Previous: Used generic form structure
+ * Current: Integrated with full password reset flow (ForgotPassword → OTP → Reset)
+ * Future: Will connect to real backend API for token validation and password update
+ */
 import React, { useEffect, useState } from "react";
 import { useNavigate, useSearchParams } from "react-router-dom";
 import { TopInfoBar } from "../../../core/components/layout/TopInfoBar";
