@@ -1,0 +1,497 @@
+{
+  "uuid": "a1b2c3d4-0001-0001-0001-000000000001",
+  "lastMigration": 33,
+  "name": "Vacation API",
+  "endpointPrefix": "",
+  "latency": 150,
+  "port": 3001,
+  "hostname": "localhost",
+  "folders": [],
+  "routes": [
+    {
+      "uuid": "a1b2c3d4-0002-0002-0002-000000000001",
+      "type": "http",
+      "documentation": "GET vacation balance for an employee",
+      "method": "get",
+      "endpoint": "api/vacations/balance/:employeeId",
+      "responses": [
+        {
+          "uuid": "a1b2c3d4-0003-0003-0003-000000000001",
+          "body": "{\n  \"assigned\": 15,\n  \"used\": 5,\n  \"available\": 10\n}",
+          "latency": 0,
+          "statusCode": 200,
+          "label": "Employee 1 – Esthera Jackson",
+          "headers": [
+            {
+              "key": "Content-Type",
+              "value": "application/json"
+            }
+          ],
+          "bodyType": "INLINE",
+          "filePath": "",
+          "databucketID": "",
+          "sendFileAsBody": false,
+          "rules": [
+            {
+              "target": "params",
+              "modifier": "employeeId",
+              "value": "1",
+              "invert": false,
+              "operator": "equals"
+            }
+          ],
+          "rulesOperator": "OR",
+          "disableTemplating": false,
+          "fallbackTo404": false,
+          "default": false,
+          "crudKey": "id",
+          "callbacks": []
+        },
+        {
+          "uuid": "a1b2c3d4-0004-0004-0004-000000000001",
+          "body": "{\n  \"assigned\": 15,\n  \"used\": 6,\n  \"available\": 9\n}",
+          "latency": 0,
+          "statusCode": 200,
+          "label": "Employee 2 – Alexa Liras",
+          "headers": [
+            {
+              "key": "Content-Type",
+              "value": "application/json"
+            }
+          ],
+          "bodyType": "INLINE",
+          "filePath": "",
+          "databucketID": "",
+          "sendFileAsBody": false,
+          "rules": [
+            {
+              "target": "params",
+              "modifier": "employeeId",
+              "value": "2",
+              "invert": false,
+              "operator": "equals"
+            }
+          ],
+          "rulesOperator": "OR",
+          "disableTemplating": false,
+          "fallbackTo404": false,
+          "default": false,
+          "crudKey": "id",
+          "callbacks": []
+        },
+        {
+          "uuid": "a1b2c3d4-0004-0004-0004-000000000002",
+          "body": "{\n  \"assigned\": 15,\n  \"used\": 0,\n  \"available\": 15\n}",
+          "latency": 0,
+          "statusCode": 200,
+          "label": "Fallback balance",
+          "headers": [
+            {
+              "key": "Content-Type",
+              "value": "application/json"
+            }
+          ],
+          "bodyType": "INLINE",
+          "filePath": "",
+          "databucketID": "",
+          "sendFileAsBody": false,
+          "rules": [],
+          "rulesOperator": "OR",
+          "disableTemplating": false,
+          "fallbackTo404": false,
+          "default": true,
+          "crudKey": "id",
+          "callbacks": []
+        }
+      ],
+      "responseMode": null,
+      "streamingMode": null,
+      "streamingInterval": 0
+    },
+    {
+      "uuid": "a1b2c3d4-0002-0002-0002-000000000002",
+      "type": "http",
+      "documentation": "GET all vacation requests (supports ?employeeId=, ?status=, ?search=)",
+      "method": "get",
+      "endpoint": "api/vacations",
+      "responses": [
+        {
+          "uuid": "a1b2c3d4-0003-0003-0003-000000000002",
+          "body": "[\n  {\n    \"id\": \"1\",\n    \"employee_id\": \"1\",\n    \"start_date\": \"2026-03-01\",\n    \"end_date\": \"2026-03-05\",\n    \"reason\": \"Family vacation\",\n    \"status\": \"pending\",\n    \"request_date\": \"2026-02-15\",\n    \"comment\": \"I need to take some time off to take care of family matters and spend time with my relatives who will be visiting during this period.\",\n    \"rejection_reason\": null,\n    \"attachment_url\": \"https://example.com/docs/family-vacation-request.pdf\",\n    \"attachment_name\": \"family-vacation-request.pdf\"\n  },\n  {\n    \"id\": \"2\",\n    \"employee_id\": \"1\",\n    \"start_date\": \"2026-04-10\",\n    \"end_date\": \"2026-04-14\",\n    \"reason\": \"Personal travel\",\n    \"status\": \"approved\",\n    \"request_date\": \"2026-03-20\",\n    \"comment\": \"I will be traveling out of the city for a few days and would like to schedule my vacation accordingly.\",\n    \"rejection_reason\": null,\n    \"attachment_url\": \"https://example.com/docs/travel-plan.pdf\",\n    \"attachment_name\": \"travel-plan.pdf\"\n  },\n  {\n    \"id\": \"3\",\n    \"employee_id\": \"1\",\n    \"start_date\": \"2026-05-03\",\n    \"end_date\": \"2026-05-06\",\n    \"reason\": \"Medical appointment\",\n    \"status\": \"rejected\",\n    \"request_date\": \"2026-04-10\",\n    \"comment\": \"I requested these days off to attend several medical appointments that require travel.\",\n    \"rejection_reason\": \"The requested dates overlap with a critical project delivery and staffing levels cannot support the absence.\",\n    \"attachment_url\": \"https://example.com/docs/medical-appointment.pdf\",\n    \"attachment_name\": \"medical-appointment.pdf\"\n  },\n  {\n    \"id\": \"4\",\n    \"employee_id\": \"1\",\n    \"start_date\": \"2026-06-15\",\n    \"end_date\": \"2026-06-20\",\n    \"reason\": \"Trip with friends\",\n    \"status\": \"cancelled\",\n    \"request_date\": \"2026-05-01\",\n    \"comment\": \"Originally planned a short trip with friends, but the trip has been canceled so the vacation request is withdrawn.\",\n    \"rejection_reason\": null,\n    \"attachment_url\": null,\n    \"attachment_name\": null\n  }\n]",
+          "latency": 0,
+          "statusCode": 200,
+          "label": "Employee 1 – Esthera Jackson (4 requests)",
+          "headers": [
+            {
+              "key": "Content-Type",
+              "value": "application/json"
+            }
+          ],
+          "bodyType": "INLINE",
+          "filePath": "",
+          "databucketID": "",
+          "sendFileAsBody": false,
+          "rules": [
+            {
+              "target": "query",
+              "modifier": "employeeId",
+              "value": "1",
+              "invert": false,
+              "operator": "equals"
+            }
+          ],
+          "rulesOperator": "OR",
+          "disableTemplating": false,
+          "fallbackTo404": false,
+          "default": false,
+          "crudKey": "id",
+          "callbacks": []
+        },
+        {
+          "uuid": "a1b2c3d4-0004-0004-0004-000000000003",
+          "body": "[\n  {\n    \"id\": \"5\",\n    \"employee_id\": \"2\",\n    \"start_date\": \"2026-03-10\",\n    \"end_date\": \"2026-03-15\",\n    \"reason\": \"Personal leave\",\n    \"status\": \"pending\",\n    \"request_date\": \"2026-02-18\",\n    \"comment\": null,\n    \"rejection_reason\": null,\n    \"attachment_url\": null,\n    \"attachment_name\": null\n  },\n  {\n    \"id\": \"7\",\n    \"employee_id\": \"2\",\n    \"start_date\": \"2026-03-20\",\n    \"end_date\": \"2026-03-25\",\n    \"reason\": \"Conference attendance\",\n    \"status\": \"approved\",\n    \"request_date\": \"2026-02-28\",\n    \"comment\": \"Conference trip confirmed and approved.\",\n    \"rejection_reason\": null,\n    \"attachment_url\": \"https://example.com/docs/conference-alexa-liras.pdf\",\n    \"attachment_name\": \"conference-alexa-liras.pdf\"\n  },\n  {\n    \"id\": \"15\",\n    \"employee_id\": \"2\",\n    \"start_date\": \"2026-04-10\",\n    \"end_date\": \"2026-04-12\",\n    \"reason\": \"Short personal trip\",\n    \"status\": \"cancelled\",\n    \"request_date\": \"2026-03-20\",\n    \"comment\": \"Cancelled by employee due to schedule change.\",\n    \"rejection_reason\": null,\n    \"attachment_url\": null,\n    \"attachment_name\": null\n  }\n]",
+          "latency": 0,
+          "statusCode": 200,
+          "label": "Employee 2 – Alexa Liras (3 requests)",
+          "headers": [
+            {
+              "key": "Content-Type",
+              "value": "application/json"
+            }
+          ],
+          "bodyType": "INLINE",
+          "filePath": "",
+          "databucketID": "",
+          "sendFileAsBody": false,
+          "rules": [
+            {
+              "target": "query",
+              "modifier": "employeeId",
+              "value": "2",
+              "invert": false,
+              "operator": "equals"
+            }
+          ],
+          "rulesOperator": "OR",
+          "disableTemplating": false,
+          "fallbackTo404": false,
+          "default": false,
+          "crudKey": "id",
+          "callbacks": []
+        },
+        {
+          "uuid": "a1b2c3d4-0004-0004-0004-000000000004",
+          "body": "[\n  {\n    \"id\": \"1\",\n    \"employee_id\": \"1\",\n    \"start_date\": \"2026-03-01\",\n    \"end_date\": \"2026-03-05\",\n    \"reason\": \"Family vacation\",\n    \"status\": \"pending\",\n    \"request_date\": \"2026-02-15\",\n    \"comment\": \"I need to take some time off to take care of family matters and spend time with my relatives who will be visiting during this period.\",\n    \"rejection_reason\": null,\n    \"attachment_url\": \"https://example.com/docs/family-vacation-request.pdf\",\n    \"attachment_name\": \"family-vacation-request.pdf\"\n  },\n  {\n    \"id\": \"2\",\n    \"employee_id\": \"1\",\n    \"start_date\": \"2026-04-10\",\n    \"end_date\": \"2026-04-14\",\n    \"reason\": \"Personal travel\",\n    \"status\": \"approved\",\n    \"request_date\": \"2026-03-20\",\n    \"comment\": \"I will be traveling out of the city for a few days and would like to schedule my vacation accordingly.\",\n    \"rejection_reason\": null,\n    \"attachment_url\": \"https://example.com/docs/travel-plan.pdf\",\n    \"attachment_name\": \"travel-plan.pdf\"\n  },\n  {\n    \"id\": \"3\",\n    \"employee_id\": \"1\",\n    \"start_date\": \"2026-05-03\",\n    \"end_date\": \"2026-05-06\",\n    \"reason\": \"Medical appointment\",\n    \"status\": \"rejected\",\n    \"request_date\": \"2026-04-10\",\n    \"comment\": \"I requested these days off to attend several medical appointments that require travel.\",\n    \"rejection_reason\": \"The requested dates overlap with a critical project delivery and staffing levels cannot support the absence.\",\n    \"attachment_url\": \"https://example.com/docs/medical-appointment.pdf\",\n    \"attachment_name\": \"medical-appointment.pdf\"\n  },\n  {\n    \"id\": \"4\",\n    \"employee_id\": \"1\",\n    \"start_date\": \"2026-06-15\",\n    \"end_date\": \"2026-06-20\",\n    \"reason\": \"Trip with friends\",\n    \"status\": \"cancelled\",\n    \"request_date\": \"2026-05-01\",\n    \"comment\": \"Originally planned a short trip with friends, but the trip has been canceled so the vacation request is withdrawn.\",\n    \"rejection_reason\": null,\n    \"attachment_url\": null,\n    \"attachment_name\": null\n  },\n  {\n    \"id\": \"5\",\n    \"employee_id\": \"2\",\n    \"start_date\": \"2026-03-10\",\n    \"end_date\": \"2026-03-15\",\n    \"reason\": \"Personal leave\",\n    \"status\": \"pending\",\n    \"request_date\": \"2026-02-18\",\n    \"comment\": null,\n    \"rejection_reason\": null,\n    \"attachment_url\": null,\n    \"attachment_name\": null\n  },\n  {\n    \"id\": \"6\",\n    \"employee_id\": \"5\",\n    \"start_date\": \"2026-02-26\",\n    \"end_date\": \"2026-03-02\",\n    \"reason\": \"Medical leave\",\n    \"status\": \"approved\",\n    \"request_date\": \"2026-02-10\",\n    \"comment\": \"Medical leave approved by HR.\",\n    \"rejection_reason\": null,\n    \"attachment_url\": \"https://example.com/docs/medical-leave-daniel-thomas.pdf\",\n    \"attachment_name\": \"medical-leave-daniel-thomas.pdf\"\n  },\n  {\n    \"id\": \"7\",\n    \"employee_id\": \"2\",\n    \"start_date\": \"2026-03-20\",\n    \"end_date\": \"2026-03-25\",\n    \"reason\": \"Conference attendance\",\n    \"status\": \"approved\",\n    \"request_date\": \"2026-02-28\",\n    \"comment\": \"Conference trip confirmed and approved.\",\n    \"rejection_reason\": null,\n    \"attachment_url\": \"https://example.com/docs/conference-alexa-liras.pdf\",\n    \"attachment_name\": \"conference-alexa-liras.pdf\"\n  },\n  {\n    \"id\": \"8\",\n    \"employee_id\": \"8\",\n    \"start_date\": \"2026-03-05\",\n    \"end_date\": \"2026-03-12\",\n    \"reason\": \"Sickness\",\n    \"status\": \"pending\",\n    \"request_date\": \"2026-03-01\",\n    \"comment\": null,\n    \"rejection_reason\": null,\n    \"attachment_url\": null,\n    \"attachment_name\": null\n  },\n  {\n    \"id\": \"9\",\n    \"employee_id\": \"3\",\n    \"start_date\": \"2026-03-22\",\n    \"end_date\": \"2026-03-24\",\n    \"reason\": \"Short break\",\n    \"status\": \"pending\",\n    \"request_date\": \"2026-03-02\",\n    \"comment\": null,\n    \"rejection_reason\": null,\n    \"attachment_url\": null,\n    \"attachment_name\": null\n  },\n  {\n    \"id\": \"10\",\n    \"employee_id\": \"4\",\n    \"start_date\": \"2026-03-18\",\n    \"end_date\": \"2026-03-22\",\n    \"reason\": \"Family visit\",\n    \"status\": \"pending\",\n    \"request_date\": \"2026-03-02\",\n    \"comment\": null,\n    \"rejection_reason\": null,\n    \"attachment_url\": null,\n    \"attachment_name\": null\n  },\n  {\n    \"id\": \"11\",\n    \"employee_id\": \"9\",\n    \"start_date\": \"2026-03-26\",\n    \"end_date\": \"2026-03-30\",\n    \"reason\": \"Travel\",\n    \"status\": \"pending\",\n    \"request_date\": \"2026-03-02\",\n    \"comment\": null,\n    \"rejection_reason\": null,\n    \"attachment_url\": null,\n    \"attachment_name\": null\n  },\n  {\n    \"id\": \"12\",\n    \"employee_id\": \"6\",\n    \"start_date\": \"2026-03-05\",\n    \"end_date\": \"2026-03-08\",\n    \"reason\": \"Cardiology conference\",\n    \"status\": \"approved\",\n    \"request_date\": \"2026-02-20\",\n    \"comment\": \"Approved to attend annual cardiology summit.\",\n    \"rejection_reason\": null,\n    \"attachment_url\": \"https://example.com/docs/cardiology-conference-mark-wilson.pdf\",\n    \"attachment_name\": \"cardiology-conference-mark-wilson.pdf\"\n  },\n  {\n    \"id\": \"13\",\n    \"employee_id\": \"7\",\n    \"start_date\": \"2026-03-25\",\n    \"end_date\": \"2026-03-29\",\n    \"reason\": \"Family vacation\",\n    \"status\": \"approved\",\n    \"request_date\": \"2026-02-22\",\n    \"comment\": \"Family vacation scheduled after shift reorganization.\",\n    \"rejection_reason\": null,\n    \"attachment_url\": null,\n    \"attachment_name\": null\n  },\n  {\n    \"id\": \"14\",\n    \"employee_id\": \"8\",\n    \"start_date\": \"2026-02-18\",\n    \"end_date\": \"2026-02-22\",\n    \"reason\": \"Post-congress rest days\",\n    \"status\": \"approved\",\n    \"request_date\": \"2026-03-05\",\n    \"comment\": \"Approved as compensation after international congress.\",\n    \"rejection_reason\": null,\n    \"attachment_url\": \"https://example.com/docs/post-congress-rest-carlos-perez.pdf\",\n    \"attachment_name\": \"post-congress-rest-carlos-perez.pdf\"\n  },\n  {\n    \"id\": \"15\",\n    \"employee_id\": \"2\",\n    \"start_date\": \"2026-04-10\",\n    \"end_date\": \"2026-04-12\",\n    \"reason\": \"Short personal trip\",\n    \"status\": \"cancelled\",\n    \"request_date\": \"2026-03-20\",\n    \"comment\": \"Cancelled by employee due to schedule change.\",\n    \"rejection_reason\": null,\n    \"attachment_url\": null,\n    \"attachment_name\": null\n  },\n  {\n    \"id\": \"16\",\n    \"employee_id\": \"7\",\n    \"start_date\": \"2026-03-15\",\n    \"end_date\": \"2026-03-18\",\n    \"reason\": \"Personal leave\",\n    \"status\": \"rejected\",\n    \"request_date\": \"2026-02-25\",\n    \"comment\": \"Request rejected due to high workload.\",\n    \"rejection_reason\": \"High workload in Oncology department\",\n    \"attachment_url\": null,\n    \"attachment_name\": null\n  }\n]",
+          "latency": 0,
+          "statusCode": 200,
+          "label": "All requests (16 total – no filter)",
+          "headers": [
+            {
+              "key": "Content-Type",
+              "value": "application/json"
+            }
+          ],
+          "bodyType": "INLINE",
+          "filePath": "",
+          "databucketID": "",
+          "sendFileAsBody": false,
+          "rules": [],
+          "rulesOperator": "OR",
+          "disableTemplating": false,
+          "fallbackTo404": false,
+          "default": true,
+          "crudKey": "id",
+          "callbacks": []
+        }
+      ],
+      "responseMode": null,
+      "streamingMode": null,
+      "streamingInterval": 0
+    },
+    {
+      "uuid": "a1b2c3d4-0002-0002-0002-000000000003",
+      "type": "http",
+      "documentation": "POST create a new vacation request",
+      "method": "post",
+      "endpoint": "api/vacations",
+      "responses": [
+        {
+          "uuid": "a1b2c3d4-0003-0003-0003-000000000003",
+          "body": "{\n  \"id\": \"{{faker 'string.uuid'}}\",\n  \"employee_id\": \"{{body 'employeeId'}}\",\n  \"start_date\": \"{{body 'startDate'}}\",\n  \"end_date\": \"{{body 'endDate'}}\",\n  \"reason\": \"{{body 'reason'}}\",\n  \"status\": \"pending\",\n  \"request_date\": \"{{now 'YYYY-MM-DD'}}\",\n  \"comment\": {{#if (body 'comment')}}\"{{body 'comment'}}\"{{else}}null{{/if}},\n  \"rejection_reason\": null,\n  \"attachment_url\": null,\n  \"attachment_name\": null\n}",
+          "latency": 0,
+          "statusCode": 201,
+          "label": "Created",
+          "headers": [
+            {
+              "key": "Content-Type",
+              "value": "application/json"
+            }
+          ],
+          "bodyType": "INLINE",
+          "filePath": "",
+          "databucketID": "",
+          "sendFileAsBody": false,
+          "rules": [],
+          "rulesOperator": "OR",
+          "disableTemplating": false,
+          "fallbackTo404": false,
+          "default": true,
+          "crudKey": "id",
+          "callbacks": []
+        }
+      ],
+      "responseMode": null,
+      "streamingMode": null,
+      "streamingInterval": 0
+    },
+    {
+      "uuid": "a1b2c3d4-0002-0002-0002-000000000004",
+      "type": "http",
+      "documentation": "PUT update a vacation request by id",
+      "method": "put",
+      "endpoint": "api/vacations/:id",
+      "responses": [
+        {
+          "uuid": "a1b2c3d4-0003-0003-0003-000000000004",
+          "body": "{\n  \"id\": \"{{urlParam 'id'}}\",\n  \"employee_id\": \"1\",\n  \"start_date\": \"{{body 'startDate'}}\",\n  \"end_date\": \"{{body 'endDate'}}\",\n  \"reason\": \"{{body 'reason'}}\",\n  \"status\": \"pending\",\n  \"request_date\": \"2026-06-01\",\n  \"comment\": {{#if (body 'comment')}}\"{{body 'comment'}}\"{{else}}null{{/if}},\n  \"rejection_reason\": null,\n  \"attachment_url\": null,\n  \"attachment_name\": null\n}",
+          "latency": 0,
+          "statusCode": 200,
+          "label": "Updated",
+          "headers": [
+            {
+              "key": "Content-Type",
+              "value": "application/json"
+            }
+          ],
+          "bodyType": "INLINE",
+          "filePath": "",
+          "databucketID": "",
+          "sendFileAsBody": false,
+          "rules": [],
+          "rulesOperator": "OR",
+          "disableTemplating": false,
+          "fallbackTo404": false,
+          "default": true,
+          "crudKey": "id",
+          "callbacks": []
+        }
+      ],
+      "responseMode": null,
+      "streamingMode": null,
+      "streamingInterval": 0
+    },
+    {
+      "uuid": "a1b2c3d4-0002-0002-0002-000000000005",
+      "type": "http",
+      "documentation": "PATCH cancel a vacation request",
+      "method": "patch",
+      "endpoint": "api/vacations/:id/cancel",
+      "responses": [
+        {
+          "uuid": "a1b2c3d4-0003-0003-0003-000000000005",
+          "body": "{\n  \"id\": \"{{urlParam 'id'}}\",\n  \"employee_id\": \"1\",\n  \"start_date\": \"2026-03-01\",\n  \"end_date\": \"2026-03-05\",\n  \"reason\": \"Family vacation\",\n  \"status\": \"cancelled\",\n  \"request_date\": \"2026-02-15\",\n  \"comment\": \"I need to take some time off for family matters.\",\n  \"rejection_reason\": null,\n  \"attachment_url\": null,\n  \"attachment_name\": null\n}",
+          "latency": 0,
+          "statusCode": 200,
+          "label": "Cancelled",
+          "headers": [
+            {
+              "key": "Content-Type",
+              "value": "application/json"
+            }
+          ],
+          "bodyType": "INLINE",
+          "filePath": "",
+          "databucketID": "",
+          "sendFileAsBody": false,
+          "rules": [],
+          "rulesOperator": "OR",
+          "disableTemplating": false,
+          "fallbackTo404": false,
+          "default": true,
+          "crudKey": "id",
+          "callbacks": []
+        }
+      ],
+      "responseMode": null,
+      "streamingMode": null,
+      "streamingInterval": 0
+    },
+    {
+      "uuid": "a1b2c3d4-0002-0002-0002-000000000006",
+      "type": "http",
+      "documentation": "POST approve a vacation request",
+      "method": "post",
+      "endpoint": "api/vacations/:id/approve",
+      "responses": [
+        {
+          "uuid": "a1b2c3d4-0003-0003-0003-000000000006",
+          "body": "{\n  \"id\": \"{{urlParam 'id'}}\",\n  \"employee_id\": \"1\",\n  \"start_date\": \"2026-03-01\",\n  \"end_date\": \"2026-03-05\",\n  \"reason\": \"Family vacation\",\n  \"status\": \"approved\",\n  \"request_date\": \"2026-02-15\",\n  \"comment\": \"I need to take some time off for family matters.\",\n  \"rejection_reason\": null,\n  \"attachment_url\": \"https://example.com/docs/family-vacation-request.pdf\",\n  \"attachment_name\": \"family-vacation-request.pdf\"\n}",
+          "latency": 0,
+          "statusCode": 200,
+          "label": "Approved",
+          "headers": [
+            {
+              "key": "Content-Type",
+              "value": "application/json"
+            }
+          ],
+          "bodyType": "INLINE",
+          "filePath": "",
+          "databucketID": "",
+          "sendFileAsBody": false,
+          "rules": [],
+          "rulesOperator": "OR",
+          "disableTemplating": false,
+          "fallbackTo404": false,
+          "default": true,
+          "crudKey": "id",
+          "callbacks": []
+        }
+      ],
+      "responseMode": null,
+      "streamingMode": null,
+      "streamingInterval": 0
+    },
+    {
+      "uuid": "a1b2c3d4-0002-0002-0002-000000000007",
+      "type": "http",
+      "documentation": "POST reject a vacation request",
+      "method": "post",
+      "endpoint": "api/vacations/:id/reject",
+      "responses": [
+        {
+          "uuid": "a1b2c3d4-0003-0003-0003-000000000007",
+          "body": "{\n  \"id\": \"{{urlParam 'id'}}\",\n  \"employee_id\": \"1\",\n  \"start_date\": \"2026-03-01\",\n  \"end_date\": \"2026-03-05\",\n  \"reason\": \"Family vacation\",\n  \"status\": \"rejected\",\n  \"request_date\": \"2026-02-15\",\n  \"comment\": \"I need to take some time off for family matters.\",\n  \"rejection_reason\": \"Overlaps with a critical project deadline.\",\n  \"attachment_url\": null,\n  \"attachment_name\": null\n}",
+          "latency": 0,
+          "statusCode": 200,
+          "label": "Rejected",
+          "headers": [
+            {
+              "key": "Content-Type",
+              "value": "application/json"
+            }
+          ],
+          "bodyType": "INLINE",
+          "filePath": "",
+          "databucketID": "",
+          "sendFileAsBody": false,
+          "rules": [],
+          "rulesOperator": "OR",
+          "disableTemplating": false,
+          "fallbackTo404": false,
+          "default": true,
+          "crudKey": "id",
+          "callbacks": []
+        }
+      ],
+      "responseMode": null,
+      "streamingMode": null,
+      "streamingInterval": 0
+    },
+    {
+      "uuid": "a1b2c3d4-0002-0002-0002-000000000008",
+      "type": "http",
+      "documentation": "PATCH revert a vacation request to pending",
+      "method": "patch",
+      "endpoint": "api/vacations/:id/pending",
+      "responses": [
+        {
+          "uuid": "a1b2c3d4-0003-0003-0003-000000000008",
+          "body": "{\n  \"id\": \"{{urlParam 'id'}}\",\n  \"employee_id\": \"1\",\n  \"start_date\": \"2026-03-01\",\n  \"end_date\": \"2026-03-05\",\n  \"reason\": \"Family vacation\",\n  \"status\": \"pending\",\n  \"request_date\": \"2026-02-15\",\n  \"comment\": \"I need to take some time off for family matters.\",\n  \"rejection_reason\": null,\n  \"attachment_url\": null,\n  \"attachment_name\": null\n}",
+          "latency": 0,
+          "statusCode": 200,
+          "label": "Set pending",
+          "headers": [
+            {
+              "key": "Content-Type",
+              "value": "application/json"
+            }
+          ],
+          "bodyType": "INLINE",
+          "filePath": "",
+          "databucketID": "",
+          "sendFileAsBody": false,
+          "rules": [],
+          "rulesOperator": "OR",
+          "disableTemplating": false,
+          "fallbackTo404": false,
+          "default": true,
+          "crudKey": "id",
+          "callbacks": []
+        }
+      ],
+      "responseMode": null,
+      "streamingMode": null,
+      "streamingInterval": 0
+    }
+  ],
+  "rootChildren": [
+    {
+      "type": "route",
+      "uuid": "a1b2c3d4-0002-0002-0002-000000000001"
+    },
+    {
+      "type": "route",
+      "uuid": "a1b2c3d4-0002-0002-0002-000000000002"
+    },
+    {
+      "type": "route",
+      "uuid": "a1b2c3d4-0002-0002-0002-000000000003"
+    },
+    {
+      "type": "route",
+      "uuid": "a1b2c3d4-0002-0002-0002-000000000004"
+    },
+    {
+      "type": "route",
+      "uuid": "a1b2c3d4-0002-0002-0002-000000000005"
+    },
+    {
+      "type": "route",
+      "uuid": "a1b2c3d4-0002-0002-0002-000000000006"
+    },
+    {
+      "type": "route",
+      "uuid": "a1b2c3d4-0002-0002-0002-000000000007"
+    },
+    {
+      "type": "route",
+      "uuid": "a1b2c3d4-0002-0002-0002-000000000008"
+    }
+  ],
+  "proxyMode": false,
+  "proxyHost": "",
+  "proxyRemovePrefix": false,
+  "tlsOptions": {
+    "enabled": false,
+    "type": "CERT",
+    "pfxPath": "",
+    "certPath": "",
+    "keyPath": "",
+    "caPath": "",
+    "passphrase": ""
+  },
+  "headers": [
+    {
+      "key": "Content-Type",
+      "value": "application/json"
+    },
+    {
+      "key": "Access-Control-Allow-Origin",
+      "value": "*"
+    },
+    {
+      "key": "Access-Control-Allow-Headers",
+      "value": "Content-Type, Authorization"
+    },
+    {
+      "key": "Access-Control-Allow-Methods",
+      "value": "GET, POST, PUT, PATCH, DELETE, OPTIONS"
+    }
+  ],
+  "proxyReqHeaders": [],
+  "proxyResHeaders": [],
+  "data": [],
+  "callbacks": [],
+  "cors": true
+}

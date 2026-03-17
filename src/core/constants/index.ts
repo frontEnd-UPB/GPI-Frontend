@@ -70,6 +70,9 @@ export const API_ENDPOINTS = {
     UPDATE: (id: string) => `/api/vacations/${id}`,
     APPROVE: (id: string) => `/api/vacations/${id}/approve`,
     REJECT: (id: string) => `/api/vacations/${id}/reject`,
+    CANCEL: (id: string) => `/api/vacations/${id}/cancel`,
+    PENDING: (id: string) => `/api/vacations/${id}/pending`,
+    BALANCE: (employeeId: string) => `/api/vacations/balance/${employeeId}`,
   },
 } as const;
 
