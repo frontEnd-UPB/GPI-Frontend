@@ -142,6 +142,16 @@ Alcance actual del sprint:
 - Solo se está implementando B2C (aka. login staff) dentro de la integración actual.
 - El endpoint `POST /login/patient` existe en el contrato backend, pero queda en reserva y no representa un error en este momento.
 
+### 4.7) Actualización vigente del módulo de autenticación
+
+Para evitar confusión con documentación anterior, en esta rama aplica lo siguiente:
+
+- El flujo real de login integrado es `AdminLoginPage -> useSignIn -> AuthContext -> authModuleService -> authApi`.
+- `PacientLoginPage` permanece como pantalla demo visual y no consume `authApi` en la implementación actual.
+- `authApi` usa endpoints `/api/auth/login` y `/api/employees/:id` (Mockoon en puerto 3001).
+- El flujo de recuperación (Forgot + OTP + Reset) sigue separado del login staff y se ejecuta con `mockBackendAuth`.
+- `LoginPage.tsx` existe en el módulo, pero no representa el flujo principal de autenticación staff en esta rama.
+
 ### 4.6) Contrato de autenticación con backend (Story 1.1)
 
 El contrato funcional completo y el estado de integración actual de endpoints se documentan en:
@@ -301,6 +311,13 @@ Flujo actual:
 6. `completePasswordReset(token, password)` guarda override en `meddical:password-overrides` y marca token como usado
 7. Redirección automática al login correspondiente tras éxito
 
+### 8.2) Ajustes vigentes del flujo recovery
+
+- El flujo requiere `meddical:reset-flow-active` en `sessionStorage` para proteger la navegación entre pantallas.
+- El OTP válido de entorno mock proviene de `src/core/mocks/data.ts`.
+- La pantalla OTP gestiona temporizador y reenvío local con `otp-timer` en `localStorage`.
+- La UI actual ya no depende del botón de prueba `Go Set New Password`; la navegación principal pasa por OTP.
+
 ---
 
 ## 9) Core UI (componentes semánticos del ERP)
@@ -367,6 +384,14 @@ Módulos actuales:
   - [src/modules/vacation-doctor/pages/DoctorVacationPage.tsx](src/modules/vacation-doctor/pages/DoctorVacationPage.tsx)
 - `vacation-management`
   - [src/modules/vacation-management/pages/VacationManagementPage.tsx](src/modules/vacation-management/pages/VacationManagementPage.tsx)
+
+### 10.1) Ajustes de estructura vigentes (importante)
+
+En la rama actual, considerar estos cambios de estructura al navegar el repo:
+
+- El componente listado como `themed-container.tsx` corresponde hoy a [src/modules/authentication/components/Container.tsx](src/modules/authentication/components/Container.tsx).
+- `AdminDashboard` y `DoctorDashboard` están en [src/modules/home/pages/index.ts](src/modules/home/pages/index.ts) (no en `src/modules/authentication/pages`).
+- El dominio de vacaciones está consolidado bajo [src/modules/vacation](src/modules/vacation), con submódulos `vacation-leave` y `vacation-management`.
 
 ---
 
