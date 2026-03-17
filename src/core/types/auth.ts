@@ -65,6 +65,7 @@ export interface SignInCredentials {
 
 export interface AuthContextValue {
   user: AuthUser | null;
+  isAuthenticated: boolean;
   loading: boolean;
   signIn: (credentials: SignInCredentials) => Promise<AuthUser>;
   signOut: () => Promise<void>;

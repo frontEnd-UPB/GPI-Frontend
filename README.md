@@ -87,6 +87,7 @@ Modelo de sesión asociado:
 Expone el contexto:
 
 - `user: AuthUser | null`
+- `isAuthenticated: boolean` (estado explícito de autenticación)
 - `loading: boolean`
 - `signIn(credentials: { email; password }): Promise<AuthUser>`
 - `signOut(): Promise<void>`
@@ -124,6 +125,8 @@ Manejo actual del token y Authorization Bearer:
 
 - El backend no entrega hoy un token que el frontend use como token oficial de autenticación.
 - El frontend sintetiza `meddical:token` como simulación de una sesión autenticada y para mantener una arquitectura consistente.
+- [src/context/AuthContext.tsx](src/context/AuthContext.tsx) mantiene `sessionToken` en memoria y lo conecta al cliente HTTP mediante `setAuthTokenResolver`.
+- [src/core/services/httpClient.ts](src/core/services/httpClient.ts) prioriza el token resuelto desde contexto/memoria y mantiene fallback a `localStorage` (`meddical:token`).
 - [src/core/services/httpClient.ts](src/core/services/httpClient.ts) agrega automáticamente `Authorization: Bearer <token>` en llamadas protegidas.
 - Para endpoints públicos, como login, se utiliza `skipAuth: true` para no enviar el header.
 - Esta decisión deja abierto el camino para que backend implemente un token real o un mecanismo de sesión distinto más adelante.
@@ -156,6 +159,7 @@ Para evitar confusión con documentación anterior, en esta rama aplica lo sigui
 - `authApi` usa endpoints `/api/auth/login` y `/api/employees/:id` (Mockoon en puerto 3001).
 - El flujo de recuperación (Forgot + OTP + Reset) sigue separado del login staff y se ejecuta con `mockBackendAuth`.
 - `LoginPage.tsx` existe en el módulo, pero no representa el flujo principal de autenticación staff en esta rama.
+- `AuthContext` ya expone `isAuthenticated` de forma explícita 
 
 ### 4.8) Estado Story 1.4 (modelo de usuario autenticado)
 
@@ -170,7 +174,8 @@ Evidencia en código:
 - Consumo en contexto (estado global de usuario): [src/context/AuthContext.tsx](src/context/AuthContext.tsx)
 - Validación de rehidratación: `isAuthUser` en [src/core/types/auth.ts](src/core/types/auth.ts)
 
-### 4.6) Contrato de autenticación con backend (Story 1.1)
+
+### 4.9) Contrato de autenticación con backend 
 
 El contrato funcional completo y el estado de integración actual de endpoints se documentan en:
 

@@ -16,6 +16,7 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
   const [user, setUser] = useState<AuthUser | null>(null);
   const [sessionToken, setSessionToken] = useState<string | null>(null);
   const [loading, setLoading] = useState(true);
+  const isAuthenticated = !!user;
 
   useEffect(() => {
     setAuthTokenResolver(() => sessionToken);
@@ -31,7 +32,7 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
       try {
         const userData = await authModuleService.getCurrentUser();
         if (userData) {
-          setSessionToken(localStorage.getItem(AUTH_STORAGE_KEYS.TOKEN));
+          setSessionToken(localStorage.getItem(AUTH_STORAGE_KEYS.TOKEN)); // ya que se pierde de la memoria al hacer f5, esto lo refresca
           setUser(userData);
           if (AUTH_DEBUG) console.log("Sesión restaurada para:", userData.email);
         } else {
@@ -95,6 +96,7 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
   // Context value
   const value: AuthContextValue = {
     user,
+    isAuthenticated,
     loading,
     signIn,
     signOut
