@@ -79,12 +79,32 @@ export const API_ENDPOINTS = {
     DELETE: (id: string) => `/api/appointments/${id}`,
   },
   VACATIONS: {
+    EMPLOYEE: {
+      LIST: "/myprofile/requestvacation",
+      DETAIL: (requestId: string) => `/myprofile/requestvacation/${requestId}`,
+      CREATE: "/myprofile/requestvacation",
+      UPDATE: (requestId: string) => `/myprofile/requestvacation/${requestId}`,
+      CANCEL: (requestId: string) =>
+        `/myprofile/requestvacation/${requestId}/cancel`,
+      BALANCE: (staffId: string) => `/myprofile/requestvacation/balance/${staffId}`,
+    },
+    HR: {
+      LIST: "/human-resources/vacation-managment",
+      DETAIL: (requestId: string) =>
+        `/human-resources/vacation-managment/${requestId}`,
+      UPDATE: (requestId: string) =>
+        `/human-resources/vacation-managment/${requestId}`,
+    },
+    // Legacy endpoints kept during migration.
     LIST: "/api/vacations",
     DETAIL: (id: string) => `/api/vacations/${id}`,
     CREATE: "/api/vacations",
     UPDATE: (id: string) => `/api/vacations/${id}`,
     APPROVE: (id: string) => `/api/vacations/${id}/approve`,
     REJECT: (id: string) => `/api/vacations/${id}/reject`,
+    CANCEL: (id: string) => `/api/vacations/${id}/cancel`,
+    PENDING: (id: string) => `/api/vacations/${id}/pending`,
+    BALANCE: (employeeId: string) => `/api/vacations/balance/${employeeId}`,
   },
 } as const;
 

@@ -26,6 +26,14 @@ export default defineConfig(({ mode }) => {
           target: apiProxyTarget,
           changeOrigin: true,
         },
+        "/myprofile": {
+          target: apiProxyTarget,
+          changeOrigin: true,
+        },
+        "/human-resources": {
+          target: apiProxyTarget,
+          changeOrigin: true,
+        },
       },
     },
     assetsInclude: ["**/*.svg", "**/*.csv"],
