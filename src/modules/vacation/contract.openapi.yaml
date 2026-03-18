@@ -165,7 +165,10 @@ paths:
       tags:
         - Employee Vacation
       summary: Cancel employee vacation request
-      description: Sets request status to cancelled.
+      description: |
+        Sets request status to cancelled.
+        Compatibility note: if this endpoint returns 404, frontend retries
+        PATCH /myprofile/requestvacation/{request_id} with status=cancelled.
       parameters:
         - $ref: '#/components/parameters/RequestId'
       responses:
@@ -272,7 +275,6 @@ paths:
       description: |
         Updates moderation status.
         rejection_reason is required when status=rejected.
-        During migration, reason may be accepted as an alias for rejection_reason.
       parameters:
         - $ref: '#/components/parameters/RequestId'
       requestBody:
@@ -496,6 +498,8 @@ components:
 
     EmployeeUpdateRequestJson:
       type: object
+      required:
+        - reason
       properties:
         start_date:
           type: string
@@ -518,6 +522,8 @@ components:
 
     EmployeeUpdateRequestMultipart:
       type: object
+      required:
+        - reason
       properties:
         start_date:
           type: string
@@ -549,10 +555,6 @@ components:
         rejection_reason:
           type: string
           nullable: true
-        reason:
-          type: string
-          nullable: true
-          description: Backward-compatible alias for rejection_reason during migration.
 
     ErrorResponse:
       type: object

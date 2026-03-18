@@ -1,0 +1,324 @@
+openapi: 3.0.3
+info:
+  title: Authentication API Contract
+  version: 1.0.0
+  description: |
+    Frontend-source-of-truth contract for authentication flows.
+
+    Notes:
+    - Staff login and current-user hydration are real HTTP endpoints used by authApi.
+    - Password recovery endpoints below are currently mock/dev compatibility operations,
+      aligned with forgotPasswordService return shapes.
+servers:
+  - url: /
+tags:
+  - name: Staff Authentication
+    description: Endpoints used by authApi/authModuleService.
+  - name: Password Recovery (Mock Compatibility)
+    description: Endpoints currently simulated by mockBackendAuth in frontend.
+paths:
+  /api/auth/login:
+    post:
+      tags:
+        - Staff Authentication
+      summary: Staff sign-in
+      description: |
+        Authenticates a staff user.
+        Frontend calls this endpoint without Authorization header (skipAuth=true).
+      security: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/StaffLoginRequest'
+      responses:
+        '200':
+          description: Sign-in succeeded.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/StaffLoginResponse'
+        '400':
+          $ref: '#/components/responses/BadRequest'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+
+  /api/employees/{id}:
+    get:
+      tags:
+        - Staff Authentication
+      summary: Get current staff profile
+      description: |
+        Retrieves employee profile used to hydrate AuthUser after login
+        and during session restoration.
+      parameters:
+        - $ref: '#/components/parameters/EmployeeId'
+      responses:
+        '200':
+          description: Employee profile.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/EmployeeProfileResponse'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '404':
+          $ref: '#/components/responses/NotFound'
+
+  /forgot_password:
+    post:
+      tags:
+        - Password Recovery (Mock Compatibility)
+      summary: Request password reset
+      description: |
+        Mock/dev compatibility contract currently simulated by frontend mockBackendAuth.
+      security: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/ForgotPasswordRequest'
+      responses:
+        '200':
+          description: Reset flow requested.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ForgotPasswordResponse'
+
+  /validate_reset_token:
+    post:
+      tags:
+        - Password Recovery (Mock Compatibility)
+      summary: Validate reset token
+      description: |
+        Mock/dev compatibility contract currently simulated by frontend mockBackendAuth.
+      security: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/ValidateResetTokenRequest'
+      responses:
+        '200':
+          description: Token validation result.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ValidateResetTokenResponse'
+
+  /reset_password:
+    post:
+      tags:
+        - Password Recovery (Mock Compatibility)
+      summary: Complete password reset
+      description: |
+        Mock/dev compatibility contract currently simulated by frontend mockBackendAuth.
+      security: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/ResetPasswordRequest'
+      responses:
+        '200':
+          description: Password reset completion result.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ResetPasswordResponse'
+
+components:
+  securitySchemes:
+    BearerAuth:
+      type: http
+      scheme: bearer
+      bearerFormat: JWT
+
+  parameters:
+    EmployeeId:
+      in: path
+      name: id
+      required: true
+      schema:
+        type: string
+
+  responses:
+    BadRequest:
+      description: Malformed input.
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/ErrorResponse'
+    Unauthorized:
+      description: Missing or invalid authentication.
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/ErrorResponse'
+    NotFound:
+      description: Resource not found.
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/ErrorResponse'
+
+  schemas:
+    StaffLoginRequest:
+      type: object
+      required:
+        - email
+        - password
+      properties:
+        email:
+          type: string
+          format: email
+        password:
+          type: string
+
+    StaffLoginResponse:
+      type: object
+      required:
+        - id
+        - name
+        - role
+      properties:
+        id:
+          type: string
+        name:
+          type: string
+        role:
+          type: string
+          enum:
+            - admin
+            - doctor
+
+    EmployeeProfileResponse:
+      type: object
+      required:
+        - id
+        - firstname
+        - lastname
+        - email
+        - role
+      properties:
+        id:
+          type: string
+        firstname:
+          type: string
+        lastname:
+          type: string
+        email:
+          type: string
+          format: email
+        role:
+          type: string
+          enum:
+            - admin
+            - doctor
+        profilePicture:
+          type: string
+          nullable: true
+
+    ForgotPasswordRequest:
+      type: object
+      required:
+        - email
+        - from
+      properties:
+        email:
+          type: string
+          format: email
+        from:
+          type: string
+          enum:
+            - patient
+            - doctor
+
+    ForgotPasswordResponse:
+      type: object
+      required:
+        - success
+        - message
+      properties:
+        success:
+          type: boolean
+        message:
+          type: string
+        token:
+          type: string
+          nullable: true
+
+    ValidateResetTokenRequest:
+      type: object
+      required:
+        - token
+      properties:
+        token:
+          type: string
+
+    ValidateResetTokenResponse:
+      type: object
+      required:
+        - success
+        - message
+      properties:
+        success:
+          type: boolean
+        message:
+          type: string
+        email:
+          type: string
+          format: email
+          nullable: true
+        from:
+          type: string
+          enum:
+            - patient
+            - doctor
+          nullable: true
+
+    ResetPasswordRequest:
+      type: object
+      required:
+        - token
+        - newPassword
+      properties:
+        token:
+          type: string
+        newPassword:
+          type: string
+
+    ResetPasswordResponse:
+      type: object
+      required:
+        - success
+        - message
+      properties:
+        success:
+          type: boolean
+        message:
+          type: string
+        from:
+          type: string
+          enum:
+            - patient
+            - doctor
+          nullable: true
+
+    ErrorResponse:
+      type: object
+      description: Frontend expects at least one of message or error.
+      properties:
+        message:
+          type: string
+        error:
+          type: string
+      additionalProperties: true
+
+security:
+  - BearerAuth: []

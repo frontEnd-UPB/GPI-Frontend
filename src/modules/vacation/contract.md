@@ -2,6 +2,9 @@
 
 This document defines the backend contract required by the vacation-leave frontend module.
 
+Related module contract:
+- Authentication: [../authentication/contract.md](../authentication/contract.md)
+
 Scope:
 - Use backend route naming convention already discussed.
 - Preserve current frontend behavior without reducing UX features.
@@ -101,7 +104,7 @@ Accepted body (application/json):
 - end_date: string (required)
 - reason: string (required)
 - comment: string | null (optional)
-- status: optional (backend should force pending on create)
+- status: optional (frontend may send pending for compatibility, backend must ignore client intent and force pending)
 
 Accepted body (multipart/form-data, optional attachment support):
 - staff_id (optional compatibility field; query param remains canonical)
@@ -128,7 +131,7 @@ Purpose:
 Accepted body (application/json):
 - start_date: string (optional)
 - end_date: string (optional)
-- reason: string (optional)
+- reason: string (required)
 - comment: string | null (optional)
 - remove_attachment: boolean (optional)
 - status: cancelled (optional, if using same endpoint for cancel)
@@ -160,6 +163,7 @@ Success:
 
 Alternative:
 - If this route is not implemented, PATCH /myprofile/requestvacation/{request_id} must support status=cancelled.
+- Frontend currently implements this fallback when /cancel responds with 404 (common in mock migration environments).
 
 ### GET /myprofile/requestvacation/balance/{staff_id}
 
@@ -202,9 +206,6 @@ Purpose:
 Body:
 - status: approved | rejected | pending (required)
 - rejection_reason: string (required when status=rejected)
-
-Backward compatibility:
-- reason may be accepted as alias for rejection_reason during migration.
 
 Success:
 - 200 OK
