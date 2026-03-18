@@ -1,1 +1,1 @@
-export * from "../../services/vacationRequestsApi";
+export * from "../../services/vacationManagementApiService";
