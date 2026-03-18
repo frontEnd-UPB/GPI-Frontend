@@ -1,4 +1,4 @@
-import { apiClient } from "../../../core/services/apiClient";
+import { ApiError, apiClient } from "../../../core/services/apiClient";
 import { API_ENDPOINTS } from "../../../core/constants";
 import type { VacationBalance } from "../../../core/constants";
 import type { VacationRequest } from "../../../core/mocks/data";
@@ -35,16 +35,17 @@ interface BackendVacationBalance {
 }
 
 interface BackendVacationRequest {
-  id: string;
-  employee_id: string;
+  id: string | number;
+  staff_id?: string | number;
+  employee_id?: string | number;
   start_date: string;
   end_date: string;
   rejection_reason?: string | null;
-  reason: string;
+  reason: string | null;
   status: string;
-  request_date: string;
+  request_date?: string;
   comment: string | null;
-  attachment_url: string | null;
+  attachment_url?: string | null;
   attachment_name?: string | null;
 }
 
@@ -60,18 +61,34 @@ function toVacationBalance(raw: BackendVacationBalance): VacationBalance {
   };
 }
 
+function normalizeVacationStatus(
+  rawStatus: string
+): VacationRequest["status"] {
+  const normalized = rawStatus.trim().toLowerCase();
+
+  if (normalized === "accepted") return "approved";
+  if (normalized === "approved") return "approved";
+  if (normalized === "rejected") return "rejected";
+  if (normalized === "cancelled") return "cancelled";
+  return "pending";
+}
+
 function toVacationRequest(raw: BackendVacationRequest): VacationRequest {
+  const status = normalizeVacationStatus(raw.status);
+  const staffId = raw.staff_id ?? raw.employee_id;
+
   return {
-    id: raw.id,
-    employeeId: raw.employee_id,
+    id: String(raw.id),
+    employeeId: staffId != null ? String(staffId) : "",
     startDate: raw.start_date,
     endDate: raw.end_date,
-    rejectionReason: raw.rejection_reason ?? null,
-    reason: raw.reason,
-    status: raw.status as VacationRequest["status"],
-    requestDate: raw.request_date,
+    rejectionReason:
+      raw.rejection_reason ?? (status === "rejected" ? raw.reason : null),
+    reason: raw.reason ?? "",
+    status,
+    requestDate: raw.request_date ?? raw.start_date,
     comment: raw.comment,
-    attachmentUrl: raw.attachment_url,
+    attachmentUrl: raw.attachment_url ?? null,
     attachmentName: raw.attachment_name ?? null,
   };
 }
@@ -91,13 +108,13 @@ function toLocalIsoDate(date: Date): string {
  * Fetches the vacation balance (assigned / used / available days) for a
  * given employee.
  *
- * GET /api/vacations/balance/:employeeId
+ * GET /myprofile/requestvacation/balance/:staffId
  */
 export async function getVacationBalance(
-  employeeId: string
+  staffId: string
 ): Promise<VacationBalance | null> {
   const raw = await apiClient.get<BackendVacationBalance>(
-    API_ENDPOINTS.VACATIONS.BALANCE(employeeId)
+    API_ENDPOINTS.VACATIONS.EMPLOYEE.BALANCE(staffId)
   );
   return toVacationBalance(raw);
 }
@@ -106,14 +123,18 @@ export async function getVacationBalance(
  * Returns all vacation requests submitted by a specific employee, ordered by
  * start date ascending.
  *
- * GET /api/vacations?employeeId=:employeeId
+ * GET /myprofile/requestvacation?staff_id=:staffId
  */
 export async function listEmployeeVacationRequests(
-  employeeId: string
+  staffId: string
 ): Promise<VacationRequest[]> {
   const rawList = await apiClient.get<BackendVacationRequest[]>(
-    API_ENDPOINTS.VACATIONS.LIST,
-    { employeeId }
+    API_ENDPOINTS.VACATIONS.EMPLOYEE.LIST,
+    {
+      staff_id: staffId,
+      // Helps Mockoon CRUD filtering while preserving backend contract param.
+      staff_id_eq: staffId,
+    }
   );
   return rawList
     .map(toVacationRequest)
@@ -124,10 +145,10 @@ export async function listEmployeeVacationRequests(
  * Creates a new vacation request for an employee. If a file attachment is
  * provided it is sent as `multipart/form-data`; otherwise a JSON body is used.
  *
- * POST /api/vacations
+ * POST /myprofile/requestvacation?staff_id=:staffId
  */
 export async function submitVacationRequest(
-  employeeId: string,
+  staffId: string,
   submitData: SubmitVacationData
 ): Promise<VacationRequest> {
   const { startDate, endDate, reason, comment, attachment } = submitData;
@@ -136,25 +157,27 @@ export async function submitVacationRequest(
 
   if (attachment) {
     const form = new FormData();
-    form.append("employeeId", employeeId);
-    form.append("startDate", toLocalIsoDate(startDate));
-    form.append("endDate", toLocalIsoDate(endDate));
+    form.append("staff_id", staffId);
+    form.append("start_date", toLocalIsoDate(startDate));
+    form.append("end_date", toLocalIsoDate(endDate));
     form.append("reason", reason);
-    if (comment) form.append("comment", comment);
+    form.append("status", "pending");
+    if (comment != null) form.append("comment", comment);
     form.append("attachment", attachment, attachment.name);
     body = form;
   } else {
     body = {
-      employeeId,
-      startDate: toLocalIsoDate(startDate),
-      endDate: toLocalIsoDate(endDate),
+      staff_id: staffId,
+      start_date: toLocalIsoDate(startDate),
+      end_date: toLocalIsoDate(endDate),
       reason,
+      status: "pending",
       comment: comment ?? null,
     };
   }
 
   const raw = await apiClient.post<BackendVacationRequest>(
-    API_ENDPOINTS.VACATIONS.CREATE,
+    `${API_ENDPOINTS.VACATIONS.EMPLOYEE.CREATE}?staff_id=${encodeURIComponent(staffId)}`,
     body
   );
   return toVacationRequest(raw);
@@ -164,7 +187,7 @@ export async function submitVacationRequest(
  * Updates an existing vacation request. Supports replacing or removing the
  * file attachment.
  *
- * PUT /api/vacations/:requestId
+ * PATCH /myprofile/requestvacation/:requestId
  */
 export async function updateVacationRequest(
   requestId: string,
@@ -177,24 +200,25 @@ export async function updateVacationRequest(
 
   if (attachment) {
     const form = new FormData();
-    if (startDate) form.append("startDate", toLocalIsoDate(startDate));
-    if (endDate) form.append("endDate", toLocalIsoDate(endDate));
+    if (startDate) form.append("start_date", toLocalIsoDate(startDate));
+    if (endDate) form.append("end_date", toLocalIsoDate(endDate));
     form.append("reason", reason);
-    if (comment) form.append("comment", comment);
+    if (comment != null) form.append("comment", comment);
+    if (removeAttachment === true) form.append("remove_attachment", "true");
     form.append("attachment", attachment, attachment.name);
     body = form;
   } else {
     body = {
-      ...(startDate ? { startDate: toLocalIsoDate(startDate) } : {}),
-      ...(endDate ? { endDate: toLocalIsoDate(endDate) } : {}),
+      ...(startDate ? { start_date: toLocalIsoDate(startDate) } : {}),
+      ...(endDate ? { end_date: toLocalIsoDate(endDate) } : {}),
       reason,
       comment: comment ?? null,
-      removeAttachment: removeAttachment === true,
+      remove_attachment: removeAttachment === true,
     };
   }
 
-  const raw = await apiClient.put<BackendVacationRequest>(
-    API_ENDPOINTS.VACATIONS.UPDATE(requestId),
+  const raw = await apiClient.patch<BackendVacationRequest>(
+    API_ENDPOINTS.VACATIONS.EMPLOYEE.UPDATE(requestId),
     body
   );
   return toVacationRequest(raw);
@@ -203,13 +227,26 @@ export async function updateVacationRequest(
 /**
  * Cancels a vacation request by its ID.
  *
- * PATCH /api/vacations/:requestId/cancel
+ * PATCH /myprofile/requestvacation/:requestId/cancel
  */
 export async function cancelVacationRequest(
   requestId: string
 ): Promise<VacationRequest | null> {
-  const raw = await apiClient.patch<BackendVacationRequest>(
-    API_ENDPOINTS.VACATIONS.CANCEL(requestId)
-  );
-  return toVacationRequest(raw);
+  try {
+    const raw = await apiClient.patch<BackendVacationRequest>(
+      API_ENDPOINTS.VACATIONS.EMPLOYEE.CANCEL(requestId)
+    );
+    return toVacationRequest(raw);
+  } catch (error) {
+    // Compatibility fallback while backend decides between explicit /cancel and status patch.
+    if (error instanceof ApiError && error.status === 404) {
+      const raw = await apiClient.patch<BackendVacationRequest>(
+        API_ENDPOINTS.VACATIONS.EMPLOYEE.UPDATE(requestId),
+        { status: "cancelled" }
+      );
+      return toVacationRequest(raw);
+    }
+
+    throw error;
+  }
 }

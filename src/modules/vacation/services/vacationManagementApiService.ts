@@ -19,16 +19,17 @@ export interface FetchVacationRequestsParams {
 // ---------------------------------------------------------------------------
 
 interface BackendVacationRequest {
-  id: string;
-  employee_id: string;
+  id: string | number;
+  staff_id?: string | number;
+  employee_id?: string | number;
   start_date: string;
   end_date: string;
   rejection_reason?: string | null;
-  reason: string;
+  reason: string | null;
   status: string;
-  request_date: string;
+  request_date?: string;
   comment: string | null;
-  attachment_url: string | null;
+  attachment_url?: string | null;
   attachment_name?: string | null;
 }
 
@@ -36,18 +37,34 @@ interface BackendVacationRequest {
 // Mapper – backend DTO → UI model
 // ---------------------------------------------------------------------------
 
+function normalizeVacationStatus(
+  rawStatus: string
+): VacationRequest["status"] {
+  const normalized = rawStatus.trim().toLowerCase();
+
+  if (normalized === "accepted") return "approved";
+  if (normalized === "approved") return "approved";
+  if (normalized === "rejected") return "rejected";
+  if (normalized === "cancelled") return "cancelled";
+  return "pending";
+}
+
 function toVacationRequest(raw: BackendVacationRequest): VacationRequest {
+  const status = normalizeVacationStatus(raw.status);
+  const staffId = raw.staff_id ?? raw.employee_id;
+
   return {
-    id: raw.id,
-    employeeId: raw.employee_id,
+    id: String(raw.id),
+    employeeId: staffId != null ? String(staffId) : "",
     startDate: raw.start_date,
     endDate: raw.end_date,
-    rejectionReason: raw.rejection_reason ?? null,
-    reason: raw.reason,
-    status: raw.status as VacationRequest["status"],
-    requestDate: raw.request_date,
+    rejectionReason:
+      raw.rejection_reason ?? (status === "rejected" ? raw.reason : null),
+    reason: raw.reason ?? "",
+    status,
+    requestDate: raw.request_date ?? raw.start_date,
     comment: raw.comment,
-    attachmentUrl: raw.attachment_url,
+    attachmentUrl: raw.attachment_url ?? null,
     attachmentName: raw.attachment_name ?? null,
   };
 }
@@ -60,7 +77,7 @@ function toVacationRequest(raw: BackendVacationRequest): VacationRequest {
  * Fetches all vacation requests, optionally filtered by status and/or
  * employee name search term.
  *
- * GET /api/vacations[?status=pending&status=approved&search=term]
+ * GET /human-resources/vacation-managment[?status=pending&status=approved&search=term]
  */
 export async function fetchVacationRequests(
   params: FetchVacationRequestsParams = {}
@@ -76,7 +93,7 @@ export async function fetchVacationRequests(
   }
 
   const rawList = await apiClient.get<BackendVacationRequest[]>(
-    API_ENDPOINTS.VACATIONS.LIST,
+    API_ENDPOINTS.VACATIONS.HR.LIST,
     queryParams
   );
   return rawList.map(toVacationRequest);
@@ -85,13 +102,14 @@ export async function fetchVacationRequests(
 /**
  * Approves a vacation request.
  *
- * POST /api/vacations/:id/approve
+ * PATCH /human-resources/vacation-managment/:id { status: approved }
  */
 export async function approveVacationRequest(
   id: string
 ): Promise<VacationRequest | null> {
-  const raw = await apiClient.post<BackendVacationRequest>(
-    API_ENDPOINTS.VACATIONS.APPROVE(id)
+  const raw = await apiClient.patch<BackendVacationRequest>(
+    API_ENDPOINTS.VACATIONS.HR.UPDATE(id),
+    { status: VACATION_STATUS.APPROVED }
   );
   return toVacationRequest(raw);
 }
@@ -99,15 +117,20 @@ export async function approveVacationRequest(
 /**
  * Rejects a vacation request with a mandatory rejection reason.
  *
- * POST /api/vacations/:id/reject
+ * PATCH /human-resources/vacation-managment/:id { status: rejected, rejection_reason }
  */
 export async function rejectVacationRequest(
   id: string,
   reason: string
 ): Promise<VacationRequest | null> {
-  const raw = await apiClient.post<BackendVacationRequest>(
-    API_ENDPOINTS.VACATIONS.REJECT(id),
-    { reason }
+  const raw = await apiClient.patch<BackendVacationRequest>(
+    API_ENDPOINTS.VACATIONS.HR.UPDATE(id),
+    {
+      status: VACATION_STATUS.REJECTED,
+      rejection_reason: reason,
+      // Temporary alias included for compatibility with backends that still read `reason`.
+      reason,
+    }
   );
   return toVacationRequest(raw);
 }
@@ -115,13 +138,14 @@ export async function rejectVacationRequest(
 /**
  * Reverts a vacation request back to pending status.
  *
- * PATCH /api/vacations/:id/pending
+ * PATCH /human-resources/vacation-managment/:id { status: pending }
  */
 export async function setVacationRequestPending(
   id: string
 ): Promise<VacationRequest | null> {
   const raw = await apiClient.patch<BackendVacationRequest>(
-    API_ENDPOINTS.VACATIONS.PENDING(id)
+    API_ENDPOINTS.VACATIONS.HR.UPDATE(id),
+    { status: VACATION_STATUS.PENDING }
   );
   return toVacationRequest(raw);
 }

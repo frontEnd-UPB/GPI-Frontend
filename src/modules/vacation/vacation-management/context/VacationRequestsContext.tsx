@@ -1,13 +1,19 @@
-import React, { createContext, useContext, useEffect, useMemo, useState } from "react";
+import React, {
+  createContext,
+  useCallback,
+  useContext,
+  useEffect,
+  useMemo,
+  useState,
+} from "react";
 import type { VacationRequest } from "../../../../core/mocks/data";
 import { mockEmployees } from "../../../../core/mocks/data";
 import { VACATION_STATUS } from "../../../../core/constants";
 import {
   approveVacationRequest,
-  getCachedVacationRequests,
+  fetchVacationRequests,
   rejectVacationRequest,
   setVacationRequestPending,
-  subscribeToVacationRequests,
 } from "../services/vacationRequestsApi";
 
 export interface VacationRequestsContextValue {
@@ -37,28 +43,36 @@ const VacationRequestsContext = createContext<VacationRequestsContextValue | und
 export const VacationRequestsProvider: React.FC<{ children: React.ReactNode }> = ({
   children,
 }) => {
-  const [requests, setRequests] = useState<VacationRequest[]>(() => getCachedVacationRequests());
+  const [requests, setRequests] = useState<VacationRequest[]>([]);
   const [search, setSearch] = useState<string>("");
   const [specialtyFilter, setSpecialtyFilter] = useState<string>("");
 
-  useEffect(() => {
-    const unsubscribe = subscribeToVacationRequests((nextRequests) => {
+  const loadRequests = useCallback(async () => {
+    try {
+      const nextRequests = await fetchVacationRequests();
       setRequests(nextRequests);
-    });
-
-    return unsubscribe;
+    } catch {
+      setRequests([]);
+    }
   }, []);
+
+  useEffect(() => {
+    void loadRequests();
+  }, [loadRequests]);
 
   const approveRequest = async (id: string) => {
     await approveVacationRequest(id);
+    await loadRequests();
   };
 
   const rejectRequest = async (id: string, reason: string) => {
     await rejectVacationRequest(id, reason);
+    await loadRequests();
   };
 
   const setRequestPending = async (id: string) => {
     await setVacationRequestPending(id);
+    await loadRequests();
   };
 
   const value = useMemo(
