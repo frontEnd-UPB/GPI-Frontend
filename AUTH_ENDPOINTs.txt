@@ -1,0 +1,178 @@
+Authentication Endpoint Integration Guide
+Story 1.1 - Contrato de autenticacion con backend
+
+Objetivo
+- Documentar el contrato de endpoints de autenticacion y su integracion en frontend.
+- Dejar trazabilidad entre el contrato backend y la implementacion actual del proyecto.
+
+Decision de alcance actual
+- Actualmente solo se esta implementando B2C (aka. login staff) dentro del frontend actual.
+- El endpoint POST /login/patient queda documentado y reservado para una fase posterior. No se considera un error ni una inconsistencia activa.
+
+Alcance de integracion (Capability 2)
+- Manejo de sesion de usuario en frontend.
+- Persistencia local de sesion (meddical:user, meddical:token).
+- Envio de datos de sesion en llamadas API (Authorization Bearer con token de sesion).
+
+Configuracion tecnica actual del frontend
+- Base URL API:
+  - Se usa VITE_API_BASE_URL en produccion.
+  - En desarrollo se trabaja con ruta relativa y proxy de Vite.
+- Cliente HTTP centralizado:
+  - Archivo: src/core/services/httpClient.ts
+  - Incluye Authorization Bearer automaticamente cuando existe meddical:token.
+  - Opcion skipAuth: true para endpoints publicos (por ejemplo login).
+- Servicio de autenticacion:
+  - src/modules/authentication/services/authApi.ts
+  - src/modules/authentication/services/authModuleService.ts
+
+Como se maneja el token actualmente
+- El backend no retorna un token que el frontend use como fuente de verdad.
+- El frontend sintetiza un auth token local al completar el login exitoso.
+- Ese token se almacena en meddical:token como simulacion de buenas practicas de sesion autenticada.
+- En llamadas protegidas, httpClient lee meddical:token y agrega Authorization: Bearer <token> automaticamente.
+- En endpoints publicos, se utiliza skipAuth: true para evitar enviar el header Authorization.
+- Esta decision mantiene abierta la posibilidad de que backend implemente un token real o un mecanismo de sesion mas adelante, sin obligar a refactorizar toda la arquitectura actual.
+
+Contrato de endpoints de autenticacion (backend)
+
+1) POST /login/patient
+Request
+{
+  "email": "patient@email.com",
+  "password": "123456"
+}
+Response (Success)
+{
+  "id": 5,
+  "name": "John Doe",
+  "role": "Patient"
+}
+Response (Error - usuario no existe)
+{
+  "success": false,
+  "message": "Invalid User"
+}
+Response (Error - contrasena incorrecta)
+{
+  "success": false,
+  "message": "Invalid Password"
+}
+Response (Error - usuario no es paciente)
+{
+  "success": false,
+  "message": "User is not a patient"
+}
+
+Nota de uso actual
+- Este endpoint no se esta consumiendo en la implementacion vigente.
+- Se conserva como endpoint de reserva del contrato backend.
+
+2) POST /login/staff
+Request
+{
+  "email": "doctor@email.com",
+  "password": "123456"
+}
+Response (Success)
+{
+  "id": 2,
+  "name": "Dr. Smith",
+  "role": "Staff"
+}
+Response (Error - credenciales invalidas)
+{
+  "success": false,
+  "message": "Invalid credentials"
+}
+Response (Error - usuario no es staff)
+{
+  "success": false,
+  "message": "User is not staff"
+}
+
+Nota de uso actual
+- Este es el endpoint priorizado para el login actualmente implementado en frontend.
+
+3) POST /forgot_password
+Payload
+{
+  "email": "user@email.com"
+}
+Response
+{
+  "message": "Verification code sent"
+}
+
+4) POST /register
+Payload
+{
+  "email": "user@email.com"
+}
+Response
+{
+  "message": "Verification code sent"
+}
+
+5) POST /verify
+Payload
+{
+  "email": "user@email.com",
+  "code": "123456"
+}
+Response (reset password)
+{
+  "message": "Code verified",
+  "next_step": "/reset_password",
+  "email": "user@email.com"
+}
+Response (registro)
+{
+  "message": "Code verified",
+  "next_step": "/register_user",
+  "email": "user@email.com"
+}
+
+6) POST /reset_password
+Payload
+{
+  "email": "user@email.com",
+  "new_password": "NewPassword123"
+}
+Response
+{
+  "message": "Password updated successfully"
+}
+
+7) POST /register_user
+Payload
+{
+  "email": "user@email.com",
+  "password": "SecurePassword123",
+  "first_name": "Juan",
+  "last_name": "Perez",
+  "date_of_birth": "1995-01-01",
+  "contact_number": "77777777"
+}
+Response
+{
+  "message": "User registered successfully"
+}
+
+Estado de integracion actual (frontend)
+- Existe cliente HTTP centralizado con soporte para auth header y skipAuth.
+- Existe flujo de login conectado al backend via authApi.signIn.
+- Actualmente authApi.signIn consume endpoint definido en API_ENDPOINTS.AUTH.LOGIN.
+- El contrato backend final para login separa login patient y login staff.
+- A nivel funcional del sprint, solo se esta priorizando el flujo staff.
+
+Ajuste pendiente para alineacion completa
+- Mantener API_ENDPOINTS.AUTH como capa actual del frontend.
+- Exponer tambien los endpoints literales del contrato backend para referencia e integracion progresiva.
+- Cuando se implemente patient login, seleccionar endpoint segun pantalla o flujo especifico.
+
+Decision vigente del sprint
+- Se mantiene token de sesion (no JWT real) para persistencia y Authorization en llamadas protegidas.
+- El valor almacenado en meddical:token es correcto para la fase actual de integracion.
+- No se planea utilizar tokens emitidos por backend en esta etapa.
+- El auth token sintetizado actual es una simulacion de buenas practicas, dejando abierto el espacio para una implementacion backend futura si el proyecto lo requiere.

@@ -1,3 +1,16 @@
+/**
+ * FE-164: Shared Authentication Component — BlurredBackground
+ * 
+ * Reusable layout wrapper used across multiple authentication pages:
+ * - ForgotPasswordPage
+ * - ResetPasswordPage
+ * - OtpVerification
+ * 
+ * Provides:
+ * - Background image with blur overlay for visual hierarchy
+ * - Responsive flex layout centering child content
+ * - Consistent styling across password recovery flow
+ */
 import React from "react";
 import bgImage from "../assets/auth_bg_image.png";
 
@@ -9,7 +22,7 @@ interface BlurredBackgroundProps {
 
 const BlurredBackground: React.FC<BlurredBackgroundProps> = ({ children, className = "", style }) => (
   <div
-    className={`min-h-screen flex items-center justify-center p-4 relative ${className}`}
+    className={`relative flex w-full flex-1 items-center justify-center overflow-hidden px-4 py-8 sm:px-6 sm:py-12 ${className}`}
     style={{
       backgroundImage: `url(${bgImage})`,
       backgroundSize: "cover",

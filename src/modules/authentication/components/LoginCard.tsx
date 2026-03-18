@@ -1,3 +1,17 @@
+/**
+ * FE-164: Shared Authentication Component — LoginCard
+ * 
+ * Reusable card component for role selection during login, used in:
+ * - LoginPage (admin/doctor quick login)
+ * - signup flows
+ * 
+ * Displays:
+ * - Admin and doctor user buttons with icons
+ * - Email and role information
+ * - Click handler to trigger login with pre-filled credentials
+ * 
+ * Note: Reads from mockEmployees (data.ts) to populate user list, it is not expected to pull from backend
+ */
 import React from "react";
 import { mockEmployees } from "../../../core/mocks/data";
 import { Button } from "../../../core/components";

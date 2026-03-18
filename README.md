@@ -90,22 +90,38 @@ Expone el contexto:
 
 Archivo: [src/modules/authentication/services/authModuleService.ts](src/modules/authentication/services/authModuleService.ts)
 
+Integración API asociada:
+
+- [src/modules/authentication/services/authApi.ts](src/modules/authentication/services/authApi.ts)
+- [src/core/services/httpClient.ts](src/core/services/httpClient.ts)
+
 - `signIn(email, password)`
 - `getCurrentUser()`
 - `signOut()`
 
-La autenticación es mock y valida contra `mockEmployees`, pero la contraseña efectiva se obtiene por:
+Cómo funciona hoy:
 
-1. `forgotPasswordService.getMockPasswordForEmail(email)` (override en `localStorage` si hubo reset)
-2. fallback a `mockEmployees.password` de [src/core/mocks/data.ts](src/core/mocks/data.ts)
+- El login ya no valida contra [src/core/mocks/data.ts](src/core/mocks/data.ts).
+- El frontend envía email y password a través de `authApi.signIn()` usando el cliente HTTP centralizado.
+- La implementación priorizada actualmente es el flujo staff.
+- El endpoint patient está documentado como parte del contrato backend, pero queda reservado para una fase posterior.
+- Tras un login exitoso, el frontend construye una sesión local a partir de la respuesta del backend.
 
 ### 4.4) Persistencia actual (`localStorage`)
 
 - `meddical:user`: usuario de sesión
-- `meddical:token`: token mock de sesión
+- `meddical:token`: token sintético de sesión
 - `meddical:password-reset-requests`: solicitudes/token de reset mock
 - `meddical:password-overrides`: contraseñas mock reseteadas por email
 - `otp-timer`: estado del contador OTP
+
+Manejo actual del token y Authorization Bearer:
+
+- El backend no entrega hoy un token que el frontend use como token oficial de autenticación.
+- El frontend sintetiza `meddical:token` como simulación de una sesión autenticada y para mantener una arquitectura consistente.
+- [src/core/services/httpClient.ts](src/core/services/httpClient.ts) agrega automáticamente `Authorization: Bearer <token>` en llamadas protegidas.
+- Para endpoints públicos, como login, se utiliza `skipAuth: true` para no enviar el header.
+- Esta decisión deja abierto el camino para que backend implemente un token real o un mecanismo de sesión distinto más adelante.
 
 ### 4.5) Cómo se hace el login hoy
 
@@ -117,10 +133,61 @@ Páginas:
 Ambas:
 
 - usan `useAuth()` o `useSignIn()`
-- validan email/password contra el mock service
+- pasan por `AuthContext` y `authModuleService`
+- terminan delegando la llamada HTTP a `authApi.signIn()`
 - redirigen según rol al dashboard correspondiente
 
-Además existe [src/modules/authentication/components/LoginCard.tsx](src/modules/authentication/components/LoginCard.tsx) con quick login demo (`Esthera`/`Alexa`) usando también la contraseña efectiva (override + fallback).
+Alcance actual del sprint:
+
+- Solo se está implementando B2C (aka. login staff) dentro de la integración actual.
+- El endpoint `POST /login/patient` existe en el contrato backend, pero queda en reserva y no representa un error en este momento.
+
+### 4.7) Actualización vigente del módulo de autenticación
+
+Para evitar confusión con documentación anterior, en esta rama aplica lo siguiente:
+
+- El flujo real de login integrado es `AdminLoginPage -> useSignIn -> AuthContext -> authModuleService -> authApi`.
+- `PacientLoginPage` permanece como pantalla demo visual y no consume `authApi` en la implementación actual.
+- `authApi` usa endpoints `/api/auth/login` y `/api/employees/:id` (Mockoon en puerto 3001).
+- El flujo de recuperación (Forgot + OTP + Reset) sigue separado del login staff y se ejecuta con `mockBackendAuth`.
+- `LoginPage.tsx` existe en el módulo, pero no representa el flujo principal de autenticación staff en esta rama.
+
+### 4.6) Contrato de autenticación con backend (Story 1.1)
+
+El contrato funcional completo y el estado de integración actual de endpoints se documentan en:
+
+- [AUTH_ENDPOINT_INTEGRATION.txt](AUTH_ENDPOINT_INTEGRATION.txt)
+
+Resumen breve:
+
+- Login separado por tipo de usuario: `POST /login/patient` y `POST /login/staff`.
+- Actualmente se prioriza solo el flujo staff; el endpoint patient queda reservado.
+- Flujos de recuperación/registro: `POST /forgot_password`, `POST /register`, `POST /verify`, `POST /reset_password`, `POST /register_user`.
+- Respuesta de login exitosa con `id`, `name` y `role`; errores con `success: false` y `message`.
+- Integración frontend con cliente HTTP centralizado, sesión local (`meddical:user`, `meddical:token`) y uso automático de `Authorization: Bearer` para rutas protegidas.
+
+### 4.10) Manejo de errores en respuestas 
+
+Flujo de manejo de errores:
+
+- [src/core/services/httpClient.ts](src/core/services/httpClient.ts) transforma respuestas no exitosas en `ApiError` con `status` y `message`.
+- [src/modules/authentication/services/authApi.ts](src/modules/authentication/services/authApi.ts) normaliza errores de login:
+  - `400` -> "Email and password are required"
+  - `401` -> "Invalid email or password"
+  - otros -> mensaje del backend o fallback genérico
+- [src/modules/authentication/services/authModuleService.ts](src/modules/authentication/services/authModuleService.ts) limpia sesión si `getCurrentUserById` retorna error auth (`401/404`).
+- [src/modules/authentication/hooks/useSignIn.ts](src/modules/authentication/hooks/useSignIn.ts) propaga el error a la UI.
+- [src/modules/authentication/pages/AdminLoginPage.tsx](src/modules/authentication/pages/AdminLoginPage.tsx) renderiza el mensaje de error en pantalla.
+
+Respuestas esperadas en auth staff:
+
+- `POST /api/auth/login`
+  - `200` con `id`, `name`, `role` cuando credenciales son válidas
+  - `400` cuando faltan credenciales
+  - `401` cuando credenciales son inválidas (No funciona todavía limitaciones de mockoon)
+- `GET /api/employees/:id`
+  - `200` con perfil del empleado si existe
+  - `404` si el id no existe
 
 ---
 
@@ -267,6 +334,13 @@ Flujo actual:
 6. `completePasswordReset(token, password)` guarda override en `meddical:password-overrides` y marca token como usado
 7. Redirección automática al login correspondiente tras éxito
 
+### 8.2) Ajustes vigentes del flujo recovery
+
+- El flujo requiere `meddical:reset-flow-active` en `sessionStorage` para proteger la navegación entre pantallas.
+- El OTP válido de entorno mock proviene de `src/core/mocks/data.ts`.
+- La pantalla OTP gestiona temporizador y reenvío local con `otp-timer` en `localStorage`.
+- La UI actual ya no depende del botón de prueba `Go Set New Password`; la navegación principal pasa por OTP.
+
 ---
 
 ## 9) Core UI (componentes semánticos del ERP)
@@ -333,6 +407,14 @@ Módulos actuales:
   - [src/modules/vacation-doctor/pages/DoctorVacationPage.tsx](src/modules/vacation-doctor/pages/DoctorVacationPage.tsx)
 - `vacation-management`
   - [src/modules/vacation-management/pages/VacationManagementPage.tsx](src/modules/vacation-management/pages/VacationManagementPage.tsx)
+
+### 10.1) Ajustes de estructura vigentes (importante)
+
+En la rama actual, considerar estos cambios de estructura al navegar el repo:
+
+- El componente listado como `themed-container.tsx` corresponde hoy a [src/modules/authentication/components/Container.tsx](src/modules/authentication/components/Container.tsx).
+- `AdminDashboard` y `DoctorDashboard` están en [src/modules/home/pages/index.ts](src/modules/home/pages/index.ts) (no en `src/modules/authentication/pages`).
+- El dominio de vacaciones está consolidado bajo [src/modules/vacation](src/modules/vacation), con submódulos `vacation-leave` y `vacation-management`.
 
 ---
 
