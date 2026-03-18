@@ -1,4 +1,4 @@
-import { apiClient } from "../../../core/services/apiClient";
+import { apiClient } from "../../../core/services/httpClient";
 import { API_ENDPOINTS, VACATION_STATUS } from "../../../core/constants";
 import type { VacationRequest } from "../../../core/mocks/data";
 
@@ -94,7 +94,7 @@ export async function fetchVacationRequests(
 
   const rawList = await apiClient.get<BackendVacationRequest[]>(
     API_ENDPOINTS.VACATIONS.HR.LIST,
-    queryParams
+    { query: queryParams }
   );
   return rawList.map(toVacationRequest);
 }
@@ -128,8 +128,6 @@ export async function rejectVacationRequest(
     {
       status: VACATION_STATUS.REJECTED,
       rejection_reason: reason,
-      // Temporary alias included for compatibility with backends that still read `reason`.
-      reason,
     }
   );
   return toVacationRequest(raw);

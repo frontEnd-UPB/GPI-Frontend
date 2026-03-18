@@ -46,11 +46,41 @@ async function parseResponseBody(response: Response): Promise<unknown> {
 
   const contentType = response.headers.get("content-type") ?? "";
   if (contentType.includes("application/json")) {
-    return response.json();
+    try {
+      return await response.json();
+    } catch {
+      return null;
+    }
   }
 
   const text = await response.text();
   return text ? text : null;
+}
+
+function getErrorMessage(response: Response, responseBody: unknown): string {
+  if (typeof responseBody === "object" && responseBody !== null) {
+    const maybeMessage =
+      "message" in responseBody && typeof responseBody.message === "string"
+        ? responseBody.message
+        : null;
+    if (maybeMessage && maybeMessage.trim().length > 0) {
+      return maybeMessage;
+    }
+
+    const maybeError =
+      "error" in responseBody && typeof responseBody.error === "string"
+        ? responseBody.error
+        : null;
+    if (maybeError && maybeError.trim().length > 0) {
+      return maybeError;
+    }
+  }
+
+  if (typeof responseBody === "string" && responseBody.trim().length > 0) {
+    return responseBody;
+  }
+
+  return response.statusText || `Request failed with status ${response.status}`;
 }
 
 function buildUrl(endpoint: string, query?: QueryParams): string {
@@ -115,13 +145,7 @@ export async function httpRequest<T>(
   const responseBody = await parseResponseBody(response);
 
   if (!response.ok) {
-    const message =
-      typeof responseBody === "object" &&
-      responseBody !== null &&
-      "message" in responseBody &&
-      typeof responseBody.message === "string"
-        ? responseBody.message
-        : `Request failed with status ${response.status}`;
+    const message = getErrorMessage(response, responseBody);
 
     throw new ApiError(message, response.status, responseBody);
   }

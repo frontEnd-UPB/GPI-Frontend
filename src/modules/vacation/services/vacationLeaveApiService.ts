@@ -1,4 +1,4 @@
-import { ApiError, apiClient } from "../../../core/services/apiClient";
+import { ApiError, apiClient } from "../../../core/services/httpClient";
 import { API_ENDPOINTS } from "../../../core/constants";
 import type { VacationBalance } from "../../../core/constants";
 import type { VacationRequest } from "../../../core/mocks/data";
@@ -131,9 +131,11 @@ export async function listEmployeeVacationRequests(
   const rawList = await apiClient.get<BackendVacationRequest[]>(
     API_ENDPOINTS.VACATIONS.EMPLOYEE.LIST,
     {
-      staff_id: staffId,
-      // Helps Mockoon CRUD filtering while preserving backend contract param.
-      staff_id_eq: staffId,
+      query: {
+        staff_id: staffId,
+        // Helps Mockoon CRUD filtering while preserving backend contract param.
+        staff_id_eq: staffId,
+      },
     }
   );
   return rawList

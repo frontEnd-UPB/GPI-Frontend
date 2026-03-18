@@ -11,16 +11,16 @@
     {
       "uuid": "b1f6d070-2000-4000-8000-000000000030",
       "type": "http",
-      "documentation": "PATCH employee request cancel (explicit endpoint)",
+      "documentation": "PATCH employee request cancel (simulate unsupported explicit endpoint to trigger fallback)",
       "method": "patch",
       "endpoint": "myprofile/requestvacation/:request_id/cancel",
       "responses": [
         {
           "uuid": "b1f6d070-2000-4000-8000-000000000031",
-          "body": "{\n  \"id\": \"{{urlParam 'request_id'}}\",\n  \"staff_id\": \"1\",\n  \"start_date\": \"2026-03-11\",\n  \"end_date\": \"2026-03-11\",\n  \"reason\": \"Cancelled request\",\n  \"status\": \"cancelled\",\n  \"request_date\": \"{{now 'YYYY-MM-DD'}}\",\n  \"comment\": \"Cancelled by employee\",\n  \"rejection_reason\": null,\n  \"attachment_url\": null,\n  \"attachment_name\": null\n}",
+          "body": "{\n  \"error\": \"Not found\",\n  \"message\": \"Cancel endpoint not implemented in mock; use status update fallback\"\n}",
           "latency": 0,
-          "statusCode": 200,
-          "label": "Cancelled",
+          "statusCode": 404,
+          "label": "Not Found - use PATCH /myprofile/requestvacation/:request_id",
           "headers": [
             {
               "key": "Content-Type",
