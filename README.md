@@ -166,6 +166,29 @@ Resumen breve:
 - Respuesta de login exitosa con `id`, `name` y `role`; errores con `success: false` y `message`.
 - Integración frontend con cliente HTTP centralizado, sesión local (`meddical:user`, `meddical:token`) y uso automático de `Authorization: Bearer` para rutas protegidas.
 
+### 4.10) Manejo de errores en respuestas 
+
+Flujo de manejo de errores:
+
+- [src/core/services/httpClient.ts](src/core/services/httpClient.ts) transforma respuestas no exitosas en `ApiError` con `status` y `message`.
+- [src/modules/authentication/services/authApi.ts](src/modules/authentication/services/authApi.ts) normaliza errores de login:
+  - `400` -> "Email and password are required"
+  - `401` -> "Invalid email or password"
+  - otros -> mensaje del backend o fallback genérico
+- [src/modules/authentication/services/authModuleService.ts](src/modules/authentication/services/authModuleService.ts) limpia sesión si `getCurrentUserById` retorna error auth (`401/404`).
+- [src/modules/authentication/hooks/useSignIn.ts](src/modules/authentication/hooks/useSignIn.ts) propaga el error a la UI.
+- [src/modules/authentication/pages/AdminLoginPage.tsx](src/modules/authentication/pages/AdminLoginPage.tsx) renderiza el mensaje de error en pantalla.
+
+Respuestas esperadas en auth staff:
+
+- `POST /api/auth/login`
+  - `200` con `id`, `name`, `role` cuando credenciales son válidas
+  - `400` cuando faltan credenciales
+  - `401` cuando credenciales son inválidas (No funciona todavía limitaciones de mockoon)
+- `GET /api/employees/:id`
+  - `200` con perfil del empleado si existe
+  - `404` si el id no existe
+
 ---
 
 ## 5) Roles y control de acceso

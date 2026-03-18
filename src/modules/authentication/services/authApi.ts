@@ -72,18 +72,44 @@ function isAuthError(error: unknown): boolean {
 	return error.status === 401 || error.status === 404;
 }
 
+function mapSignInError(error: unknown): Error {
+	if (error instanceof ApiError) {
+		if (error.status === 400) {
+			return new Error("Email and password are required");
+		}
+
+		if (error.status === 401) {
+			return new Error("Invalid email or password");
+		}
+
+		if (error.message && error.message.trim().length > 0) {
+			return new Error(error.message);
+		}
+	}
+
+	if (error instanceof Error) {
+		return error;
+	}
+
+	return new Error("Sign in failed. Please try again.");
+}
+
 export const authApi = {
 	async signIn(email: string, password: string): Promise<SignInResult> {
-		const response = await apiClient.post<LoginResponseDto>(
-			API_ENDPOINTS.AUTH.LOGIN,
-			{
-				email: email.trim(),
-				password,
-			},
-			{ skipAuth: true }
-		);
+		try {
+			const response = await apiClient.post<LoginResponseDto>(
+				API_ENDPOINTS.AUTH.LOGIN,
+				{
+					email: email.trim(),
+					password,
+				},
+				{ skipAuth: true }
+			);
 
-		return mapLoginResponse(email, response);
+			return mapLoginResponse(email, response);
+		} catch (error) {
+			throw mapSignInError(error);
+		}
 	},
 
 	async getCurrentUserById(id: string): Promise<AuthUserPayload> {
