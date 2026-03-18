@@ -4,7 +4,7 @@ import { useAuth } from "../../../context/AuthContext";
 import { ROUTE_PATHS } from "../../../routes/routes";
 
 const doctorLinks: NavbarLink[] = [
-  { label: "Home", href: ROUTE_PATHS.HOME },
+  { label: "Dashboard", href: ROUTE_PATHS.DOCTOR_DASHBOARD },
   { label: "Agenda", href: ROUTE_PATHS.AGENDA },
   { label: "Patients", href: ROUTE_PATHS.PATIENTS },
   { label: "Pathology Results", href: ROUTE_PATHS.PATHOLOGY_RESULTS },

@@ -1,0 +1,570 @@
+openapi: 3.0.3
+info:
+  title: Vacation Leave API Contract
+  version: 1.0.0
+  description: |
+    Frontend-source-of-truth contract for vacation leave flows.
+
+    Notes:
+    - staff_id is the same identity as frontend employeeId.
+    - API responses must use snake_case.
+    - Mutation endpoints must return a full VacationRequest object.
+    - Frontend currently includes minor compatibility handling during migration:
+      - employee_id is accepted as a fallback alias for staff_id.
+      - accepted is normalized to approved for status.
+      - reason may be null and request_date may be missing in backend responses.
+servers:
+  - url: /
+tags:
+  - name: Employee Vacation
+    description: Self-service endpoints for employee vacation requests.
+  - name: HR Vacation Management
+    description: Management endpoints for HR moderation and reporting.
+paths:
+  /myprofile/requestvacation:
+    get:
+      tags:
+        - Employee Vacation
+      summary: List employee vacation requests
+      description: Returns the request history for a specific staff member.
+      parameters:
+        - in: query
+          name: staff_id
+          required: true
+          schema:
+            type: string
+          description: Staff identifier (maps to frontend employeeId).
+        - in: query
+          name: staff_id_eq
+          required: false
+          schema:
+            type: string
+          description: Optional compatibility filter for Mockoon CRUD environments.
+      responses:
+        '200':
+          description: Vacation request list.
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/VacationRequest'
+        '400':
+          $ref: '#/components/responses/BadRequest'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '403':
+          $ref: '#/components/responses/Forbidden'
+    post:
+      tags:
+        - Employee Vacation
+      summary: Create a vacation request
+      description: |
+        Creates a new vacation request for a staff member.
+        Backend should force status to pending even if provided differently.
+      parameters:
+        - in: query
+          name: staff_id
+          required: true
+          schema:
+            type: string
+          description: Canonical staff identifier.
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/EmployeeCreateRequestJson'
+          multipart/form-data:
+            schema:
+              $ref: '#/components/schemas/EmployeeCreateRequestMultipart'
+      responses:
+        '201':
+          description: Request created.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/VacationRequest'
+        '400':
+          $ref: '#/components/responses/BadRequest'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '403':
+          $ref: '#/components/responses/Forbidden'
+        '413':
+          $ref: '#/components/responses/PayloadTooLarge'
+        '415':
+          $ref: '#/components/responses/UnsupportedMediaType'
+        '422':
+          $ref: '#/components/responses/UnprocessableEntity'
+
+  /myprofile/requestvacation/{request_id}:
+    get:
+      tags:
+        - Employee Vacation
+      summary: Get employee vacation request detail
+      parameters:
+        - $ref: '#/components/parameters/RequestId'
+      responses:
+        '200':
+          description: Request detail.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/VacationRequest'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '403':
+          $ref: '#/components/responses/Forbidden'
+        '404':
+          $ref: '#/components/responses/NotFound'
+    patch:
+      tags:
+        - Employee Vacation
+      summary: Update employee vacation request
+      description: |
+        Updates editable fields of a pending request.
+        This endpoint can also support cancellation via status=cancelled if the explicit cancel endpoint is not used.
+      parameters:
+        - $ref: '#/components/parameters/RequestId'
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/EmployeeUpdateRequestJson'
+          multipart/form-data:
+            schema:
+              $ref: '#/components/schemas/EmployeeUpdateRequestMultipart'
+      responses:
+        '200':
+          description: Request updated.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/VacationRequest'
+        '400':
+          $ref: '#/components/responses/BadRequest'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '403':
+          $ref: '#/components/responses/Forbidden'
+        '404':
+          $ref: '#/components/responses/NotFound'
+        '409':
+          $ref: '#/components/responses/Conflict'
+        '413':
+          $ref: '#/components/responses/PayloadTooLarge'
+        '415':
+          $ref: '#/components/responses/UnsupportedMediaType'
+        '422':
+          $ref: '#/components/responses/UnprocessableEntity'
+
+  /myprofile/requestvacation/{request_id}/cancel:
+    patch:
+      tags:
+        - Employee Vacation
+      summary: Cancel employee vacation request
+      description: |
+        Sets request status to cancelled.
+        Compatibility note: if this endpoint returns 404, frontend retries
+        PATCH /myprofile/requestvacation/{request_id} with status=cancelled.
+      parameters:
+        - $ref: '#/components/parameters/RequestId'
+      responses:
+        '200':
+          description: Request cancelled.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/VacationRequest'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '403':
+          $ref: '#/components/responses/Forbidden'
+        '404':
+          $ref: '#/components/responses/NotFound'
+        '409':
+          $ref: '#/components/responses/Conflict'
+
+  /myprofile/requestvacation/balance/{staff_id}:
+    get:
+      tags:
+        - Employee Vacation
+      summary: Get employee vacation balance
+      parameters:
+        - in: path
+          name: staff_id
+          required: true
+          schema:
+            type: string
+      responses:
+        '200':
+          description: Vacation balance.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/VacationBalance'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '403':
+          $ref: '#/components/responses/Forbidden'
+        '404':
+          $ref: '#/components/responses/NotFound'
+
+  /human-resources/vacation-managment:
+    get:
+      tags:
+        - HR Vacation Management
+      summary: List vacation requests for management
+      parameters:
+        - in: query
+          name: status
+          required: false
+          description: Repeatable status filter.
+          style: form
+          explode: true
+          schema:
+            type: array
+            items:
+              $ref: '#/components/schemas/VacationStatus'
+        - in: query
+          name: search
+          required: false
+          description: Search term (for employee name or other backend-supported fields).
+          schema:
+            type: string
+      responses:
+        '200':
+          description: Request list.
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/VacationRequest'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '403':
+          $ref: '#/components/responses/Forbidden'
+
+  /human-resources/vacation-managment/{request_id}:
+    get:
+      tags:
+        - HR Vacation Management
+      summary: Get vacation request detail for management
+      parameters:
+        - $ref: '#/components/parameters/RequestId'
+      responses:
+        '200':
+          description: Request detail.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/VacationRequest'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '403':
+          $ref: '#/components/responses/Forbidden'
+        '404':
+          $ref: '#/components/responses/NotFound'
+    patch:
+      tags:
+        - HR Vacation Management
+      summary: Moderate vacation request status
+      description: |
+        Updates moderation status.
+        rejection_reason is required when status=rejected.
+      parameters:
+        - $ref: '#/components/parameters/RequestId'
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/HrModerationPatchRequest'
+      responses:
+        '200':
+          description: Request moderated.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/VacationRequest'
+        '400':
+          $ref: '#/components/responses/BadRequest'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '403':
+          $ref: '#/components/responses/Forbidden'
+        '404':
+          $ref: '#/components/responses/NotFound'
+        '409':
+          $ref: '#/components/responses/Conflict'
+        '422':
+          $ref: '#/components/responses/UnprocessableEntity'
+
+components:
+  securitySchemes:
+    BearerAuth:
+      type: http
+      scheme: bearer
+      bearerFormat: JWT
+
+  parameters:
+    RequestId:
+      in: path
+      name: request_id
+      required: true
+      schema:
+        type: string
+
+  responses:
+    BadRequest:
+      description: Malformed input.
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/ErrorResponse'
+    Unauthorized:
+      description: Missing or invalid authentication.
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/ErrorResponse'
+    Forbidden:
+      description: Role or ownership violation.
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/ErrorResponse'
+    NotFound:
+      description: Resource not found.
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/ErrorResponse'
+    Conflict:
+      description: Invalid state transition or business conflict.
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/ErrorResponse'
+    PayloadTooLarge:
+      description: Uploaded file exceeds allowed size.
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/ErrorResponse'
+    UnsupportedMediaType:
+      description: Unsupported file type or media type.
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/ErrorResponse'
+    UnprocessableEntity:
+      description: Business validation failed.
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/ErrorResponse'
+
+  schemas:
+    VacationStatus:
+      type: string
+      enum:
+        - pending
+        - approved
+        - rejected
+        - cancelled
+
+    VacationRequest:
+      type: object
+      required:
+        - id
+        - staff_id
+        - start_date
+        - end_date
+        - reason
+        - status
+        - request_date
+        - comment
+        - rejection_reason
+        - attachment_url
+        - attachment_name
+      properties:
+        id:
+          type: string
+          description: API identifier, serialized as string.
+        staff_id:
+          type: string
+          description: Staff identifier (frontend employeeId).
+        employee_id:
+          type: string
+          nullable: true
+          description: Compatibility alias accepted by frontend during migration.
+        start_date:
+          type: string
+          format: date
+        end_date:
+          type: string
+          format: date
+        reason:
+          type: string
+          nullable: true
+          description: Canonical contract expects string; frontend tolerates null during migration.
+        status:
+          $ref: '#/components/schemas/VacationStatus'
+        request_date:
+          type: string
+          format: date
+          nullable: true
+          description: Canonical contract expects a value; frontend falls back to start_date if missing.
+        comment:
+          type: string
+          nullable: true
+        rejection_reason:
+          type: string
+          nullable: true
+        attachment_url:
+          type: string
+          nullable: true
+        attachment_name:
+          type: string
+          nullable: true
+
+    VacationBalance:
+      type: object
+      required:
+        - assigned
+        - used
+        - available
+      properties:
+        assigned:
+          type: number
+        used:
+          type: number
+        available:
+          type: number
+
+    EmployeeCreateRequestJson:
+      type: object
+      required:
+        - start_date
+        - end_date
+        - reason
+      properties:
+        staff_id:
+          type: string
+          description: Optional compatibility field. Canonical source is query param staff_id.
+        start_date:
+          type: string
+          format: date
+        end_date:
+          type: string
+          format: date
+        reason:
+          type: string
+        comment:
+          type: string
+          nullable: true
+        status:
+          type: string
+          description: Optional on input. Backend should force pending.
+          example: pending
+
+    EmployeeCreateRequestMultipart:
+      type: object
+      required:
+        - start_date
+        - end_date
+        - reason
+      properties:
+        staff_id:
+          type: string
+          description: Optional compatibility field. Canonical source is query param staff_id.
+        start_date:
+          type: string
+          format: date
+        end_date:
+          type: string
+          format: date
+        reason:
+          type: string
+        comment:
+          type: string
+        attachment:
+          type: string
+          format: binary
+
+    EmployeeUpdateRequestJson:
+      type: object
+      required:
+        - reason
+      properties:
+        start_date:
+          type: string
+          format: date
+        end_date:
+          type: string
+          format: date
+        reason:
+          type: string
+        comment:
+          type: string
+          nullable: true
+        remove_attachment:
+          type: boolean
+        status:
+          type: string
+          enum:
+            - cancelled
+          description: Optional cancellation signal when explicit /cancel route is not used.
+
+    EmployeeUpdateRequestMultipart:
+      type: object
+      required:
+        - reason
+      properties:
+        start_date:
+          type: string
+          format: date
+        end_date:
+          type: string
+          format: date
+        reason:
+          type: string
+        comment:
+          type: string
+        remove_attachment:
+          type: boolean
+        attachment:
+          type: string
+          format: binary
+
+    HrModerationPatchRequest:
+      type: object
+      required:
+        - status
+      properties:
+        status:
+          type: string
+          enum:
+            - approved
+            - rejected
+            - pending
+        rejection_reason:
+          type: string
+          nullable: true
+
+    ErrorResponse:
+      type: object
+      description: Frontend expects at least one of message or error.
+      properties:
+        message:
+          type: string
+        error:
+          type: string
+      additionalProperties: true
+
+security:
+  - BearerAuth: []

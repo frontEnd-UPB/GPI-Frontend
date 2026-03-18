@@ -59,7 +59,9 @@ npm run build
 1. El navegador carga [index.html](index.html) y monta el root.
 2. [src/main.tsx](src/main.tsx) renderiza `<App />` envuelto en `<AuthProvider />`.
 3. [src/app/App.tsx](src/app/App.tsx) renderiza el router: `<AppRouter />`.
-4. [src/routes/router.tsx](src/routes/router.tsx) define las rutas de la SPA.
+4. [src/routes/router.tsx](src/routes/router.tsx) define las rutas de la SPA (`BrowserRouter` + `useRoutes`).
+
+Nota: `AuthProvider` está siendo utilizado (wrapping) en [src/main.tsx](src/main.tsx) 
 
 ---
 
@@ -75,40 +77,140 @@ La sesión se representa con:
 - `role` (tipo `UserRole`)
 - `profilePicture` (string | null)
 
+Modelo de sesión asociado:
+
+- `AuthSession` (`token` + `user`) en [src/core/types/auth.ts](src/core/types/auth.ts)
+- `authModuleService.signIn` retorna `AuthSession` para separar identidad (`AuthUser`) de datos de sesión (`token`)
+
 ### 4.2) `AuthProvider`
 
 Expone el contexto:
 
 - `user: AuthUser | null`
+- `isAuthenticated: boolean` (estado explícito de autenticación)
 - `loading: boolean`
-- `signIn(token: string): Promise<void>`
-- `signOut(): void`
+- `signIn(credentials: { email; password }): Promise<AuthUser>`
+- `signOut(): Promise<void>`
 
-### 4.3) `AuthService` (patrón de servicio)
+### 4.3) Servicio de auth actual
 
-El provider acepta opcionalmente `authService`.
+Archivo: [src/modules/authentication/services/authModuleService.ts](src/modules/authentication/services/authModuleService.ts)
 
-Interfaz:
+Integración API asociada:
 
+- [src/modules/authentication/services/authApi.ts](src/modules/authentication/services/authApi.ts)
+- [src/core/services/httpClient.ts](src/core/services/httpClient.ts)
+
+- `signIn(email, password)`
 - `getCurrentUser()`
-- `signIn(token)`
 - `signOut()`
 
-Implementación actual: **mock** (`createMockAuthService`).
+Cómo funciona hoy:
 
-**Persistencia:** usa `localStorage` con la key `meddical:user`.
+- El login ya no valida contra [src/core/mocks/data.ts](src/core/mocks/data.ts).
+- El frontend envía email y password a través de `authApi.signIn()` usando el cliente HTTP centralizado.
+- La implementación priorizada actualmente es el flujo staff.
+- El endpoint patient está documentado como parte del contrato backend, pero queda reservado para una fase posterior.
+- Tras un login exitoso, el frontend construye una sesión local a partir de la respuesta del backend.
 
-**Detalle clave:** en modo mock, el “token” que recibe `signIn(token)` se interpreta como **JSON string** de un `AuthUser`.
+### 4.4) Persistencia actual (`localStorage`)
 
-### 4.4) Cómo se hace el login hoy
+- `meddical:user`: usuario de sesión
+- `meddical:token`: token sintético de sesión
+- `meddical:password-reset-requests`: solicitudes/token de reset mock
+- `meddical:password-overrides`: contraseñas mock reseteadas por email
+- `otp-timer`: estado del contador OTP
 
-Página: [src/modules/authentication/pages/LoginPage.tsx](src/modules/authentication/pages/LoginPage.tsx)
+Manejo actual del token y Authorization Bearer:
 
-- Muestra botones “quick login”
-- Toma un empleado de `mockEmployees`
-- Construye un `authUser`
-- Ejecuta `signIn(JSON.stringify(authUser))`
-- Redirige a `from` (si venías de una ruta protegida) o `/`
+- El backend no entrega hoy un token que el frontend use como token oficial de autenticación.
+- El frontend sintetiza `meddical:token` como simulación de una sesión autenticada y para mantener una arquitectura consistente.
+- [src/context/AuthContext.tsx](src/context/AuthContext.tsx) mantiene `sessionToken` en memoria y lo conecta al cliente HTTP mediante `setAuthTokenResolver`.
+- [src/core/services/httpClient.ts](src/core/services/httpClient.ts) prioriza el token resuelto desde contexto/memoria y mantiene fallback a `localStorage` (`meddical:token`).
+- [src/core/services/httpClient.ts](src/core/services/httpClient.ts) agrega automáticamente `Authorization: Bearer <token>` en llamadas protegidas.
+- Para endpoints públicos, como login, se utiliza `skipAuth: true` para no enviar el header.
+- Esta decisión deja abierto el camino para que backend implemente un token real o un mecanismo de sesión distinto más adelante.
+
+### 4.5) Cómo se hace el login hoy
+
+Páginas:
+
+- [src/modules/authentication/pages/AdminLoginPage.tsx](src/modules/authentication/pages/AdminLoginPage.tsx)
+- [src/modules/authentication/pages/PacientLoginPage.tsx](src/modules/authentication/pages/PacientLoginPage.tsx)
+
+Ambas:
+
+- usan `useAuth()` o `useSignIn()`
+- pasan por `AuthContext` y `authModuleService`
+- terminan delegando la llamada HTTP a `authApi.signIn()`
+- redirigen según rol al dashboard correspondiente
+
+Alcance actual del sprint:
+
+- Solo se está implementando B2C (aka. login staff) dentro de la integración actual.
+- El endpoint `POST /login/patient` existe en el contrato backend, pero queda en reserva y no representa un error en este momento.
+
+### 4.7) Actualización vigente del módulo de autenticación
+
+Para evitar confusión con documentación anterior, en esta rama aplica lo siguiente:
+
+- El flujo real de login integrado es `AdminLoginPage -> useSignIn -> AuthContext -> authModuleService -> authApi`.
+- `PacientLoginPage` permanece como pantalla demo visual y no consume `authApi` en la implementación actual.
+- `authApi` usa endpoints `/api/auth/login` y `/api/employees/:id` (Mockoon en puerto 3001).
+- El flujo de recuperación (Forgot + OTP + Reset) sigue separado del login staff y se ejecuta con `mockBackendAuth`.
+- `LoginPage.tsx` existe en el módulo, pero no representa el flujo principal de autenticación staff en esta rama.
+- `AuthContext` ya expone `isAuthenticated` de forma explícita 
+
+### 4.8) Estado Story 1.4 (modelo de usuario autenticado)
+
+Estado actual: **completada**.
+
+Evidencia en código:
+
+- Modelo autenticado tipado: `AuthUser` en [src/core/types/auth.ts](src/core/types/auth.ts)
+- Payload canónico para DTOs: `AuthUserPayload` en [src/core/types/auth.ts](src/core/types/auth.ts)
+- Modelo de sesión separado: `AuthSession` en [src/core/types/auth.ts](src/core/types/auth.ts)
+- Consumo en servicio: [src/modules/authentication/services/authModuleService.ts](src/modules/authentication/services/authModuleService.ts)
+- Consumo en contexto (estado global de usuario): [src/context/AuthContext.tsx](src/context/AuthContext.tsx)
+- Validación de rehidratación: `isAuthUser` en [src/core/types/auth.ts](src/core/types/auth.ts)
+
+
+### 4.9) Contrato de autenticación con backend 
+
+El contrato funcional completo y el estado de integración actual de endpoints se documentan en:
+
+- [AUTH_ENDPOINT_INTEGRATION.txt](AUTH_ENDPOINT_INTEGRATION.txt)
+
+Resumen breve:
+
+- Login separado por tipo de usuario: `POST /login/patient` y `POST /login/staff`.
+- Actualmente se prioriza solo el flujo staff; el endpoint patient queda reservado.
+- Flujos de recuperación/registro: `POST /forgot_password`, `POST /register`, `POST /verify`, `POST /reset_password`, `POST /register_user`.
+- Respuesta de login exitosa con `id`, `name` y `role`; errores con `success: false` y `message`.
+- Integración frontend con cliente HTTP centralizado, sesión local (`meddical:user`, `meddical:token`) y uso automático de `Authorization: Bearer` para rutas protegidas.
+
+### 4.10) Manejo de errores en respuestas 
+
+Flujo de manejo de errores:
+
+- [src/core/services/httpClient.ts](src/core/services/httpClient.ts) transforma respuestas no exitosas en `ApiError` con `status` y `message`.
+- [src/modules/authentication/services/authApi.ts](src/modules/authentication/services/authApi.ts) normaliza errores de login:
+  - `400` -> "Email and password are required"
+  - `401` -> "Invalid email or password"
+  - otros -> mensaje del backend o fallback genérico
+- [src/modules/authentication/services/authModuleService.ts](src/modules/authentication/services/authModuleService.ts) limpia sesión si `getCurrentUserById` retorna error auth (`401/404`).
+- [src/modules/authentication/hooks/useSignIn.ts](src/modules/authentication/hooks/useSignIn.ts) propaga el error a la UI.
+- [src/modules/authentication/pages/AdminLoginPage.tsx](src/modules/authentication/pages/AdminLoginPage.tsx) renderiza el mensaje de error en pantalla.
+
+Respuestas esperadas en auth staff:
+
+- `POST /api/auth/login`
+  - `200` con `id`, `name`, `role` cuando credenciales son válidas
+  - `400` cuando faltan credenciales
+  - `401` cuando credenciales son inválidas (No funciona todavía limitaciones de mockoon)
+- `GET /api/employees/:id`
+  - `200` con perfil del empleado si existe
+  - `404` si el id no existe
 
 ---
 
@@ -134,7 +236,7 @@ Archivo: [src/routes/ProtectedRoute.tsx](src/routes/ProtectedRoute.tsx)
 
 Qué hace:
 
-1. Si no hay `user` ⇒ redirige a `/login` y guarda `state.from`.
+1. Si no hay `user` ⇒ redirige a `ROUTE_PATHS.LOGIN` (hoy `/admin-login`) y guarda `state.from`.
 2. Normaliza el path actual (quita trailing slash).
 3. Si la ruta está en `ALWAYS_ALLOWED_ROUTES` ⇒ permite.
 4. Si la ruta no está permitida para el rol ⇒ redirige a `/unauthorized`.
@@ -152,9 +254,16 @@ Archivo: [src/routes/router.tsx](src/routes/router.tsx)
 
 Estructura (alto nivel):
 
-- `/login` (lazy-loaded)
+- `/admin-login` (login admin/doctor)
+- `/patient-login`
+- `/sign-up`
+- `/forgot-password`
+- `/reset-password`
+- `/otp-verification`
 - Grupo protegido con `<ProtectedRoute />`:
   - `/unauthorized`
+  - `/admin-dashboard`
+  - `/doctor-dashboard`
   - `<MainLayout />` + children:
     - `/` (Home)
     - rutas admin (staff-directory, vacation manager, etc.)
@@ -226,6 +335,34 @@ Estos datos alimentan:
 
 - login demo (elige un empleado)
 - dashboard (Home)
+- forgot/reset password mock
+
+---
+
+## 8.1) Flujo Forgot/Reset Password (mock)
+
+Servicios y hooks:
+
+- [src/modules/authentication/services/forgotPasswordService.ts](src/modules/authentication/services/forgotPasswordService.ts)
+- [src/modules/authentication/hooks/useForgotPassword.ts](src/modules/authentication/hooks/useForgotPassword.ts)
+- [src/modules/authentication/hooks/useResetPassword.ts](src/modules/authentication/hooks/useResetPassword.ts)
+
+Flujo actual:
+
+1. `ForgotPasswordPage` valida email y llama `requestPasswordReset(email, from)`
+2. Si el email existe en mock, se genera token temporal (TTL 15 min) y se guarda en `meddical:password-reset-requests`
+3. UI muestra botón de test `Go Set New Password` (placeholder del link por gmail real)
+4. `ResetPasswordPage` valida token con `validateResetToken(token)`
+5. Si es válido, permite setear nueva contraseña
+6. `completePasswordReset(token, password)` guarda override en `meddical:password-overrides` y marca token como usado
+7. Redirección automática al login correspondiente tras éxito
+
+### 8.2) Ajustes vigentes del flujo recovery
+
+- El flujo requiere `meddical:reset-flow-active` en `sessionStorage` para proteger la navegación entre pantallas.
+- El OTP válido de entorno mock proviene de `src/core/mocks/data.ts`.
+- La pantalla OTP gestiona temporizador y reenvío local con `otp-timer` en `localStorage`.
+- La UI actual ya no depende del botón de prueba `Go Set New Password`; la navegación principal pasa por OTP.
 
 ---
 
@@ -261,7 +398,28 @@ Cada módulo hoy es principalmente una **página placeholder** para escalar más
 Módulos actuales:
 
 - `authentication`
-  - [src/modules/authentication/pages/LoginPage.tsx](src/modules/authentication/pages/LoginPage.tsx)
+  - pages:
+    - [src/modules/authentication/pages/AdminLoginPage.tsx](src/modules/authentication/pages/AdminLoginPage.tsx)
+    - [src/modules/authentication/pages/PacientLoginPage.tsx](src/modules/authentication/pages/PacientLoginPage.tsx)
+    - [src/modules/authentication/pages/SignUpPage.tsx](src/modules/authentication/pages/SignUpPage.tsx)
+    - [src/modules/authentication/pages/ForgotPasswordPage.tsx](src/modules/authentication/pages/ForgotPasswordPage.tsx)
+    - [src/modules/authentication/pages/ResetPasswordPage.tsx](src/modules/authentication/pages/ResetPasswordPage.tsx)
+    - [src/modules/authentication/pages/OtpVerification.tsx](src/modules/authentication/pages/OtpVerification.tsx)
+    - [src/modules/authentication/pages/AdminDashboard.tsx](src/modules/authentication/pages/AdminDashboard.tsx)
+    - [src/modules/authentication/pages/DoctorDashboard.tsx](src/modules/authentication/pages/DoctorDashboard.tsx)
+  - components:
+    - [src/modules/authentication/components/LoginCard.tsx](src/modules/authentication/components/LoginCard.tsx)
+    - [src/modules/authentication/components/PasswordInputWithEye.tsx](src/modules/authentication/components/PasswordInputWithEye.tsx)
+    - [src/modules/authentication/components/themed-container.tsx](src/modules/authentication/components/themed-container.tsx)
+    - [src/modules/authentication/components/BlurredBackground.tsx](src/modules/authentication/components/BlurredBackground.tsx)
+  - hooks:
+    - [src/modules/authentication/hooks/useSignIn.ts](src/modules/authentication/hooks/useSignIn.ts)
+    - [src/modules/authentication/hooks/useSignOut.ts](src/modules/authentication/hooks/useSignOut.ts)
+    - [src/modules/authentication/hooks/useForgotPassword.ts](src/modules/authentication/hooks/useForgotPassword.ts)
+    - [src/modules/authentication/hooks/useResetPassword.ts](src/modules/authentication/hooks/useResetPassword.ts)
+  - services:
+    - [src/modules/authentication/services/authModuleService.ts](src/modules/authentication/services/authModuleService.ts)
+    - [src/modules/authentication/services/forgotPasswordService.ts](src/modules/authentication/services/forgotPasswordService.ts)
 - `home`
   - [src/modules/home/pages/HomePage.tsx](src/modules/home/pages/HomePage.tsx)
 - `staff-directory`
@@ -272,6 +430,14 @@ Módulos actuales:
   - [src/modules/vacation-doctor/pages/DoctorVacationPage.tsx](src/modules/vacation-doctor/pages/DoctorVacationPage.tsx)
 - `vacation-management`
   - [src/modules/vacation-management/pages/VacationManagementPage.tsx](src/modules/vacation-management/pages/VacationManagementPage.tsx)
+
+### 10.1) Ajustes de estructura vigentes (importante)
+
+En la rama actual, considerar estos cambios de estructura al navegar el repo:
+
+- El componente listado como `themed-container.tsx` corresponde hoy a [src/modules/authentication/components/Container.tsx](src/modules/authentication/components/Container.tsx).
+- `AdminDashboard` y `DoctorDashboard` están en [src/modules/home/pages/index.ts](src/modules/home/pages/index.ts) (no en `src/modules/authentication/pages`).
+- El dominio de vacaciones está consolidado bajo [src/modules/vacation](src/modules/vacation), con submódulos `vacation-leave` y `vacation-management`.
 
 ---
 
@@ -464,8 +630,33 @@ src/
 │  └─ utils/             (vacío hoy)
 ├─ modules/
 │  ├─ authentication/
-│  │  └─ pages/
-│  │     └─ LoginPage.tsx
+│  │  ├─ assets/
+│  │  │  ├─ auth_bg_image.png
+│  │  │  ├─ auth_eyeIcon_image.png
+│  │  │  └─ auth_side_image.png
+│  │  ├─ components/
+│  │  │  ├─ BlurredBackground.tsx
+│  │  │  ├─ LoginCard.tsx
+│  │  │  ├─ PasswordInputWithEye.tsx
+│  │  │  └─ themed-container.tsx
+│  │  ├─ hooks/
+│  │  │  ├─ useForgotPassword.ts
+│  │  │  ├─ useResetPassword.ts
+│  │  │  ├─ useSignIn.ts
+│  │  │  └─ useSignOut.ts
+│  │  ├─ pages/
+│  │  │  ├─ AdminDashboard.tsx
+│  │  │  ├─ AdminLoginPage.tsx
+│  │  │  ├─ Auth_TestPage.tsx
+│  │  │  ├─ DoctorDashboard.tsx
+│  │  │  ├─ ForgotPasswordPage.tsx
+│  │  │  ├─ OtpVerification.tsx
+│  │  │  ├─ PacientLoginPage.tsx
+│  │  │  ├─ ResetPasswordPage.tsx
+│  │  │  └─ SignUpPage.tsx
+│  │  └─ services/
+│  │     ├─ authModuleService.ts
+│  │     └─ forgotPasswordService.ts
 │  ├─ home/
 │  │  └─ pages/
 │  │     └─ HomePage.tsx
@@ -552,28 +743,38 @@ Checklist (código actual):
 Sugerencia de implementación (sin refactor grande):
 
 - Mantener `AuthContext` como API estable.
-- Crear un `JwtAuthService` que implemente `AuthService`.
-- Pasarlo al provider:
+- Reemplazar llamadas mock en:
+  - [src/modules/authentication/services/authModuleService.ts](src/modules/authentication/services/authModuleService.ts)
+  - [src/modules/authentication/services/forgotPasswordService.ts](src/modules/authentication/services/forgotPasswordService.ts)
+- Mantener las firmas actuales del contexto:
+  - `signIn({ email, password })`
+  - `signOut()`
+
+Ejemplo orientativo:
 
 ```tsx
-<AuthProvider authService={jwtAuthService}>
-  <App />
-</AuthProvider>
+const response = await api.post("/auth/login", credentials);
+localStorage.setItem("meddical:token", response.token);
+localStorage.setItem("meddical:user", JSON.stringify(response.user));
 ```
 
-En JWT real, `token` ya no sería JSON: sería el token del backend.
+En JWT real, la validación/refresh del token y recuperación de sesión debe venir del backend, no de `mockEmployees`/`localStorage` como fuente de verdad principal.
 
 ---
 
 ## 17) Troubleshooting común
 
-- “Siempre me manda a `/login`”
+- “Siempre me manda a `/admin-login`”
   - Verificá `localStorage['meddical:user']`.
-  - En mock, `signIn()` espera un JSON válido.
+  - Revisá que `AuthContext` termine de cargar (`loading === false`) antes de evaluar guards.
 
 - “Me manda a `/unauthorized` aunque estoy logueado”
   - Revisá si la ruta existe en `ROLE_ROUTE_ACCESS` para tu rol.
   - Recordá que el sistema valida por prefijo (rutas hijas también cuentan).
+
+- “Reseteé contraseña pero no puedo loguear”
+  - Verificá `localStorage['meddical:password-overrides']`.
+  - Confirmá que el email del login coincide con el email del reset (normalizado en minúsculas).
 
 - “No se aplican estilos”
   - Confirmá que [src/styles/index.css](src/styles/index.css) se importa en [src/main.tsx](src/main.tsx).
@@ -583,3 +784,5 @@ En JWT real, `token` ya no sería JSON: sería el token del backend.
 ## 18) Documentación
 
 La documentación oficial del frontend vive en este archivo: `README.md`.
+
+...

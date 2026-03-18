@@ -10,6 +10,13 @@ type LoginLocationState = {
   from?: string;
 };
 
+const getDisplayName = (employee: { firstname?: string; lastname?: string }) => {
+  const first = employee.firstname?.trim() ?? "";
+  const last = employee.lastname?.trim() ?? "";
+  const full = `${first} ${last}`.trim();
+  return full || "User";
+};
+
 const LoginPage: React.FC = () => {
   const { user, signIn } = useAuth();
   const navigate = useNavigate();
@@ -33,7 +40,7 @@ const LoginPage: React.FC = () => {
 
       const authUser = {
         id: employee.id,
-        name: employee.name,
+        name: getDisplayName(employee),
         email: employee.email,
         role: employee.role,
         profilePicture: employee.profilePicture,
@@ -84,7 +91,9 @@ const LoginPage: React.FC = () => {
                 })}
               </div>
               <div className="flex-1 text-left">
-                <p className="font-medium text-foreground">{adminUser.name}</p>
+                <p className="font-medium text-foreground">
+                  {getDisplayName(adminUser)}
+                </p>
                 <p className="text-xs text-muted-foreground">Admin · {adminUser.department}</p>
               </div>
             </Button>
@@ -103,7 +112,9 @@ const LoginPage: React.FC = () => {
                 })}
               </div>
               <div className="flex-1 text-left">
-                <p className="font-medium text-foreground">{doctorUser.name}</p>
+                <p className="font-medium text-foreground">
+                  {getDisplayName(doctorUser)}
+                </p>
                 <p className="text-xs text-muted-foreground">Doctor · {doctorUser.department}</p>
               </div>
             </Button>

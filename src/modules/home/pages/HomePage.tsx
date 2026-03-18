@@ -129,11 +129,11 @@ const HomePage: React.FC = () => {
                           <TableCell>
                             <div className="flex items-center gap-3">
                               <div className="size-10 rounded-full bg-accent flex items-center justify-center text-ring font-medium">
-                                {emp.name[0]}
+                                {emp.firstname[0]}
                               </div>
                               <div>
                                 <p className="font-medium text-foreground">
-                                  {emp.name}
+                                  {emp.firstname} {emp.lastname}
                                 </p>
                                 <p className="text-xs text-muted-foreground">
                                   {emp.email}
@@ -144,7 +144,7 @@ const HomePage: React.FC = () => {
                           <TableCell>
                             <div>
                               <p className="font-medium text-foreground">
-                                {emp.function}
+                                {emp.speciality}
                               </p>
                               <p className="text-xs text-muted-foreground">
                                 {emp.department}
@@ -153,10 +153,10 @@ const HomePage: React.FC = () => {
                           </TableCell>
                           <TableCell>
                             <Badge status={emp.status}>
-                              {emp.status === "online" ? "Online" : "Offline"}
+                              {emp.status}
                             </Badge>
                           </TableCell>
-                          <TableCell>{emp.employed}</TableCell>
+                          <TableCell>{emp.start_date}</TableCell>
                           <TableCell>
                             <Button variant="ghost" size="sm">
                               Edit
@@ -192,7 +192,7 @@ const HomePage: React.FC = () => {
                         <Users className="size-5 text-ring" />
                         <div className="flex-1">
                           <p className="text-sm font-medium text-foreground">
-                            {apt.patientName} - {apt.doctorName}
+                            {apt.patientId} - {apt.doctorId}
                           </p>
                         </div>
                       </div>

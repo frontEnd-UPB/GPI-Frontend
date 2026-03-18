@@ -17,36 +17,72 @@
   --primary: #1F2B6C; /* theme.colors.primary */
   --primary-foreground: #ffffff; /* theme.colors.textOnPrimary */
 
-  --secondary: #2e7d32; /* theme.colors.secondary */
-  --secondary-foreground: #ffffff;
+  --secondary: #159EEC; /* theme.colors.secondary */
+  --secondary-foreground: #F0F7FF;
 
   --muted: #E0EFFF; /* primaryLight como color suave */
-  --muted-foreground: #6b7280; /* textSecondary */
+  --muted-foreground: #595959; /* textSecondary */
 
   --accent: #e3f2fd;
   --accent-foreground: #111827;
 
-  --destructive: #e53935; /* theme.colors.error */
-  --destructive-foreground: #ffffff;
+  --destructive: #FF383C; /* theme.colors.error */
+  --destructive-foreground: #FFEBEB;
 
   /* Estados adicionales alineados con core/theme */
-  --success: #4caf50; /* theme.colors.success */
-  --warning: #f9a825; /* theme.colors.warning */
-  --info: #29b6f6; /* theme.colors.info */
+  --success: #34C759; /* theme.colors.success */
+  --warning: #FFCC00; /* theme.colors.warning */
+  --info: #159EEC; /* theme.colors.info */
 
   --border: #e5e7eb; /* theme.colors.border */
   --input: transparent;
   --input-background: #ffffff; /* surface */
   --switch-background: #e5e7eb;
 
-  --ring: #1e88e5; /* primary */
+  --ring: #159EEC; /* primary */
+  --ring: #159EEC; /* primary */
 
   /* Paleta para gráficos (puedes ajustar más adelante si lo necesitas) */
-  --chart-1: #1e88e5;
-  --chart-2: #2e7d32;
-  --chart-3: #29b6f6;
-  --chart-4: #f9a825;
-  --chart-5: #4caf50;
+  --chart-1: #FF383C;
+  --chart-2: #6155F5;
+  --chart-3: #00C3D0;
+  --chart-4: #FF8D28;
+  --chart-5: #CB30E0;
+  --chart-6: #34C759;
+  --chart-7: #F59E0B;
+  --chart-8: #8B5CF6;
+
+
+  /* Status Colors */
+  --status-pending: #FFCC00;
+  --status-approved: #34C759;
+  --status-rejected: #FF383C;
+  --status-canceled: #159EEC;
+
+  --status-pending-foreground: #FFFBE5;
+  --status-approved-foreground: #EDFFE8;
+  --status-rejected-foreground: #FFEBEB;
+  --status-canceled-foreground: #F0F7FF;
+  --chart-1: #FF383C;
+  --chart-2: #6155F5;
+  --chart-3: #00C3D0;
+  --chart-4: #FF8D28;
+  --chart-5: #CB30E0;
+  --chart-6: #34C759;
+  --chart-7: #F59E0B;
+  --chart-8: #8B5CF6;
+
+
+  /* Status Colors */
+  --status-pending: #FFCC00;
+  --status-approved: #34C759;
+  --status-rejected: #FF383C;
+  --status-canceled: #159EEC;
+
+  --status-pending-foreground: #FFFBE5;
+  --status-approved-foreground: #EDFFE8;
+  --status-rejected-foreground: #FFEBEB;
+  --status-canceled-foreground: #F0F7FF;
 
   /* Radius acorde a theme.radius.md (10px) */
   --radius: 0.625rem;
@@ -75,7 +111,8 @@
   --primary-foreground: #ffffff;
 
   --secondary: #2e7d32;
-  --secondary-foreground: #ffffff;
+  --secondary-foreground: #F0F7FF;
+  --secondary-foreground: #F0F7FF;
 
   --muted: #374151;
   --muted-foreground: #9ca3af;
@@ -136,6 +173,14 @@
   --color-chart-3: var(--chart-3);
   --color-chart-4: var(--chart-4);
   --color-chart-5: var(--chart-5);
+  --color-chart-6: var(--chart-6);
+  --color-chart-7: var(--chart-7);
+  --color-chart-8: var(--chart-8);
+
+  --color-chart-6: var(--chart-6);
+  --color-chart-7: var(--chart-7);
+  --color-chart-8: var(--chart-8);
+
   --radius-sm: calc(var(--radius) - 4px);
   --radius-md: calc(var(--radius) - 2px);
   --radius-lg: var(--radius);
@@ -148,6 +193,26 @@
   --color-sidebar-accent-foreground: var(--sidebar-accent-foreground);
   --color-sidebar-border: var(--sidebar-border);
   --color-sidebar-ring: var(--sidebar-ring);
+
+  --color-status-pending: var(--status-pending);
+  --color-status-approved: var(--status-approved);
+  --color-status-rejected: var(--status-rejected);
+  --color-status-canceled: var(--status-canceled);
+
+  --color-status-pending-foreground: var(--status-pending-foreground);
+  --color-status-approved-foreground: var(--status-approved-foreground);
+  --color-status-rejected-foreground: var(--status-rejected-foreground);
+  --color-status-canceled-foreground: var(--status-canceled-foreground);
+
+  --color-status-pending: var(--status-pending);
+  --color-status-approved: var(--status-approved);
+  --color-status-rejected: var(--status-rejected);
+  --color-status-canceled: var(--status-canceled);
+
+  --color-status-pending-foreground: var(--status-pending-foreground);
+  --color-status-approved-foreground: var(--status-approved-foreground);
+  --color-status-rejected-foreground: var(--status-rejected-foreground);
+  --color-status-canceled-foreground: var(--status-canceled-foreground);
 }
 
 @layer base {
@@ -208,6 +273,26 @@
     font-size: var(--text-base);
     font-weight: var(--font-weight-normal);
     line-height: 1.5;
+  }
+
+  /* Hide native password reveal icon (e.g. Edge on Windows) so we only show our custom eye */
+  input[type="password"]::-ms-reveal,
+  input[type="password"]::-ms-clear {
+    display: none;
+  }
+
+  input[type="password"]::-webkit-textfield-decoration-container {
+    display: none;
+  }
+
+  /* Hide native password reveal icon (e.g. Edge on Windows) so we only show our custom eye */
+  input[type="password"]::-ms-reveal,
+  input[type="password"]::-ms-clear {
+    display: none;
+  }
+
+  input[type="password"]::-webkit-textfield-decoration-container {
+    display: none;
   }
 
   /* Overrides para react-day-picker (calendario del DatePicker) */
