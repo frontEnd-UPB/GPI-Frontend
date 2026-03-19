@@ -3,6 +3,10 @@
 This document explains the high-level flow of the Employee Vacation feature.
 It focuses on how data moves between page, components, hooks, and services.
 
+Note: this folder mixes direct implementations and adapter files that re-export
+shared vacation components/hooks from sibling paths. The runtime flow described
+here still applies to the Employee Vacation screen.
+
 ## Start Point (Page Orchestrator)
 
 The flow starts in `EmployeeVacationPage`.
@@ -20,6 +24,10 @@ Main responsibilities:
   - Cancel an existing request.
   - Update an existing request.
 - Refreshes balance after create, cancel, or update.
+
+Important assumption:
+
+- The page expects a valid authenticated user id (`employeeId`) to drive service calls.
 
 High-level startup flow:
 
@@ -75,7 +83,7 @@ What it captures:
 
 - Start date
 - End date
-- Request type/reason
+- Type of absence (mapped to the `reason` field sent to service)
 - Comment
 - Optional attachment
 
@@ -135,7 +143,7 @@ Detail/Edit/Cancel flow:
 1. User clicks "View" in table.
 2. Page stores selected request and opens `VacationRequestModal`.
 3. Modal loads selected values into form state.
-4. If request is pending, user can edit or cancel.
+4. If request is pending, user can enter edit mode and then save changes or cancel.
 5. Modal callbacks call page handlers:
    - Cancel path -> `useEmployeeVacationRequests.cancel(id)` -> `cancelVacationRequest(id)` service
    - Update path -> `useEmployeeVacationRequests.update(id, updates)` -> `updateVacationRequest(id, updates)` service
@@ -151,6 +159,8 @@ Detail/Edit/Cancel flow:
 Current wiring in this module:
 
 - `vacation-leave/services/vacationDoctorService.ts` re-exports from shared `modules/vacation/services/vacationLeaveApiService.ts`.
+- `vacation-leave/components/VacationRequestModal.tsx` re-exports shared `modules/vacation/components/VacationRequestModal.tsx`.
+- `vacation-leave/hooks/useVacationRequestValidation.ts` re-exports shared `modules/vacation/hooks/useVacationRequestValidation.ts`.
 - So all vacation-leave hooks call the API-oriented vacation leave service contract.
 
 Service contract used by hooks:
@@ -160,6 +170,13 @@ Service contract used by hooks:
 - `submitVacationRequest(employeeId, data)`
 - `updateVacationRequest(requestId, updates)`
 - `cancelVacationRequest(requestId)`
+
+Additional service behavior currently implemented:
+
+- Backend DTO mapping from snake_case into UI-friendly request objects.
+- Status normalization (for example `accepted` -> `approved`).
+- Cancel compatibility fallback: if explicit cancel endpoint returns 404,
+  service retries with a status patch to `cancelled`.
 
 This keeps UI and hook logic stable while allowing the underlying implementation (mock or real API) to be swapped behind the same function names.
 
