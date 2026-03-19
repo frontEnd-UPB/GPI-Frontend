@@ -17,6 +17,28 @@ import { EmptyState } from "../../../../core/components/feedback/EmptyState";
 import { Button } from "../../../../ui/button";
 import { USER_ROLES } from "../../../../core/constants";
 
+function getRequestsErrorMessage(error: string): string {
+  if (!error) return "";
+
+  if (error.toLowerCase().includes("500")) {
+    return "Something went wrong while loading your vacation requests.";
+  }
+
+  if (error.toLowerCase().includes("404")) {
+    return "Vacation requests service is not available.";
+  }
+
+  if (error.toLowerCase().includes("401")) {
+    return "Your session has expired. Please log in again.";
+  }
+
+  if (error.toLowerCase().includes("failed to fetch")) {
+    return "Unable to connect to the server.";
+  }
+
+  return "Unexpected error while loading vacation requests.";
+}
+
 export const EmployeeVacationPage: React.FC = () => {
   const { user } = useAuth();
   const employeeId = user?.id ?? "";
@@ -150,7 +172,7 @@ export const EmployeeVacationPage: React.FC = () => {
 
         {requestsError && (
           <ErrorMessage
-            message={`Error loading vacation requests: ${requestsError}`}
+            message={getRequestsErrorMessage(requestsError)}
           />
         )}
 
