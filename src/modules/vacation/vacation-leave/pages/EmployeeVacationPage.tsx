@@ -20,24 +20,22 @@ import { USER_ROLES } from "../../../../core/constants";
 function getRequestsErrorMessage(error: string): string {
   if (!error) return "";
 
-  const err = error.toLowerCase();
-
-  if (err.includes("not found") || err.includes("404")) {
-    return "Vacation requests service is not available.";
-  }
-
-  if (err.includes("unauthorized") || err.includes("401")) {
-    return "Your session has expired. Please log in again.";
-  }
-
-  if (err.includes("failed to fetch")) {
-    return "Unable to connect to the server.";
-  }
-
-  if (err.includes("internal server error") || err.includes("500")) {
+  if (error.toLowerCase().includes("500")) {
     return "Something went wrong while loading your vacation requests.";
   }
 
+  if (error.toLowerCase().includes("404")) {
+    return "Vacation requests service is not available.";
+  }
+
+  if (error.toLowerCase().includes("401")) {
+    return "Your session has expired. Please log in again.";
+  }
+
+  if (error.toLowerCase().includes("failed to fetch")) {
+    return "Unable to connect to the server.";
+  }
+  
   return "Unexpected error while loading vacation requests.";
 }
 

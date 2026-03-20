@@ -79,7 +79,7 @@ export function useEmployeeVacationRequests(
           ? err.message
           : "Failed to cancel vacation request.";
       setError(message);
-      return null;
+      throw err; //return null;
     } finally {
       setActionLoading(false);
     }
@@ -107,7 +107,7 @@ export function useEmployeeVacationRequests(
           ? err.message
           : "Failed to update vacation request.";
       setError(message);
-      return null;
+      throw err; //return null;
     } finally {
       setActionLoading(false);
     }

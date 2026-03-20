@@ -15,6 +15,7 @@ import TypeSelector from "./form/TypeSelector";
 import CommentField from "./form/CommentField";
 import FileAttachmentField from "./form/FileAttachmentField";
 
+
 interface VacationRequestModalProps {
   open: boolean;
   onClose: () => void;
@@ -44,6 +45,14 @@ export default function VacationRequestModal({
   onCancelRequest,
   onUpdateRequest,
 }: VacationRequestModalProps) {
+  const [actionError, setActionError] = useState<string | null>(null);
+  const showTemporaryError = (message: string) => {
+    setActionError(message);
+
+    setTimeout(() => {
+      setActionError(null);
+    }, 3000); // 3 segundos
+  };
   const [isEditing, setIsEditing] = useState(false);
   const [existingAttachmentName, setExistingAttachmentName] = useState<
     string | undefined
@@ -115,10 +124,15 @@ export default function VacationRequestModal({
 
   const handleCancel = async () => {
     if (!onCancelRequest) return;
-    const didCancel = await onCancelRequest(vacation.id);
 
-    if (didCancel) {
-      onClose();
+    try {
+      const didCancel = await onCancelRequest(vacation.id);
+
+      if (didCancel) {
+        onClose();
+      }
+    } catch (error: any) {
+      showTemporaryError("Unable to cancel request. Server not available.");
     }
   };
 
@@ -127,18 +141,22 @@ export default function VacationRequestModal({
     if (!data.startDate || !data.endDate) return;
     if (!validateFormValues(form, data)) return;
 
-    const didUpdate = await onUpdateRequest(
-      vacation.id,
-      data.startDate,
-      data.endDate,
-      data.type,
-      data.comment,
-      attachment,
-      shouldRemoveExistingAttachment
-    );
+    try {
+      const didUpdate = await onUpdateRequest(
+        vacation.id,
+        data.startDate,
+        data.endDate,
+        data.type,
+        data.comment,
+        attachment,
+        shouldRemoveExistingAttachment
+      );
 
-    if (didUpdate) {
-      onClose();
+      if (didUpdate) {
+        onClose();
+      }
+    } catch (error: any) {
+      showTemporaryError("Unable to update request. Server not available.");
     }
   });
 
@@ -168,6 +186,11 @@ export default function VacationRequestModal({
               noValidate
               className="px-12 py-10 flex flex-col gap-4"
             >
+              {actionError && (
+                <div className="bg-red-100 border border-red-400 text-red-700 px-4 py-3 rounded-xl text-sm">
+                  {actionError}
+                </div>
+              )}
             <DateRangeFields control={form.control} disabled={isReadOnly} />
 
             <div className="grid grid-cols-1 md:grid-cols-2 gap-6 items-start">
