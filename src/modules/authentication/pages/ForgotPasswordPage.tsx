@@ -135,10 +135,7 @@ const ForgotPasswordPage: React.FC = () => {
             
             {/* Error Message */}
             {(validationError || error) && (
-              <>
-                <br />
-                <ErrorMessage message={validationError || error || ""} />
-              </>
+              <ErrorMessage message={validationError || error || ""} className="mt-4" />
             )}
 
             {successMessage && !validationError && !error && (

@@ -34,7 +34,6 @@ export type AuthTokenResolver = () => string | null | undefined;
 let authTokenResolver: AuthTokenResolver | null = null;
 
 export function setAuthTokenResolver(resolver: AuthTokenResolver): void {
-  console.log("TOKEN DESDE MEMORIA:", resolver());
   authTokenResolver = resolver;
 }
 
@@ -158,11 +157,19 @@ export async function httpRequest<T>(
     requestHeaders.set("Accept", "application/json");
   }
 
-  const response = await fetch(`${API_BASE_URL}${endpoint}`, {
-    ...requestInit,
-    headers: requestHeaders,
-    body: requestBody,
-  });
+  let response: Response;
+  try {
+    response = await fetch(`${API_BASE_URL}${endpoint}`, {
+      ...requestInit,
+      headers: requestHeaders,
+      body: requestBody,
+    });
+  } catch (error) {
+    throw new ApiError("Internal server error (500)", 500, {
+      reason: "NETWORK_ERROR",
+      details: error instanceof Error ? error.message : String(error),
+    });
+  }
 
   const responseBody = await parseResponseBody(response);
 

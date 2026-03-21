@@ -182,7 +182,9 @@ const OtpVerificationPage: React.FC = () => {
               </InputOTP>
             </div>
 
-            {error && <ErrorMessage message={error} />}
+            <div className="mt-4 min-h-20">
+              {error && <ErrorMessage message={error} />}
+            </div>
 
             <div className="mt-2 mb-6 w-full flex justify-center">
               <Button
