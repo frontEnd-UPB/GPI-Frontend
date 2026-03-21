@@ -114,7 +114,6 @@ const appRoutes: RouteObject[] = [
 ];
 
 const routes: RouteObject[] = [
-  // --- RUTAS PÚBLICAS (Sin protección) ---
   { path: ROUTE_PATHS.LOGIN, element: <AdminLoginPage /> },
   { path: ROUTE_PATHS.SIGN_UP, element: <SignUpPage /> },
   { path: ROUTE_PATHS.RESET_PASSWORD, element: <ResetPasswordPage /> },
@@ -123,24 +122,19 @@ const routes: RouteObject[] = [
   { path: ROUTE_PATHS.FORGOT_PASSWORD, element: <ForgotPasswordPage /> },
   { path: "/HomePage", element: <Navigate to={ROUTE_PATHS.HOME} replace /> },
   
-  // La ruta de Unauthorized no requiere rol, pero es útil que esté fuera de la protección estricta
   { path: ROUTE_PATHS.UNAUTHORIZED, element: <UnauthorizedPage /> },
 
-  // --- RUTAS PROTEGIDAS POR SESIÓN (Cualquier usuario logueado) ---
   {
-    // Usamos ProtectedRoute sin allowedRoles. Solo verifica que isAuthenticated sea true.
     element: <ProtectedRoute />, 
     children: [
       {
         element: <MainLayout />,
-        children: appRoutes, // Asumo que appRoutes son accesibles para ambos roles. Si no, habría que dividirlas también.
+        children: appRoutes,
       },
     ],
   },
 
-  // --- RUTAS PROTEGIDAS SOLO PARA ADMIN ---
   {
-    // Solo usuarios con rol 'admin' pueden entrar aquí
     element: <ProtectedRoute allowedRoles={[USER_ROLES.ADMIN]} />,
     children: [
       {
@@ -150,9 +144,7 @@ const routes: RouteObject[] = [
     ],
   },
 
-  // --- RUTAS PROTEGIDAS SOLO PARA DOCTOR ---
   {
-    // Solo usuarios con rol 'doctor' pueden entrar aquí
     element: <ProtectedRoute allowedRoles={[USER_ROLES.DOCTOR]} />,
     children: [
       {
@@ -162,7 +154,6 @@ const routes: RouteObject[] = [
     ],
   },
 
-  // --- RUTAS NO ENCONTRADAS (404) ---
   { path: "*", element: <NotFoundPage /> },
 ];
 
