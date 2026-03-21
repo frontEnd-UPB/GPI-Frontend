@@ -6,9 +6,12 @@ import {
   useRoutes,
   type RouteObject,
 } from "react-router-dom";
+
+import { USER_ROLES } from "../core/constants/roles"; 
+
 import { EmptyState, MainLayout } from "../core/components";
 import NotFoundPage from "../core/pages/NotFoundPage";
-import UnauthorizedPage from "../core/pages/UnauthorizedPage";
+import { UnauthorizedPage } from "../core/pages/UnauthorizedPage";
 import ComponentsDemoPage from "../core/pages/ComponentsDemoPage";
 import StaffDirectoryPage from "../modules/staff-directory/pages/StaffDirectoryPage";
 import VacationManagementPage from "../modules/vacation/vacation-management/pages/VacationManagementPage";
@@ -61,12 +64,10 @@ const appRoutes: RouteObject[] = [
     path: ROUTE_PATHS.HR.slice(1),
     element: <Navigate to={ROUTE_PATHS.ADMIN_STAFF_DIRECTORY} replace />,
   },
-
   {
     path: ROUTE_PATHS.DEMO.slice(1),
     element: <ComponentsDemoPage />,
   },
-
   {
     path: ROUTE_PATHS.ADMIN_STAFF_DIRECTORY.slice(1),
     element: <StaffDirectoryPage />,
@@ -86,7 +87,6 @@ const appRoutes: RouteObject[] = [
       path: route.path?.slice(1),
     })),
   },
-
   {
     path: ROUTE_PATHS.AGENDA.slice(1),
     element: comingSoon("Agenda"),
@@ -114,64 +114,60 @@ const appRoutes: RouteObject[] = [
 ];
 
 const routes: RouteObject[] = [
+  // --- RUTAS PÚBLICAS (Sin protección) ---
+  { path: ROUTE_PATHS.LOGIN, element: <AdminLoginPage /> },
+  { path: ROUTE_PATHS.SIGN_UP, element: <SignUpPage /> },
+  { path: ROUTE_PATHS.RESET_PASSWORD, element: <ResetPasswordPage /> },
+  { path: ROUTE_PATHS.PATIENT_LOGIN, element: <PacientLoginPge /> },
+  { path: ROUTE_PATHS.OTP_VERIFICATION, element: <OtpVerification /> },
+  { path: ROUTE_PATHS.FORGOT_PASSWORD, element: <ForgotPasswordPage /> },
+  { path: "/HomePage", element: <Navigate to={ROUTE_PATHS.HOME} replace /> },
+  
+  // La ruta de Unauthorized no requiere rol, pero es útil que esté fuera de la protección estricta
+  { path: ROUTE_PATHS.UNAUTHORIZED, element: <UnauthorizedPage /> },
+
+  // --- RUTAS PROTEGIDAS POR SESIÓN (Cualquier usuario logueado) ---
   {
-    path: ROUTE_PATHS.LOGIN,
-    element: <AdminLoginPage />,
-  },
-  {
-    path: ROUTE_PATHS.SIGN_UP,
-    element: <SignUpPage />,
-  },
-  {
-    path: ROUTE_PATHS.RESET_PASSWORD,
-    element: <ResetPasswordPage />,
-  },
-  {
-    path: ROUTE_PATHS.PATIENT_LOGIN,
-    element: <PacientLoginPge />,
-  },
-  {
-    path: ROUTE_PATHS.OTP_VERIFICATION,
-    element: <OtpVerification />,
-  },
-  {
-    path: ROUTE_PATHS.FORGOT_PASSWORD,
-    element: <ForgotPasswordPage />,
-  },
-  {
-    path: "/HomePage",
-    element: <Navigate to={ROUTE_PATHS.HOME} replace />,
-  },
-  {
-    element: <ProtectedRoute />,
+    // Usamos ProtectedRoute sin allowedRoles. Solo verifica que isAuthenticated sea true.
+    element: <ProtectedRoute />, 
     children: [
       {
-        path: ROUTE_PATHS.UNAUTHORIZED,
-        element: <UnauthorizedPage />,
+        element: <MainLayout />,
+        children: appRoutes, // Asumo que appRoutes son accesibles para ambos roles. Si no, habría que dividirlas también.
       },
+    ],
+  },
+
+  // --- RUTAS PROTEGIDAS SOLO PARA ADMIN ---
+  {
+    // Solo usuarios con rol 'admin' pueden entrar aquí
+    element: <ProtectedRoute allowedRoles={[USER_ROLES.ADMIN]} />,
+    children: [
       {
         path: ROUTE_PATHS.ADMIN_DASHBOARD,
         element: <AdminDashboard />,
       },
+    ],
+  },
+
+  // --- RUTAS PROTEGIDAS SOLO PARA DOCTOR ---
+  {
+    // Solo usuarios con rol 'doctor' pueden entrar aquí
+    element: <ProtectedRoute allowedRoles={[USER_ROLES.DOCTOR]} />,
+    children: [
       {
         path: ROUTE_PATHS.DOCTOR_DASHBOARD,
         element: <DoctorDashboard />,
       },
-      {
-        element: <MainLayout />,
-        children: appRoutes,
-      },
     ],
   },
-  {
-    path: "*",
-    element: <NotFoundPage />,
-  },
+
+  // --- RUTAS NO ENCONTRADAS (404) ---
+  { path: "*", element: <NotFoundPage /> },
 ];
 
 const RoutesConfig: React.FC = () => {
   const element = useRoutes(routes);
-
   return element;
 };
 
