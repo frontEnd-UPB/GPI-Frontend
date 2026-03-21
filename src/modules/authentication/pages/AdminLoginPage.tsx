@@ -115,7 +115,7 @@ const AdminLoginPage: React.FC = () => {
               required
             />
 
-            {error && <ErrorMessage message={error} />}
+            {error && <ErrorMessage message={error} className="mt-4" />}
 
             <div className="flex justify-end mt-3">
               <a

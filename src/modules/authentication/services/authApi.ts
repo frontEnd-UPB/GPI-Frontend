@@ -82,9 +82,21 @@ function mapSignInError(error: unknown): Error {
 			return new Error("Invalid email or password");
 		}
 
-		if (error.message && error.message.trim().length > 0) {
-			return new Error(error.message);
+		if (
+			error.status === 500 &&
+			typeof error.data === "object" &&
+			error.data !== null &&
+			"reason" in error.data &&
+			error.data.reason === "NETWORK_ERROR"
+		) {
+			return new Error("Internal server error (500)");
 		}
+
+		if (error.message && error.message.trim().length > 0) {
+			return new Error(`${error.message} (${error.status})`);
+		}
+
+		return new Error(`Request failed (${error.status})`);
 	}
 
 	if (error instanceof Error) {

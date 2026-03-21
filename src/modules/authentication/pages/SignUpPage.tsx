@@ -82,7 +82,7 @@ const SignUpPage: React.FC = () => {
               Full Name
             </p>
             <Input
-              id="fullName"
+	          id="fullName"
               placeholder="Abigail Johnson"
               value={fullName}
               onChange={(e) => setFullName(e.target.value)}
@@ -123,14 +123,14 @@ const SignUpPage: React.FC = () => {
               required
             />
 
-            <br />
-            
-            {error && <ErrorMessage message={error} />}
+            <div className="">
+              {error && <ErrorMessage message={error} className="mt-4" />}
+            </div>
 
             <div className="mt-4 flex flex-col items-center w-full">
               <Button 
                 type="submit" 
-                className="z-10 bg-chart-3 w-full font-bold"
+                className="z-10 w-full bg-secondary hover:bg-secondary/90 text-secondary-foreground font-bold "
                 disabled={isLoading}
               >
                 {isLoading ? "Creating account..." : "Sign Up"}

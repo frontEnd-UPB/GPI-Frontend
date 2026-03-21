@@ -179,10 +179,7 @@ const ResetPasswordPage: React.FC = () => {
             />
 
             {(validationError || error) && (
-              <>
-                <br />
-                <ErrorMessage message={validationError || error || ""} />
-              </>
+              <ErrorMessage message={validationError || error || ""} className="mt-4" />
             )}
 
             {/* Se elimina el mensaje "Validating reset link..." para simplificar el flujo */}
