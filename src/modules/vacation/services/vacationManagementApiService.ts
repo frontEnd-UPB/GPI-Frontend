@@ -1,6 +1,6 @@
-import { ApiError, apiClient } from "../../../core/services/httpClient";
-import { API_ENDPOINTS, VACATION_STATUS } from "../../../core/constants";
-import type { VacationRequest } from "../../../core/mocks/data";
+import { apiClient } from "../../../core/services/httpClient";
+import { API_ENDPOINTS, AUTH_STORAGE_KEYS, VACATION_STATUS } from "../../../core/constants";
+import type { VacationEmployeeProfile, VacationRequest } from "../types";
 
 // ---------------------------------------------------------------------------
 // Types
@@ -31,6 +31,27 @@ interface BackendVacationRequest {
   comment: string | null;
   attachment_url?: string | null;
   attachment_name?: string | null;
+}
+
+function getLoggedInUserRole(): string {
+  const rawStoredUser = localStorage.getItem(AUTH_STORAGE_KEYS.USER);
+  if (!rawStoredUser) return "";
+
+  try {
+    const parsed: unknown = JSON.parse(rawStoredUser);
+    if (
+      typeof parsed === "object" &&
+      parsed !== null &&
+      "role" in parsed &&
+      typeof parsed.role === "string"
+    ) {
+      return parsed.role.trim().toLowerCase();
+    }
+  } catch {
+    return "";
+  }
+
+  return "";
 }
 
 // ---------------------------------------------------------------------------
@@ -79,7 +100,7 @@ function toVacationRequest(raw: BackendVacationRequest): VacationRequest {
  */
 export async function fetchEmployeeProfile(
   id: string
-): Promise<{ firstname: string; lastname: string; department?: string }> {
+): Promise<VacationEmployeeProfile> {
   interface EmployeeResponseDto {
     id: string | number;
     firstname?: string;
@@ -88,36 +109,30 @@ export async function fetchEmployeeProfile(
     last_name?: string;
     email?: string;
     department?: string;
+    role?: string;
+    role_level?: string;
+    specialty?: string;
+    profilePicture?: string | null;
+    profile_pic?: string | null;
   }
 
-  const response = await fetchEmployeeProfileByIdWithFallback(id);
+  const requesterRole = getLoggedInUserRole();
+  const response = await apiClient.get<EmployeeResponseDto>(
+    API_ENDPOINTS.EMPLOYEES.DETAIL(id),
+    {
+      query: {
+        requester_role: requesterRole || undefined,
+      },
+    }
+  );
   return {
     firstname: response.firstname ?? response.first_name ?? "",
     lastname: response.lastname ?? response.last_name ?? "",
     department: response.department,
+    role: response.role ?? response.role_level,
+    specialty: response.specialty,
+    profilePicture: response.profilePicture ?? response.profile_pic ?? null,
   };
-}
-
-async function fetchEmployeeProfileByIdWithFallback(
-  id: string
-): Promise<{
-  id: string | number;
-  firstname?: string;
-  first_name?: string;
-  lastname?: string;
-  last_name?: string;
-  email?: string;
-  department?: string;
-}> {
-  try {
-    return await apiClient.get(API_ENDPOINTS.EMPLOYEES.DETAIL(id));
-  } catch (error) {
-    if (!(error instanceof ApiError) || error.status !== 404) {
-      throw error;
-    }
-
-    return apiClient.get(`/api/v1/staff/${id}`);
-  }
 }
 
 /**

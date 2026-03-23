@@ -6,8 +6,11 @@ import React, {
   useMemo,
   useState,
 } from "react";
-import type { VacationRequest } from "../../../../core/mocks/data";
 import { VACATION_STATUS } from "../../../../core/constants";
+import type {
+  VacationEmployeeProfile,
+  VacationRequest,
+} from "../../types";
 import {
   approveVacationRequest,
   fetchVacationRequests,
@@ -18,6 +21,8 @@ import {
 
 export interface VacationRequestsContextValue {
   requests: VacationRequest[];
+  employeeProfiles: Record<string, VacationEmployeeProfile>;
+  availableDepartments: string[];
   error: string | null;
   approveRequest: (id: string) => Promise<void>;
   rejectRequest: (id: string, reason: string) => Promise<void>;
@@ -45,9 +50,8 @@ export const VacationRequestsProvider: React.FC<{ children: React.ReactNode }> =
   children,
 }) => {
   const [requests, setRequests] = useState<VacationRequest[]>([]);
-  const [employeeProfiles, setEmployeeProfiles] = useState<
-    Record<string, { firstname: string; lastname: string; department?: string }>
-  >({});
+  const [employeeProfiles, setEmployeeProfiles] =
+    useState<Record<string, VacationEmployeeProfile>>({});
   const [loadedEmployeeIds, setLoadedEmployeeIds] = useState<Set<string>>(
     new Set()
   );
@@ -193,6 +197,14 @@ export const VacationRequestsProvider: React.FC<{ children: React.ReactNode }> =
 
       return {
         requests,
+        employeeProfiles,
+        availableDepartments: Array.from(
+          new Set(
+            Object.values(employeeProfiles)
+              .map((profile) => profile.department)
+              .filter((department): department is string => Boolean(department))
+          )
+        ).sort(),
         error,
         approveRequest,
         rejectRequest,

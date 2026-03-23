@@ -7,14 +7,19 @@ import Decision from "../components/Decision";
 import { VacationInfoCard } from "../components/VacationInfoCard";
 import { AppointmentsCalendar } from "../components/AppointmentsCalendar";
 import { GoBackButton } from "../../../../core/components";
-import { mockEmployees } from "../../../../core/mocks/data";
 import { ErrorMessage } from "../../../../core/components/feedback/ErrorMessage";
 
 const VacationDetailPage: React.FC = () => {
   const { id } = useParams<{ id: string }>();
   const navigate = useNavigate();
-  const { requests, approveRequest, rejectRequest, setRequestPending, error } =
-    useVacationRequests();
+  const {
+    requests,
+    employeeProfiles,
+    approveRequest,
+    rejectRequest,
+    setRequestPending,
+    error,
+  } = useVacationRequests();
 
   useEffect(() => {
     window.scrollTo({ top: 0, behavior: "smooth" });
@@ -47,11 +52,11 @@ const VacationDetailPage: React.FC = () => {
     );
   }
 
-  const employee = mockEmployees.find((e) => e.id === request?.employeeId);
-  const baseName = employee
-    ? `${employee.firstname} ${employee.lastname}`
-    : "Unknown employee";
-  const isDoctor = employee?.role === "doctor";
+  const employee = employeeProfiles[request.employeeId];
+  const baseName = `${employee?.firstname ?? ""} ${employee?.lastname ?? ""}`.trim() ||
+    "Unknown employee";
+  const normalizedRole = (employee?.role ?? "").toLowerCase();
+  const isDoctor = normalizedRole.includes("doctor");
   const displayName = isDoctor ? `Dr. ${baseName}` : baseName;
 
   return (
@@ -81,7 +86,7 @@ const VacationDetailPage: React.FC = () => {
           doctorName={baseName}
           employeeFunction={isDoctor ? "Doctor" : employee?.role}
           department={employee?.department}
-          doctorRole={employee?.speciality}
+          doctorRole={employee?.specialty}
           avatarUrl={employee?.profilePicture ?? undefined}
           status={request.status}
         />
@@ -95,7 +100,7 @@ const VacationDetailPage: React.FC = () => {
             </div>
 
             <div className="w-full max-w-[1100px] mx-auto mt-4">
-              <AppointmentsCalendar doctorId={employee?.id} />
+              <AppointmentsCalendar appointments={[]} />
             </div>
           </>
         )}

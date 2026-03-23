@@ -1,8 +1,12 @@
 import React, { useState } from "react";
 import { Card } from "../../../../ui/card";
 import { ChevronLeft, ChevronRight } from "lucide-react";
-import { mockAppointments, mockPatients } from "../../../../core/mocks/data";
-import { APPOINTMENT_STATUS } from "../../../../core/constants";
+
+interface CalendarAppointment {
+  id: string;
+  patientName: string;
+  date: string;
+}
 
 interface AppointmentItem {
   patientName: string;
@@ -17,12 +21,7 @@ interface DayAgenda {
   appointments: AppointmentItem[];
 }
 
-export function AppointmentsCalendar({ doctorId }: { doctorId?: string }) {
-  // Filtrar por doctor (si se pasa) y por status SCHEDULED
-  const filteredAll = mockAppointments.filter((appointment) => {
-    if (doctorId && appointment.doctorId !== doctorId) return false;
-    return appointment.status === APPOINTMENT_STATUS.SCHEDULED;
-  });
+export function AppointmentsCalendar({ appointments = [] }: { appointments?: CalendarAppointment[] }) {
 
   const parseLocalDate = (dateTimeStr: string) => {
     const [datePart] = dateTimeStr.split("T");
@@ -38,8 +37,8 @@ export function AppointmentsCalendar({ doctorId }: { doctorId?: string }) {
     return new Date(y, m - 1, d, hh, mm || 0);
   };
 
-  const initialMonth = filteredAll.length
-    ? parseLocalDate(filteredAll.map((a) => a.date).sort()[0])
+  const initialMonth = appointments.length
+    ? parseLocalDate(appointments.map((a) => a.date).sort()[0])
     : new Date();
   const [currentMonth, setCurrentMonth] = useState<Date>(new Date(initialMonth.getFullYear(), initialMonth.getMonth(), 1));
 
@@ -47,7 +46,7 @@ export function AppointmentsCalendar({ doctorId }: { doctorId?: string }) {
   const nextMonth = () => setCurrentMonth((d) => new Date(d.getFullYear(), d.getMonth() + 1, 1));
 
   // Filter by doctor and by selected month (use local date parsing to avoid timezone shifts)
-  const filtered = filteredAll.filter((a) => {
+  const filtered = appointments.filter((a) => {
     const ad = parseLocalDate(a.date);
     return ad.getFullYear() === currentMonth.getFullYear() && ad.getMonth() === currentMonth.getMonth();
   });
@@ -57,8 +56,7 @@ export function AppointmentsCalendar({ doctorId }: { doctorId?: string }) {
     const dateKey = a.date.split("T")[0];
     const dateTime = parseLocalDateTime(a.date);
     const timeLabel = dateTime.toLocaleTimeString("es-ES", { hour: "2-digit", minute: "2-digit", hour12: false });
-    const patient = mockPatients.find((p) => p.id === a.patientId);
-    const patientName = patient ? `${patient.firstname} ${patient.lastname}` : "Paciente desconocido";
+    const patientName = a.patientName || "Unknown patient";
 
     const list = acc[dateKey] || [];
     list.push({ patientName, timeLabel, dateTime });

@@ -1,4 +1,4 @@
-import { API_ENDPOINTS, USER_ROLES } from "../../../core/constants";
+import { API_ENDPOINTS, AUTH_STORAGE_KEYS, USER_ROLES } from "../../../core/constants";
 import { ApiError, apiClient } from "../../../core/services/httpClient";
 import type { UserRole } from "../../../core/constants/roles";
 import type { AuthUserPayload } from "../../../core/types/auth";
@@ -57,6 +57,26 @@ function pickFirstNonEmpty(...values: unknown[]): string {
 		const normalized = toNonEmptyString(value);
 		if (normalized) return normalized;
 	}
+	return "";
+}
+function getLoggedInUserRole(): string {
+	const rawStoredUser = localStorage.getItem(AUTH_STORAGE_KEYS.USER);
+	if (!rawStoredUser) return "";
+
+	try {
+		const parsed: unknown = JSON.parse(rawStoredUser);
+		if (
+			typeof parsed === "object" &&
+			parsed !== null &&
+			"role" in parsed &&
+			typeof parsed.role === "string"
+		) {
+			return parsed.role.trim().toLowerCase();
+		}
+	} catch {
+		return "";
+	}
+
 	return "";
 }
 
@@ -170,18 +190,6 @@ function mapEmployeeResponse(response: EmployeeResponseDto): AuthUserPayload {
 	};
 }
 
-async function fetchEmployeeByIdWithFallback(id: string): Promise<EmployeeResponseDto> {
-	try {
-		return await apiClient.get<EmployeeResponseDto>(API_ENDPOINTS.EMPLOYEES.DETAIL(id));
-	} catch (error) {
-		if (!(error instanceof ApiError) || error.status !== 404) {
-			throw error;
-		}
-
-		return apiClient.get<EmployeeResponseDto>(`/api/v1/staff/${id}`);
-	}
-}
-
 function isAuthError(error: unknown): boolean {
 	if (!(error instanceof ApiError)) return false;
 	return error.status === 401 || error.status === 404;
@@ -263,7 +271,15 @@ export const authApi = {
 	},
 
 	async getCurrentUserById(id: string): Promise<AuthUserPayload> {
-		const response = await fetchEmployeeByIdWithFallback(id);
+		const requesterRole = getLoggedInUserRole();
+		const response = await apiClient.get<EmployeeResponseDto>(
+			API_ENDPOINTS.EMPLOYEES.DETAIL(id),
+			{
+				query: {
+					requester_role: requesterRole || undefined,
+				},
+			}
+		);
 		return mapEmployeeResponse(response);
 	},
 

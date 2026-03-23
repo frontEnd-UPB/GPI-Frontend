@@ -1,4 +1,4 @@
-import React, { useMemo, useState } from "react";
+import React, { useState } from "react";
 import { MainContainer, PageHeader } from "../../../../core/components";
 import { ROUTE_PATHS } from "../../../../routes/routes";
 import Calendario from "../components/Calendario";
@@ -6,7 +6,6 @@ import { useVacationRequests } from "../context/VacationRequestsContext";
 import VacationRequestsTable from "../components/VacationRequestsTable";
 import VacationFilters from "../components/VacationFilters";
 import Title from "../components/Title";
-import { mockEmployees } from "../../../../core/mocks/data";
 import { useNavigate } from "react-router-dom";
 import { ErrorMessage } from "../../../../core/components/feedback/ErrorMessage";
 
@@ -66,15 +65,10 @@ const InnerContent: React.FC<{
     setSearch,
     specialtyFilter,
     setSpecialtyFilter,
+    availableDepartments,
     calendarEvents,
     error,
   } = useVacationRequests();
-
-  const departments = useMemo(
-    () =>
-      Array.from(new Set(mockEmployees.map((e) => e.department))).sort(),
-    [],
-  );
 
   return (
     <div className="container mx-auto px-5 py-8 space-y-8">
@@ -83,7 +77,7 @@ const InnerContent: React.FC<{
       <VacationFilters
         search={search}
         specialty={specialtyFilter}
-        specialties={departments}
+        specialties={availableDepartments}
         onSearchChange={setSearch}
         onSpecialtyChange={setSpecialtyFilter}
       />

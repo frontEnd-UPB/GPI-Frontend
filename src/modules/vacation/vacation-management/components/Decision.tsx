@@ -4,7 +4,7 @@ import { Button } from "../../../../ui/core/Button";
 import { Modal } from "../../../../ui/core/Modal";
 import { Textarea } from "../../../../ui/core/Textarea";
 import { VACATION_STATUS } from "../../../../core/constants";
-import type { VacationRequest } from "../../../../core/mocks/data";
+import type { VacationRequest } from "../../types";
 import { ErrorMessage } from "../../../../core/components/feedback/ErrorMessage";
 
 // Temporary backend compatibility flag.

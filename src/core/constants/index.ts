@@ -59,7 +59,7 @@ export const API_ENDPOINTS = {
   },
   EMPLOYEES: {
     LIST: "/api/v1/employees",
-    DETAIL: (id: string) => `/api/v1/employees/${id}`,
+    DETAIL: (id: string) => `/api/v1/staff/${id}`,
     CREATE: "/api/v1/employees",
     UPDATE: (id: string) => `/api/v1/employees/${id}`,
     DELETE: (id: string) => `/api/v1/employees/${id}`,

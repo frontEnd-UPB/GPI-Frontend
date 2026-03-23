@@ -3,7 +3,7 @@ import { Badge } from "../../../../ui/badge";
 import { Clock, Paperclip } from "lucide-react";
 import { formatDisplayDate } from "../../../../core/constants";
 import { StatusBadge } from "../../../../core/components/StatusBadge";
-import type { VacationRequest } from "../../../../core/mocks/data";
+import type { VacationRequest } from "../../types";
 
 interface VacationInfoCardProps {
   doctorName: string;
@@ -23,7 +23,7 @@ export function VacationInfoCard({
   avatarUrl,
   request,
 }: VacationInfoCardProps & { employeeFunction?: string }) {
-  // All domain data comes from the vacation request (mocks)
+  // All domain data comes from the vacation request payload.
   const typeValue = request.reason;
   const submittedDateValue = formatDisplayDate(request.requestDate);
   const fromDateValue = formatDisplayDate(request.startDate);
