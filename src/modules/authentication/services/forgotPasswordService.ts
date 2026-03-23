@@ -22,6 +22,15 @@ export interface CompleteResetResult {
   from?: ForgotPasswordSource;
 }
 
+const NEUTRAL_FORGOT_PASSWORD_MESSAGE =
+  "If an account exists for this email, you will receive a verification code shortly.";
+const INVALID_OR_EXPIRED_CODE_MESSAGE =
+  "Invalid or expired code. Request a new link and try again.";
+const GENERIC_REQUEST_ERROR_MESSAGE =
+  "We could not process your request right now. Please try again in a moment.";
+const GENERIC_RESET_ERROR_MESSAGE =
+  "We could not update your password. Request a new code and try again.";
+
 function toTrimmedString(value: unknown): string {
   if (typeof value !== "string") return "";
   return value.trim();
@@ -75,7 +84,7 @@ export const forgotPasswordService = {
     const normalizedEmail = toTrimmedString(email).toLowerCase();
 
     try {
-      const response = await apiClient.post<{ message?: string }>(
+      await apiClient.post<{ message?: string }>(
         API_ENDPOINTS.AUTH_CONTRACT.FORGOT_PASSWORD,
         undefined,
         {
@@ -88,18 +97,22 @@ export const forgotPasswordService = {
 
       return {
         success: true,
-        message:
-          readResponseMessage(response) ||
-          "Verification code sent successfully.",
+        message: NEUTRAL_FORGOT_PASSWORD_MESSAGE,
         email: normalizedEmail,
       };
     } catch (error) {
+      // Do not reveal whether the email exists. Treat user-not-found as success.
+      if (error instanceof ApiError && error.status === 404) {
+        return {
+          success: true,
+          message: NEUTRAL_FORGOT_PASSWORD_MESSAGE,
+          email: normalizedEmail,
+        };
+      }
+
       return {
         success: false,
-        message: mapApiError(
-          error,
-          "Unexpected error while processing your request."
-        ),
+        message: GENERIC_REQUEST_ERROR_MESSAGE,
       };
     }
   },
@@ -127,14 +140,14 @@ export const forgotPasswordService = {
 
       return {
         success: true,
-        message: readResponseMessage(response) || "Code verified successfully.",
+        message: "Code verified successfully.",
         email: toTrimmedString(response?.email) || normalizedEmail,
         from,
       };
     } catch (error) {
       return {
         success: false,
-        message: mapApiError(error, "Invalid or expired verification code."),
+        message: INVALID_OR_EXPIRED_CODE_MESSAGE,
         email: normalizedEmail,
         from,
       };
@@ -165,14 +178,28 @@ export const forgotPasswordService = {
 
       return {
         success: true,
-        message:
-          readResponseMessage(response) || "Password updated successfully.",
+        message: readResponseMessage(response) || "Password updated successfully.",
         from,
       };
     } catch (error) {
+      if (
+        error instanceof ApiError &&
+        typeof error.data === "object" &&
+        error.data !== null &&
+        "detail" in error.data &&
+        typeof error.data.detail === "string" &&
+        error.data.detail.toLowerCase().includes("password")
+      ) {
+        return {
+          success: false,
+          message: "Passwords do not match.",
+          from,
+        };
+      }
+
       return {
         success: false,
-        message: mapApiError(error, "Unexpected error while updating password."),
+        message: GENERIC_RESET_ERROR_MESSAGE,
         from,
       };
     }

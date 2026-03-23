@@ -13,6 +13,7 @@ import { ROUTE_PATHS } from "../../../routes/routes";
 import { forgotPasswordService } from "../services/forgotPasswordService";
 import { useResetPassword } from "../hooks/useResetPassword";
 const OtpVerificationPage: React.FC = () => {
+  const invalidCodeMessage = "Invalid or expired code. Request a new link and try again.";
   const navigate = useNavigate();
   const [searchParams] = useSearchParams();
 
@@ -67,7 +68,7 @@ const OtpVerificationPage: React.FC = () => {
 
     const verified = await verifyCode(resetEmail, otp, resetSource);
     if (!verified) {
-      setError("Invalid or expired verification code");
+      setError(invalidCodeMessage);
       return;
     }
 
@@ -202,7 +203,9 @@ const OtpVerificationPage: React.FC = () => {
             </div>
 
             <div className="mt-4">
-              {(error || verifyError) && <ErrorMessage message={error || verifyError || ""} />}
+              {(error || verifyError) && (
+                <ErrorMessage message={error || verifyError || invalidCodeMessage} />
+              )}
             </div>
 
             <div className="mt-2 mb-6 w-full flex justify-center">
