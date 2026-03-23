@@ -6,6 +6,7 @@ import DateRangeFields from "../../components/form/DateRangeFields";
 import TypeSelector from "../../components/form/TypeSelector";
 import CommentField from "../../components/form/CommentField";
 import FileAttachmentField from "../../components/form/FileAttachmentField";
+import { ErrorMessage } from "../../../../core/components/feedback/ErrorMessage";
 
 interface VacationRequestFormProps {
   visible: boolean;
@@ -13,6 +14,7 @@ interface VacationRequestFormProps {
   onCancel: () => void;
   availableDays?: number | null;
   isSubmitting?: boolean;
+  submitError?: string | null;
 }
 
 export default function VacationRequestForm({
@@ -21,6 +23,7 @@ export default function VacationRequestForm({
   onCancel,
   availableDays,
   isSubmitting = false,
+  submitError,
 }: VacationRequestFormProps) {
   const {
     form,
@@ -88,6 +91,14 @@ export default function VacationRequestForm({
                 Cancel
               </Button>
             </div>
+
+            {submitError && (
+              <ErrorMessage
+                variant="inline"
+                message={submitError}
+                className="mt-1"
+              />
+            )}
           </form>
         </Form>
       </div>

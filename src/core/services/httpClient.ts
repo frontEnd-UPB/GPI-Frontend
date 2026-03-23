@@ -80,6 +80,27 @@ async function parseResponseBody(response: Response): Promise<unknown> {
 
 function getErrorMessage(response: Response, responseBody: unknown): string {
   if (typeof responseBody === "object" && responseBody !== null) {
+    const maybeDetail =
+      "detail" in responseBody ? responseBody.detail : null;
+
+    if (typeof maybeDetail === "string" && maybeDetail.trim().length > 0) {
+      return maybeDetail;
+    }
+
+    // FastAPI validation errors often return detail as an array of objects.
+    if (Array.isArray(maybeDetail) && maybeDetail.length > 0) {
+      const first = maybeDetail[0];
+      if (
+        typeof first === "object" &&
+        first !== null &&
+        "msg" in first &&
+        typeof first.msg === "string" &&
+        first.msg.trim().length > 0
+      ) {
+        return first.msg;
+      }
+    }
+
     const maybeMessage =
       "message" in responseBody && typeof responseBody.message === "string"
         ? responseBody.message

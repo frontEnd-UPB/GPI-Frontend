@@ -1,11 +1,10 @@
-import React, { useMemo, useState } from "react";
+import React, { useState } from "react";
 import { MainContainer, PageHeader, GoBackButton } from "../../../../core/components";
 import { ROUTE_PATHS } from "../../../../routes/routes";
 import { useVacationRequests } from "../context/VacationRequestsContext";
 import VacationFilters from "../components/VacationFilters";
 import Title from "../components/Title";
 import VacationsHistoryTable from "../components/VacationsHistoryTable";
-import { mockEmployees } from "../../../../core/mocks/data";
 
 const VacationHistoryPage: React.FC = () => {
   const [sortConfig, setSortConfig] = useState<{
@@ -57,13 +56,13 @@ const InnerContent: React.FC<{
   sortConfig: { key: "startDate" | "employeeName"; direction: "asc" | "desc" };
   onToggleSort: (k: "startDate" | "employeeName") => void;
 }> = ({ sortConfig, onToggleSort }) => {
-  const { search, setSearch, specialtyFilter, setSpecialtyFilter } = useVacationRequests();
-
-  const departments = useMemo(
-    () =>
-      Array.from(new Set(mockEmployees.map((e) => e.department))).sort(),
-    [],
-  );
+  const {
+    search,
+    setSearch,
+    specialtyFilter,
+    setSpecialtyFilter,
+    availableDepartments,
+  } = useVacationRequests();
 
   return (
     <div className="container mx-auto px-5 py-8 space-y-8">
@@ -74,7 +73,7 @@ const InnerContent: React.FC<{
       <VacationFilters
         search={search}
         specialty={specialtyFilter}
-        specialties={departments}
+        specialties={availableDepartments}
         onSearchChange={setSearch}
         onSpecialtyChange={setSpecialtyFilter}
       />

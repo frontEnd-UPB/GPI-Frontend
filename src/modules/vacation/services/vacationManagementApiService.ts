@@ -1,6 +1,6 @@
 import { apiClient } from "../../../core/services/httpClient";
-import { API_ENDPOINTS, VACATION_STATUS } from "../../../core/constants";
-import type { VacationRequest } from "../../../core/mocks/data";
+import { API_ENDPOINTS, AUTH_STORAGE_KEYS, VACATION_STATUS } from "../../../core/constants";
+import type { VacationEmployeeProfile, VacationRequest } from "../types";
 
 // ---------------------------------------------------------------------------
 // Types
@@ -31,6 +31,27 @@ interface BackendVacationRequest {
   comment: string | null;
   attachment_url?: string | null;
   attachment_name?: string | null;
+}
+
+function getLoggedInUserRole(): string {
+  const rawStoredUser = localStorage.getItem(AUTH_STORAGE_KEYS.USER);
+  if (!rawStoredUser) return "";
+
+  try {
+    const parsed: unknown = JSON.parse(rawStoredUser);
+    if (
+      typeof parsed === "object" &&
+      parsed !== null &&
+      "role" in parsed &&
+      typeof parsed.role === "string"
+    ) {
+      return parsed.role.trim().toLowerCase();
+    }
+  } catch {
+    return "";
+  }
+
+  return "";
 }
 
 // ---------------------------------------------------------------------------
@@ -74,10 +95,51 @@ function toVacationRequest(raw: BackendVacationRequest): VacationRequest {
 // ---------------------------------------------------------------------------
 
 /**
+ * Fetches employee profile by ID (same pattern as authApi.getCurrentUserById)
+ * Returns formatted employee data for use in calendar/table displays
+ */
+export async function fetchEmployeeProfile(
+  id: string
+): Promise<VacationEmployeeProfile> {
+  interface EmployeeResponseDto {
+    id: string | number;
+    firstname?: string;
+    first_name?: string;
+    lastname?: string;
+    last_name?: string;
+    email?: string;
+    department?: string;
+    role?: string;
+    role_level?: string;
+    specialty?: string;
+    profilePicture?: string | null;
+    profile_pic?: string | null;
+  }
+
+  const requesterRole = getLoggedInUserRole();
+  const response = await apiClient.get<EmployeeResponseDto>(
+    API_ENDPOINTS.EMPLOYEES.DETAIL(id),
+    {
+      query: {
+        requester_role: requesterRole || undefined,
+      },
+    }
+  );
+  return {
+    firstname: response.firstname ?? response.first_name ?? "",
+    lastname: response.lastname ?? response.last_name ?? "",
+    department: response.department,
+    role: response.role ?? response.role_level,
+    specialty: response.specialty,
+    profilePicture: response.profilePicture ?? response.profile_pic ?? null,
+  };
+}
+
+/**
  * Fetches all vacation requests, optionally filtered by status and/or
  * employee name search term.
  *
- * GET /human-resources/vacation-managment[?status=pending&status=approved&search=term]
+ * GET /human-resources/vacation-management[?status=pending&status=approved&search=term]
  */
 export async function fetchVacationRequests(
   params: FetchVacationRequestsParams = {}
@@ -102,14 +164,15 @@ export async function fetchVacationRequests(
 /**
  * Approves a vacation request.
  *
- * PATCH /human-resources/vacation-managment/:id { status: approved }
+ * PATCH /human-resources/vacation-management/:id { status: approved }
  */
 export async function approveVacationRequest(
   id: string
 ): Promise<VacationRequest | null> {
   const raw = await apiClient.patch<BackendVacationRequest>(
     API_ENDPOINTS.VACATIONS.HR.UPDATE(id),
-    { status: VACATION_STATUS.APPROVED }
+    // Backend currently expects "accepted" while frontend normalizes it to "approved".
+    { status: "accepted" }
   );
   return toVacationRequest(raw);
 }
@@ -117,7 +180,7 @@ export async function approveVacationRequest(
 /**
  * Rejects a vacation request with a mandatory rejection reason.
  *
- * PATCH /human-resources/vacation-managment/:id { status: rejected, rejection_reason }
+ * PATCH /human-resources/vacation-management/:id { status: rejected, rejection_reason }
  */
 export async function rejectVacationRequest(
   id: string,
@@ -136,7 +199,7 @@ export async function rejectVacationRequest(
 /**
  * Reverts a vacation request back to pending status.
  *
- * PATCH /human-resources/vacation-managment/:id { status: pending }
+ * PATCH /human-resources/vacation-management/:id { status: pending }
  */
 export async function setVacationRequestPending(
   id: string

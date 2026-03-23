@@ -1,7 +1,7 @@
 import React, { useMemo, useState } from "react";
 import { useVacationRequests } from "../context/VacationRequestsContext";
 import { VACATION_STATUS } from "../../../../core/constants";
-import { mockEmployees, type VacationRequest } from "../../../../core/mocks/data";
+import type { VacationRequest } from "../../types";
 import { EmptyState } from "../../../../core/components";
 import { StatusBadge } from "../../../../core/components/StatusBadge";
 import VacationRequestModal from "../../vacation-leave/components/VacationRequestModal";
@@ -17,31 +17,8 @@ const VacationsHistoryTable: React.FC<VacationsHistoryTableProps> = ({
   sortDirection,
   onSortChange,
 }) => {
-  const { requests, search, specialtyFilter } = useVacationRequests();
+  const { requests, search, specialtyFilter, employeeProfiles } = useVacationRequests();
   const [selected, setSelected] = useState<VacationRequest | null>(null);
-
-  const { specialtyByEmployeeId, nameByEmployeeId, specialties } = useMemo(() => {
-    const specialtyMap: Record<string, string> = {};
-    const nameMap: Record<string, string> = {};
-
-    mockEmployees.forEach((employee) => {
-      if (!nameMap[employee.id]) {
-        nameMap[employee.id] = `${employee.firstname} ${employee.lastname}`;
-      }
-
-      if (employee.department && !specialtyMap[employee.id]) {
-        specialtyMap[employee.id] = employee.department;
-      }
-    });
-
-    const uniqueSpecialties = Array.from(new Set(Object.values(specialtyMap))).sort();
-
-    return {
-      specialtyByEmployeeId: specialtyMap,
-      nameByEmployeeId: nameMap,
-      specialties: uniqueSpecialties,
-    };
-  }, []);
 
   const filteredAndSorted = useMemo(() => {
     let result = requests.filter(
@@ -51,14 +28,17 @@ const VacationsHistoryTable: React.FC<VacationsHistoryTableProps> = ({
     if (search.trim()) {
       const term = search.toLowerCase();
       result = result.filter((r) => {
-        const name = nameByEmployeeId[r.employeeId]?.toLowerCase() ?? "";
+        const profile = employeeProfiles[r.employeeId];
+        const name = `${profile?.firstname ?? ""} ${profile?.lastname ?? ""}`
+          .trim()
+          .toLowerCase();
         return name.includes(term);
       });
     }
 
     if (specialtyFilter) {
       result = result.filter(
-        (r) => specialtyByEmployeeId[r.employeeId] === specialtyFilter
+        (r) => employeeProfiles[r.employeeId]?.department === specialtyFilter
       );
     }
 
@@ -74,8 +54,10 @@ const VacationsHistoryTable: React.FC<VacationsHistoryTableProps> = ({
       }
 
       if (sortKey === "employeeName") {
-        const nameA = nameByEmployeeId[a.employeeId] ?? "";
-        const nameB = nameByEmployeeId[b.employeeId] ?? "";
+        const profileA = employeeProfiles[a.employeeId];
+        const profileB = employeeProfiles[b.employeeId];
+        const nameA = `${profileA?.firstname ?? ""} ${profileA?.lastname ?? ""}`.trim();
+        const nameB = `${profileB?.firstname ?? ""} ${profileB?.lastname ?? ""}`.trim();
         const compare = nameA.localeCompare(nameB);
         return sortDirection === "asc" ? compare : -compare;
       }
@@ -90,7 +72,7 @@ const VacationsHistoryTable: React.FC<VacationsHistoryTableProps> = ({
     specialtyFilter,
     sortDirection,
     sortKey,
-    specialtyByEmployeeId,
+    employeeProfiles,
   ]);
 
   const handleCloseModal = () => setSelected(null);
@@ -163,11 +145,11 @@ const VacationsHistoryTable: React.FC<VacationsHistoryTableProps> = ({
                     } ${isLast ? "rounded-b-[20px]" : ""}`}
                   >
                     <div className="flex flex-[1] items-center justify-start pl-10 font-medium text-primary">
-                      {nameByEmployeeId[request.employeeId] ?? "Unknown employee"}
+                      {`${employeeProfiles[request.employeeId]?.firstname ?? ""} ${employeeProfiles[request.employeeId]?.lastname ?? ""}`.trim() || "Unknown employee"}
                     </div>
 
                     <div className="flex flex-[1.5] items-center justify-center text-primary">
-                      {specialtyByEmployeeId[request.employeeId] ?? "-"}
+                      {employeeProfiles[request.employeeId]?.department ?? "-"}
                     </div>
 
                     <div className="flex flex-[1] items-center justify-center text-primary">

@@ -1,4 +1,4 @@
-import React, { useMemo, useState } from "react";
+import React, { useState } from "react";
 import { MainContainer, PageHeader } from "../../../../core/components";
 import { ROUTE_PATHS } from "../../../../routes/routes";
 import Calendario from "../components/Calendario";
@@ -6,8 +6,8 @@ import { useVacationRequests } from "../context/VacationRequestsContext";
 import VacationRequestsTable from "../components/VacationRequestsTable";
 import VacationFilters from "../components/VacationFilters";
 import Title from "../components/Title";
-import { mockEmployees } from "../../../../core/mocks/data";
 import { useNavigate } from "react-router-dom";
+import { ErrorMessage } from "../../../../core/components/feedback/ErrorMessage";
 
 const VacationManagementPage: React.FC = () => {
   const navigate = useNavigate();
@@ -60,13 +60,15 @@ const InnerContent: React.FC<{
   onToggleSort: (k: "startDate" | "employeeName") => void;
   onViewHistoryClick: () => void;
 }> = ({ sortConfig, onToggleSort, onViewHistoryClick }) => {
-  const { search, setSearch, specialtyFilter, setSpecialtyFilter, calendarEvents } = useVacationRequests();
-
-  const departments = useMemo(
-    () =>
-      Array.from(new Set(mockEmployees.map((e) => e.department))).sort(),
-    [],
-  );
+  const {
+    search,
+    setSearch,
+    specialtyFilter,
+    setSpecialtyFilter,
+    availableDepartments,
+    calendarEvents,
+    error,
+  } = useVacationRequests();
 
   return (
     <div className="container mx-auto px-5 py-8 space-y-8">
@@ -75,10 +77,16 @@ const InnerContent: React.FC<{
       <VacationFilters
         search={search}
         specialty={specialtyFilter}
-        specialties={departments}
+        specialties={availableDepartments}
         onSearchChange={setSearch}
         onSpecialtyChange={setSpecialtyFilter}
       />
+
+      {error && (
+        <ErrorMessage
+          message={`Error loading vacation management data: ${error}`}
+        />
+      )}
 
       <div className="flex flex-col items-center justify-center">
         <Calendario events={calendarEvents} />

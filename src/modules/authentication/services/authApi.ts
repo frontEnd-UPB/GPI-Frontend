@@ -1,4 +1,4 @@
-import { API_ENDPOINTS, USER_ROLES } from "../../../core/constants";
+import { API_ENDPOINTS, AUTH_STORAGE_KEYS, USER_ROLES } from "../../../core/constants";
 import { ApiError, apiClient } from "../../../core/services/httpClient";
 import type { UserRole } from "../../../core/constants/roles";
 import type { AuthUserPayload } from "../../../core/types/auth";
@@ -17,12 +17,16 @@ interface SignInResult {
 }
 
 interface EmployeeResponseDto {
-	id: string;
-	firstname: string;
-	lastname: string;
-	email: string;
-	role: string;
+	id: string | number;
+	firstname?: string;
+	first_name?: string;
+	lastname?: string;
+	last_name?: string;
+	email?: string;
+	role?: string;
+	role_level?: string;
 	profilePicture?: string | null;
+	profile_pic?: string | null;
 }
 
 function isUserRole(role: string): role is UserRole {
@@ -53,6 +57,26 @@ function pickFirstNonEmpty(...values: unknown[]): string {
 		const normalized = toNonEmptyString(value);
 		if (normalized) return normalized;
 	}
+	return "";
+}
+function getLoggedInUserRole(): string {
+	const rawStoredUser = localStorage.getItem(AUTH_STORAGE_KEYS.USER);
+	if (!rawStoredUser) return "";
+
+	try {
+		const parsed: unknown = JSON.parse(rawStoredUser);
+		if (
+			typeof parsed === "object" &&
+			parsed !== null &&
+			"role" in parsed &&
+			typeof parsed.role === "string"
+		) {
+			return parsed.role.trim().toLowerCase();
+		}
+	} catch {
+		return "";
+	}
+
 	return "";
 }
 
@@ -146,20 +170,23 @@ function mapLoginResponse(email: string, response: LoginResponseDto): SignInResu
 }
 
 function mapEmployeeResponse(response: EmployeeResponseDto): AuthUserPayload {
-	const normalizedRole = normalizeRole(response.role);
-	const fullName = `${response.firstname ?? ""} ${response.lastname ?? ""}`.trim();
+	const normalizedRole = normalizeRole(
+		pickFirstNonEmpty(response.role, response.role_level)
+	);
+	const fullName = `${pickFirstNonEmpty(response.firstname, response.first_name)} ${pickFirstNonEmpty(response.lastname, response.last_name)}`.trim();
 	const normalizedEmail = toTrimmedString(response.email).toLowerCase();
+	const normalizedId = pickFirstNonEmpty(response.id);
 
-	if (!response.id || !normalizedEmail || !fullName || !isUserRole(normalizedRole)) {
+	if (!normalizedId || !normalizedEmail || !fullName || !isUserRole(normalizedRole)) {
 		throw new Error("Current user response is missing required user fields.");
 	}
 
 	return {
-		id: response.id,
+		id: normalizedId,
 		email: normalizedEmail,
 		name: fullName,
 		role: normalizedRole,
-		profilePicture: response.profilePicture ?? null,
+		profilePicture: response.profilePicture ?? response.profile_pic ?? null,
 	};
 }
 
@@ -244,7 +271,15 @@ export const authApi = {
 	},
 
 	async getCurrentUserById(id: string): Promise<AuthUserPayload> {
-		const response = await apiClient.get<EmployeeResponseDto>(API_ENDPOINTS.EMPLOYEES.DETAIL(id));
+		const requesterRole = getLoggedInUserRole();
+		const response = await apiClient.get<EmployeeResponseDto>(
+			API_ENDPOINTS.EMPLOYEES.DETAIL(id),
+			{
+				query: {
+					requester_role: requesterRole || undefined,
+				},
+			}
+		);
 		return mapEmployeeResponse(response);
 	},
 

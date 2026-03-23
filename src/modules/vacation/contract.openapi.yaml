@@ -22,39 +22,6 @@ tags:
     description: Management endpoints for HR moderation and reporting.
 paths:
   /myprofile/requestvacation:
-    get:
-      tags:
-        - Employee Vacation
-      summary: List employee vacation requests
-      description: Returns the request history for a specific staff member.
-      parameters:
-        - in: query
-          name: staff_id
-          required: true
-          schema:
-            type: string
-          description: Staff identifier (maps to frontend employeeId).
-        - in: query
-          name: staff_id_eq
-          required: false
-          schema:
-            type: string
-          description: Optional compatibility filter for Mockoon CRUD environments.
-      responses:
-        '200':
-          description: Vacation request list.
-          content:
-            application/json:
-              schema:
-                type: array
-                items:
-                  $ref: '#/components/schemas/VacationRequest'
-        '400':
-          $ref: '#/components/responses/BadRequest'
-        '401':
-          $ref: '#/components/responses/Unauthorized'
-        '403':
-          $ref: '#/components/responses/Forbidden'
     post:
       tags:
         - Employee Vacation
@@ -98,12 +65,46 @@ paths:
         '422':
           $ref: '#/components/responses/UnprocessableEntity'
 
-  /myprofile/requestvacation/{request_id}:
+  /myprofile/requestvacation/{staff_id}:
+    get:
+      tags:
+        - Employee Vacation
+      summary: List employee vacation requests
+      description: Returns the request history for a specific staff member.
+      parameters:
+        - in: path
+          name: staff_id
+          required: true
+          schema:
+            type: string
+          description: Staff identifier (maps to frontend employeeId).
+      responses:
+        '200':
+          description: Vacation request list.
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/VacationRequest'
+        '400':
+          $ref: '#/components/responses/BadRequest'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '403':
+          $ref: '#/components/responses/Forbidden'
+
+  /myprofile/requestvacation/{staff_id}/{request_id}:
     get:
       tags:
         - Employee Vacation
       summary: Get employee vacation request detail
       parameters:
+        - in: path
+          name: staff_id
+          required: true
+          schema:
+            type: string
         - $ref: '#/components/parameters/RequestId'
       responses:
         '200':
@@ -118,6 +119,8 @@ paths:
           $ref: '#/components/responses/Forbidden'
         '404':
           $ref: '#/components/responses/NotFound'
+
+  /myprofile/requestvacation/{request_id}:
     patch:
       tags:
         - Employee Vacation
@@ -212,7 +215,7 @@ paths:
         '404':
           $ref: '#/components/responses/NotFound'
 
-  /human-resources/vacation-managment:
+  /human-resources/vacation-management:
     get:
       tags:
         - HR Vacation Management
@@ -248,7 +251,7 @@ paths:
         '403':
           $ref: '#/components/responses/Forbidden'
 
-  /human-resources/vacation-managment/{request_id}:
+  /human-resources/vacation-management/{request_id}:
     get:
       tags:
         - HR Vacation Management
