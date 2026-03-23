@@ -41,7 +41,7 @@ export const VACATION_STATUS = {
 
 export const API_ENDPOINTS = {
   AUTH: {
-    LOGIN: "/api/auth/login",
+    LOGIN: "/api/v1/login/staff",
     LOGOUT: "/api/auth/logout",
     REFRESH: "/api/auth/refresh",
     PROFILE: "/api/auth/profile",
@@ -49,13 +49,13 @@ export const API_ENDPOINTS = {
   // Endpoints del contrato con backend.
   // Se agregan sin reemplazar la estructura AUTH actual para priorizar la arquitectura vigente del frontend.
   AUTH_CONTRACT: {
-    LOGIN_PATIENT: "/login/patient",
-    LOGIN_STAFF: "/login/staff",
-    FORGOT_PASSWORD: "/forgot_password",
-    REGISTER: "/register",
-    VERIFY: "/verify",
-    RESET_PASSWORD: "/reset_password",
-    REGISTER_USER: "/register_user",
+    LOGIN_PATIENT: "/api/v1/login/patient",
+    LOGIN_STAFF: "/api/v1/login/staff",
+    FORGOT_PASSWORD: "/api/v1/forgot_password",
+    REGISTER: "/api/v1/register",
+    VERIFY: "/api/v1/verify",
+    RESET_PASSWORD: "/api/v1/reset_password",
+    REGISTER_USER: "/api/v1/register_user",
   },
   EMPLOYEES: {
     LIST: "/api/employees",
