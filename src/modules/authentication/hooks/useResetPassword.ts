@@ -3,9 +3,9 @@ import { forgotPasswordService } from "../services/forgotPasswordService";
 import type { ForgotPasswordSource } from "../services/forgotPasswordService";
 
 interface ResetPasswordState {
-  checkingToken: boolean;
+  verifyingCode: boolean;
   loading: boolean;
-  isTokenValid: boolean;
+  isCodeVerified: boolean;
   error: string | null;
   successMessage: string | null;
   from: ForgotPasswordSource | null;
@@ -13,32 +13,36 @@ interface ResetPasswordState {
 
 export const useResetPassword = () => {
   const [state, setState] = useState<ResetPasswordState>({
-    checkingToken: false,
+    verifyingCode: false,
     loading: false,
-    isTokenValid: false,
+    isCodeVerified: false,
     error: null,
     successMessage: null,
     from: null,
   });
 
-  const validateToken = useCallback(async (token: string) => {
+  const verifyCode = useCallback(async (
+    email: string,
+    code: string,
+    from: ForgotPasswordSource
+  ) => {
     setState((current) => ({
       ...current,
-      checkingToken: true,
+      verifyingCode: true,
       error: null,
       successMessage: null,
-      isTokenValid: false,
+      isCodeVerified: false,
       from: null,
     }));
 
     try {
-      const result = await forgotPasswordService.validateResetToken(token);
+      const result = await forgotPasswordService.verifyResetCode(email, code, from);
 
       if (!result.success) {
         setState((current) => ({
           ...current,
-          checkingToken: false,
-          isTokenValid: false,
+          verifyingCode: false,
+          isCodeVerified: false,
           error: result.message,
           from: null,
         }));
@@ -47,25 +51,30 @@ export const useResetPassword = () => {
 
       setState((current) => ({
         ...current,
-        checkingToken: false,
-        isTokenValid: true,
+        verifyingCode: false,
+        isCodeVerified: true,
         error: null,
-        from: result.from ?? null,
+        from: result.from ?? from,
       }));
       return true;
     } catch {
       setState((current) => ({
         ...current,
-        checkingToken: false,
-        isTokenValid: false,
-        error: "Unexpected error while validating reset link.",
+        verifyingCode: false,
+        isCodeVerified: false,
+        error: "Unexpected error while validating verification code.",
         from: null,
       }));
       return false;
     }
   }, []);
 
-  const submitNewPassword = useCallback(async (token: string, newPassword: string) => {
+  const submitNewPassword = useCallback(async (
+    email: string,
+    newPassword: string,
+    passwordConfirmation: string,
+    from: ForgotPasswordSource
+  ) => {
     setState((current) => ({
       ...current,
       loading: true,
@@ -75,8 +84,10 @@ export const useResetPassword = () => {
 
     try {
       const result = await forgotPasswordService.completePasswordReset(
-        token,
-        newPassword
+        email,
+        newPassword,
+        passwordConfirmation,
+        from
       );
 
       if (!result.success) {
@@ -92,10 +103,10 @@ export const useResetPassword = () => {
       setState((current) => ({
         ...current,
         loading: false,
-        isTokenValid: false,
+        isCodeVerified: false,
         error: null,
         successMessage: result.message,
-        from: result.from ?? current.from,
+        from: result.from ?? from,
       }));
       return true;
     } catch {
@@ -111,7 +122,7 @@ export const useResetPassword = () => {
 
   return {
     ...state,
-    validateToken,
+    verifyCode,
     submitNewPassword,
   };
 };

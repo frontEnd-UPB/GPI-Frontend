@@ -44,21 +44,16 @@ const ResetPasswordPage: React.FC = () => {
   const [validationError, setValidationError] = useState("");
 
   const {
-    checkingToken,
     loading,
-    isTokenValid,
     error,
     successMessage,
-    from,
-    validateToken,
     submitNewPassword,
   } = useResetPassword();
 
-  const urlToken = searchParams.get("token");
-  const token = urlToken ?? "";
+  const emailParam = (searchParams.get("email") ?? "").trim().toLowerCase();
   const sourceParam = searchParams.get("from");
   const initialSource = sourceParam === "patient" ? "patient" : "doctor";
-  const resolvedSource = from ?? initialSource;
+  const resolvedSource = initialSource;
   const returnLoginPath =
     resolvedSource === "patient" ? ROUTE_PATHS.PATIENT_LOGIN : ROUTE_PATHS.LOGIN;
   const flowKey = "meddical:reset-flow-active";
@@ -68,27 +63,24 @@ const ResetPasswordPage: React.FC = () => {
 
     if (AUTH_DEBUG) {
       console.log("[RESET PASSWORD] validating token", {
-        urlToken,
-        token,
+        emailParam,
         isFlowActive,
       });
     }
 
-    if (!token || !isFlowActive) {
+    if (!emailParam || !isFlowActive) {
       if (AUTH_DEBUG) {
-        console.log("[RESET PASSWORD] missing token or flow inactive, redirecting to login");
+        console.log("[RESET PASSWORD] missing email or flow inactive, redirecting to login");
       }
       sessionStorage.removeItem(flowKey);
       navigate(returnLoginPath, { replace: true });
       return;
     }
 
-    void validateToken(token);
-
     return () => {
       sessionStorage.removeItem(flowKey);
     };
-  }, [token, urlToken, navigate, returnLoginPath, validateToken]);
+  }, [emailParam, navigate, returnLoginPath]);
 
   useEffect(() => {
     if (!successMessage) return;
@@ -102,10 +94,6 @@ const ResetPasswordPage: React.FC = () => {
 
   const handleSubmit: React.FormEventHandler<HTMLFormElement> = async (e) => {
     e.preventDefault();
-
-    if (!isTokenValid) {
-      return;
-    }
 
     if (!newPassword.trim()) {
       setValidationError("New password is required");
@@ -128,7 +116,12 @@ const ResetPasswordPage: React.FC = () => {
     }
 
     setValidationError("");
-    const updated = await submitNewPassword(token, newPassword);
+    const updated = await submitNewPassword(
+      emailParam,
+      newPassword,
+      confirmPassword,
+      resolvedSource
+    );
     if (updated) {
       setNewPassword("");
       setConfirmPassword("");
@@ -160,7 +153,7 @@ const ResetPasswordPage: React.FC = () => {
               placeholder="••••••••••••"
               value={newPassword}
               onChange={(e) => setNewPassword(e.target.value)}
-              disabled={!isTokenValid || loading || checkingToken}
+              disabled={loading}
               className="w-full"
               required
             />
@@ -173,7 +166,7 @@ const ResetPasswordPage: React.FC = () => {
               placeholder="••••••••••••"
               value={confirmPassword}
               onChange={(e) => setConfirmPassword(e.target.value)}
-              disabled={!isTokenValid || loading || checkingToken}
+              disabled={loading}
               className="w-full"
               required
             />
@@ -194,7 +187,7 @@ const ResetPasswordPage: React.FC = () => {
             <div className="mt-8 flex justify-center">
               <Button
                 type="submit"
-                disabled={!isTokenValid || loading || checkingToken}
+                disabled={loading}
                 className="z-10 w-full bg-secondary font-semibold text-secondary-foreground hover:bg-secondary/90 sm:w-3/4"
               >
                 {loading ? "Saving..." : "Save New Password"}

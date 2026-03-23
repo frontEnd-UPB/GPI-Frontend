@@ -9,7 +9,7 @@ interface ForgotPasswordState {
   loading: boolean;
   error: string | null;
   successMessage: string | null;
-  token: string | null;
+  requestedEmail: string | null;
 }
 
 export const useForgotPassword = () => {
@@ -17,14 +17,19 @@ export const useForgotPassword = () => {
     loading: false,
     error: null,
     successMessage: null,
-    token: null,
+    requestedEmail: null,
   });
 
   const requestReset = async (
     email: string,
     from: ForgotPasswordSource
   ): Promise<string | null> => {
-    setState({ loading: true, error: null, successMessage: null, token: null });
+    setState({
+      loading: true,
+      error: null,
+      successMessage: null,
+      requestedEmail: null,
+    });
 
     try {
       const result = await forgotPasswordService.requestPasswordReset(email, from);
@@ -38,25 +43,27 @@ export const useForgotPassword = () => {
           loading: false,
           error: result.message,
           successMessage: null,
-          token: null,
+          requestedEmail: null,
         });
         return null;
       }
+
+      const normalizedEmail = (result.email ?? email).trim().toLowerCase();
 
       setState({
         loading: false,
         error: null,
         successMessage: result.message,
-        token: result.token ?? null,
+        requestedEmail: normalizedEmail,
       });
 
-      return result.token ?? null;
+      return normalizedEmail;
     } catch {
       setState({
         loading: false,
         error: "Unexpected error while processing your request.",
         successMessage: null,
-        token: null,
+        requestedEmail: null,
       });
       return null;
     }
@@ -67,7 +74,7 @@ export const useForgotPassword = () => {
       ...current,
       error: null,
       successMessage: null,
-      token: null,
+      requestedEmail: null,
     }));
   };
 
