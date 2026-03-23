@@ -10,8 +10,10 @@ import { AUTH_DEBUG } from "../../../core/constants";
 import { ErrorMessage } from "../../../core/components/feedback/ErrorMessage";
 import BlurredBackground from "../components/BlurredBackground";
 import { ROUTE_PATHS } from "../../../routes/routes";
-import { mockOtpCode } from "../../../core/mocks/data";
+import { forgotPasswordService } from "../services/forgotPasswordService";
+import { useResetPassword } from "../hooks/useResetPassword";
 const OtpVerificationPage: React.FC = () => {
+  const invalidCodeMessage = "Invalid or expired code. Request a new link and try again.";
   const navigate = useNavigate();
   const [searchParams] = useSearchParams();
 
@@ -20,7 +22,7 @@ const OtpVerificationPage: React.FC = () => {
   const [showTimer, setShowTimer] = React.useState(false);
   const [seconds, setSeconds] = React.useState(60);
   const [expiresAt, setExpiresAt] = React.useState<number | null>(null);
-  const resetToken = searchParams.get("token") ?? "";
+  const resetEmail = (searchParams.get("email") ?? "").trim().toLowerCase();
   const fromParam = searchParams.get("from");
   const resetSource = fromParam === "patient" ? "patient" : "doctor";
   const returnLoginPath =
@@ -28,10 +30,12 @@ const OtpVerificationPage: React.FC = () => {
   const flowKey = "meddical:reset-flow-active";
   const programmaticNavRef = useRef(false);
   const [isVerified, setIsVerified] = React.useState(false);
+  const [isResending, setIsResending] = React.useState(false);
+  const { verifyingCode, error: verifyError, verifyCode } = useResetPassword();
 
   useEffect(() => {
     const isFlowActive = sessionStorage.getItem(flowKey) === "1";
-    if (!isFlowActive) {
+    if (!isFlowActive || !resetEmail) {
       navigate(returnLoginPath, { replace: true });
     }
 
@@ -40,7 +44,7 @@ const OtpVerificationPage: React.FC = () => {
         sessionStorage.removeItem(flowKey);
       }
     };
-  }, [navigate, returnLoginPath]);
+  }, [navigate, returnLoginPath, resetEmail]);
 
   const handleOtpChange = (value: string) => {
     if (/^\d*$/.test(value)) {
@@ -49,7 +53,7 @@ const OtpVerificationPage: React.FC = () => {
     }
   };
 
-  const handleSubmit = (e: React.FormEvent) => {
+  const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
 
     if (!otp.trim()) {
@@ -57,25 +61,26 @@ const OtpVerificationPage: React.FC = () => {
       return;
     }
 
-    if (otp.length < 4) {
-      setError("OTP code must be 4 digits");
+    if (otp.length !== 6) {
+      setError("OTP code must be 6 digits");
       return;
     }
 
-    if (otp !== mockOtpCode) {
-      setError("Invalid OTP code");
+    const verified = await verifyCode(resetEmail, otp, resetSource);
+    if (!verified) {
+      setError(invalidCodeMessage);
       return;
     }
 
     setError("");
     setIsVerified(true);
 
-    if (AUTH_DEBUG) console.log("[OTP VERIFIED]", otp);
+    if (AUTH_DEBUG) console.log("[OTP VERIFIED]", { otp, email: resetEmail });
     setTimeout(() => {
       programmaticNavRef.current = true;
       navigate(
-        `${ROUTE_PATHS.RESET_PASSWORD}?token=${encodeURIComponent(
-          resetToken
+        `${ROUTE_PATHS.RESET_PASSWORD}?email=${encodeURIComponent(
+          resetEmail
         )}&from=${resetSource}`,
         { replace: true }
       );
@@ -125,14 +130,29 @@ const OtpVerificationPage: React.FC = () => {
     return () => clearInterval(timer);
   }, [showTimer, expiresAt]);
 
-  const handleResend = (e: React.MouseEvent) => {
+  const handleResend = async (e: React.MouseEvent) => {
     e.preventDefault();
+
+    setIsResending(true);
+
+    const result = await forgotPasswordService.requestPasswordReset(
+      resetEmail,
+      resetSource
+    );
+
+    if (!result.success) {
+      setError(result.message);
+      setIsResending(false);
+      return;
+    }
 
     const nextExpiresAt = Date.now() + 60000;
 
     setShowTimer(true);
     setSeconds(60);
     setExpiresAt(nextExpiresAt);
+    setError("");
+    setIsResending(false);
 
     localStorage.setItem("otp-timer", JSON.stringify({ expiresAt: nextExpiresAt }));
   };
@@ -160,19 +180,19 @@ const OtpVerificationPage: React.FC = () => {
               </p>
             </div>
 
-            <div className="mb-8 flex w-full justify-center overflow-x-auto">
-              <InputOTP value={otp} onChange={handleOtpChange} maxLength={4}>
-                <InputOTPGroup className="gap-2 sm:gap-4">
-                  {[...Array(4)].map((_, i) => (
+            <div className="mb-8 flex w-full justify-center">
+              <InputOTP value={otp} onChange={handleOtpChange} maxLength={6}>
+                <InputOTPGroup className="gap-1.5 sm:gap-2.5">
+                  {[...Array(6)].map((_, i) => (
                     <InputOTPSlot
                       key={i}
                       index={i}
                       className="
-                        h-10 w-10 sm:h-12 sm:w-12
+                        h-9 w-9 sm:h-10 sm:w-10
                         rounded-full
                         bg-white
                         border border-input
-                        text-base sm:text-lg
+                        text-sm sm:text-base
                         font-semibold
                         text-primary
                       "
@@ -182,12 +202,16 @@ const OtpVerificationPage: React.FC = () => {
               </InputOTP>
             </div>
 
-            {error && <ErrorMessage message={error} />}
+            <div className="mt-4">
+              {(error || verifyError) && (
+                <ErrorMessage message={error || verifyError || invalidCodeMessage} />
+              )}
+            </div>
 
             <div className="mt-2 mb-6 w-full flex justify-center">
               <Button
                 type="submit"
-                disabled={isVerified}
+                disabled={isVerified || verifyingCode}
                 className={`w-full max-w-[220px] rounded-xl font-semibold flex items-center justify-center gap-2 transition-all
                 ${
                   isVerified
@@ -201,7 +225,7 @@ const OtpVerificationPage: React.FC = () => {
                     Verified
                   </>
                 ) : (
-                  "Verify Code"
+                  verifyingCode ? "Verifying..." : "Verify Code"
                 )}
               </Button>
             </div>
@@ -212,10 +236,10 @@ const OtpVerificationPage: React.FC = () => {
                   <button
                     type="button"
                     onClick={handleResend}
-                    disabled={seconds > 0}
+                    disabled={seconds > 0 || isResending}
                     className="underline disabled:cursor-not-allowed disabled:opacity-60"
                   >
-                    Resend
+                    {isResending ? "Resending..." : "Resend"}
                   </button>{" "}
                   code in{" "}
                   <span className="text-secondary font-medium">
@@ -228,9 +252,10 @@ const OtpVerificationPage: React.FC = () => {
                   <button
                     type="button"
                     onClick={handleResend}
+                    disabled={isResending}
                     className="underline text-secondary hover:text-secondary-foreground font-medium"
                   >
-                    Resend code
+                    {isResending ? "Resending..." : "Resend code"}
                   </button>
                 </p>
               )}

@@ -36,7 +36,7 @@ const ForgotPasswordPage: React.FC = () => {
   const [searchParams] = useSearchParams();
   const [email, setEmail] = useState("");
   const [validationError, setValidationError] = useState("");
-  const { loading, error, successMessage, token, requestReset, clearFeedback } =
+  const { loading, error, successMessage, requestedEmail, requestReset, clearFeedback } =
     useForgotPassword();
 
   const from = searchParams.get("from");
@@ -70,15 +70,14 @@ const ForgotPasswordPage: React.FC = () => {
     }
     
     setValidationError("");
-    const resetToken = await requestReset(email, requestSource);
+    const resolvedEmail = await requestReset(email, requestSource);
 
-    // Solo si el backend mock acepta el email (y genera token) pasamos a OTP
-    if (resetToken) {
+    if (resolvedEmail) {
       sessionStorage.setItem(flowKey, "1");
       programmaticNavRef.current = true;
       navigate(
-        `${ROUTE_PATHS.OTP_VERIFICATION}?token=${encodeURIComponent(
-          resetToken
+        `${ROUTE_PATHS.OTP_VERIFICATION}?email=${encodeURIComponent(
+          resolvedEmail
         )}&from=${requestSource}`,
         { replace: true }
       );
@@ -90,14 +89,9 @@ const ForgotPasswordPage: React.FC = () => {
     if (validationError) {
       setValidationError("");
     }
-    if (error || successMessage || token) {
+    if (error || successMessage || requestedEmail) {
       clearFeedback();
     }
-  };
-
-  const handleGoToReset = () => {
-    if (!token) return;
-    navigate(`/reset-password?token=${encodeURIComponent(token)}&from=${requestSource}`);
   };
 
   return (
@@ -135,10 +129,7 @@ const ForgotPasswordPage: React.FC = () => {
             
             {/* Error Message */}
             {(validationError || error) && (
-              <>
-                <br />
-                <ErrorMessage message={validationError || error || ""} />
-              </>
+              <ErrorMessage message={validationError || error || ""} className="mt-4" />
             )}
 
             {successMessage && !validationError && !error && (

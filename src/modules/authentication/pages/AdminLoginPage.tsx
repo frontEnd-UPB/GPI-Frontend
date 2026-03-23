@@ -17,7 +17,11 @@ const AdminLoginPage: React.FC = () => {
   const { user, loading: authLoading } = useAuth();
   const { signIn: hookSignIn, signInLoading: loading } = useSignIn();
 
-  const hideLoginCard = import.meta.env.VITE_HIDE_LOGIN_CARD === "true";
+  const hideLoginCard = ["true", "1", "yes"].includes(
+    String(import.meta.env.VITE_HIDE_LOGIN_CARD ?? "")
+      .trim()
+      .toLowerCase()
+  );
 
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
@@ -115,7 +119,7 @@ const AdminLoginPage: React.FC = () => {
               required
             />
 
-            {error && <ErrorMessage message={error} />}
+            {error && <ErrorMessage message={error} className="mt-4" />}
 
             <div className="flex justify-end mt-3">
               <a

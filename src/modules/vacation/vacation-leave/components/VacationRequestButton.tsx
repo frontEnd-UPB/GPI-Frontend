@@ -9,6 +9,7 @@ interface VacationRequestButtonProps {
   open?: boolean;
   onOpenChange?: (open: boolean) => void;
   isSubmitting?: boolean;
+  submitError?: string | null;
 }
 
 export default function VacationRequestButton({
@@ -17,6 +18,7 @@ export default function VacationRequestButton({
   open,
   onOpenChange,
   isSubmitting = false,
+  submitError,
 }: VacationRequestButtonProps) {
   const [internalOpen, setInternalOpen] = useState(false);
   const formVisible = open ?? internalOpen;
@@ -76,6 +78,7 @@ export default function VacationRequestButton({
           onCancel={handleCancel}
           availableDays={availableDays}
           isSubmitting={isSubmitting}
+          submitError={submitError}
         />
       </div>
     </div>

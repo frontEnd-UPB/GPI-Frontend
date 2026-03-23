@@ -1,7 +1,7 @@
 import React from "react";
 import { Link } from "react-router-dom";
 import { useAuth } from "../../context/AuthContext";
-import { MainLayout } from "../components";
+import { MainLayout } from "../components/layout/MainLayout"; 
 import { PublicLayout } from "../components/layout/PublicLayout";
 
 const UnauthorizedContent: React.FC = () => {
@@ -15,21 +15,20 @@ const UnauthorizedContent: React.FC = () => {
 
       <div className="relative z-10 max-w-xl mx-auto space-y-4">
         <p className="text-xs uppercase tracking-[0.2em] text-primary/70 mb-2">
-          Access / Restricted
+          Acceso Restringido
         </p>
         <h1 className="text-3xl md:text-4xl font-bold text-primary">
-          You are not authorized
+          No tienes autorización
         </h1>
         <p className="text-sm md:text-base text-muted-foreground max-w-md mx-auto">
-          You do not have permission to access this section. If you think this is
-          an error, please contact the administrator.
+          No tienes los permisos necesarios para acceder a esta sección. Si crees que esto es un error, por favor contacta al administrador.
         </p>
         <div className="mt-6">
           <Link
             to="/"
             className="inline-flex items-center rounded-full bg-primary px-6 py-2 text-sm font-medium text-primary-foreground shadow-sm hover:bg-primary/90 transition-colors"
           >
-            Back to dashboard
+            Volver al inicio
           </Link>
         </div>
       </div>
@@ -37,16 +36,15 @@ const UnauthorizedContent: React.FC = () => {
   );
 };
 
-const UnauthorizedPage: React.FC = () => {
+// CAMBIO AQUÍ: Lo exportamos directamente como una constante nombrada
+export const UnauthorizedPage: React.FC = () => {
   const { user } = useAuth();
-
   const content = <UnauthorizedContent />;
 
+  // Muestra el layout con sidebar/navbar si está logueado, o el layout público si no
   return user ? (
     <MainLayout>{content}</MainLayout>
   ) : (
     <PublicLayout>{content}</PublicLayout>
   );
 };
-
-export default UnauthorizedPage;

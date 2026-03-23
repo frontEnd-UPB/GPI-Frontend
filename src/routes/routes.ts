@@ -3,7 +3,6 @@ import type { UserRole } from "../core/constants/roles";
 export const ROUTE_PATHS = {
   HOME: "/",
   LOGIN: "/admin-login",
-  //Debe ver login de pacientes
   UNAUTHORIZED: "/unauthorized",
   ADMIN_DASHBOARD: "/admin-dashboard",
   DOCTOR_DASHBOARD: "/doctor-dashboard",

@@ -87,9 +87,7 @@ const PacientLoginPage: React.FC = () => {
               required
             />
 
-            <br />
-
-            {error && <ErrorMessage message={error} />}
+            {error && <ErrorMessage message={error} className="mt-4" />}
 
             <div className="flex justify-between items-center mt-4 mb-6">
               <a

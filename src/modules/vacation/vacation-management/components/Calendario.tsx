@@ -4,7 +4,7 @@ import { Button } from "../../../../ui/button";
 
 export type CalendarEvent = {
   id: string;
-  doctorName: string;
+  employeeName: string;
   department: string;
   startDate: string;
   endDate: string;
@@ -16,6 +16,28 @@ type CalendarioProps = {
 
 function startOfDay(d: Date) {
   return new Date(d.getFullYear(), d.getMonth(), d.getDate());
+}
+
+function parseApiDateAsLocal(value: string): Date {
+  const [datePart] = value.split("T");
+  const [yearRaw, monthRaw, dayRaw] = datePart.split("-");
+  const year = Number(yearRaw);
+  const month = Number(monthRaw);
+  const day = Number(dayRaw);
+
+  if (
+    Number.isFinite(year) &&
+    Number.isFinite(month) &&
+    Number.isFinite(day) &&
+    month >= 1 &&
+    month <= 12 &&
+    day >= 1 &&
+    day <= 31
+  ) {
+    return new Date(year, month - 1, day);
+  }
+
+  return new Date(value);
 }
 
 function formatDateKey(d: Date) {
@@ -76,8 +98,8 @@ export default function Calendario({ events }: CalendarioProps) {
     const map: Record<string, CalendarEvent[]> = {};
 
     events.forEach((evt) => {
-      const start = startOfDay(new Date(evt.startDate));
-      const end = startOfDay(new Date(evt.endDate));
+      const start = startOfDay(parseApiDateAsLocal(evt.startDate));
+      const end = startOfDay(parseApiDateAsLocal(evt.endDate));
 
       for (let d = new Date(start); d <= end; d.setDate(d.getDate() + 1)) {
         const key = formatDateKey(d);
@@ -109,8 +131,8 @@ export default function Calendario({ events }: CalendarioProps) {
     const set = new Set<string>();
 
     events.forEach((evt) => {
-      const s = startOfDay(new Date(evt.startDate));
-      const e = startOfDay(new Date(evt.endDate));
+      const s = startOfDay(parseApiDateAsLocal(evt.startDate));
+      const e = startOfDay(parseApiDateAsLocal(evt.endDate));
 
       if (s <= gridEnd && e >= gridStart) {
         if (evt.department) set.add(evt.department);
@@ -177,7 +199,7 @@ export default function Calendario({ events }: CalendarioProps) {
 
       {/* Calendario */}
       <div className="rounded-[15px] overflow-hidden border border-border">
-        <div className="grid grid-cols-7 auto-rows-[95px]">
+        <div className="grid grid-cols-7 auto-rows-[110px]">
 
           {/* Header días */}
           {["Su", "Mo", "Tu", "We", "Th", "Fr", "Sa"].map((day) => (
@@ -230,7 +252,7 @@ export default function Calendario({ events }: CalendarioProps) {
                             "var(--chart-1)",
                         }}
                       >
-                        {evt.doctorName}
+                        {evt.employeeName}
                       </div>
                     ))}
 

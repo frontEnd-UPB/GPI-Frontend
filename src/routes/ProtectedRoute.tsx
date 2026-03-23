@@ -1,53 +1,27 @@
-import React from "react";
-import { Navigate, Outlet, useLocation } from "react-router-dom";
-import { useAuth } from "../context/AuthContext";
-import {
-  ALWAYS_ALLOWED_ROUTES,
-  ROLE_ROUTE_ACCESS,
-  ROUTE_PATHS,
-  UNAUTHORIZED_ROUTE,
-} from "./routes";
+import { Navigate, Outlet, useLocation } from 'react-router-dom';
+import { useAuth } from '../context/AuthContext'; 
+import { Loader } from '../core/components/feedback/Loader';
 
-const normalizePath = (path: string) => {
-  const trimmed = path.replace(/\/+$/, "");
-  return trimmed === "" ? "/" : trimmed;
-};
+interface ProtectedRouteProps {
+  children?: React.ReactNode;
+  allowedRoles?: string[]; 
+}
 
-const isRouteAllowed = (path: string, allowedRoutes: string[]) =>
-  allowedRoutes.some((allowedRoute) => {
-    const normalizedAllowed = normalizePath(allowedRoute);
-
-    if (normalizedAllowed === "/") {
-      return path === "/";
-    }
-
-    return path === normalizedAllowed || path.startsWith(`${normalizedAllowed}/`);
-  });
-
-export const ProtectedRoute: React.FC = () => {
+export const ProtectedRoute = ({ children, allowedRoles }: ProtectedRouteProps) => {
   const { user, loading } = useAuth();
   const location = useLocation();
 
   if (loading) {
-    return null;
+    return <Loader />;
   }
 
   if (!user) {
-    const from = `${location.pathname}${location.search}${location.hash}`;
-    return <Navigate to={ROUTE_PATHS.LOGIN} replace state={{ from }} />;
+    return <Navigate to="/admin-login" state={{ from: location }} replace />;
   }
 
-  const currentPath = normalizePath(location.pathname);
-
-  if (isRouteAllowed(currentPath, ALWAYS_ALLOWED_ROUTES)) {
-    return <Outlet />;
+  if (allowedRoles && user && user.role && !allowedRoles.includes(user.role)) {
+    return <Navigate to="/unauthorized" replace />;
   }
 
-  const allowedRoutes = ROLE_ROUTE_ACCESS[user.role] ?? [];
-
-  if (!isRouteAllowed(currentPath, allowedRoutes)) {
-    return <Navigate to={UNAUTHORIZED_ROUTE} replace />;
-  }
-
-  return <Outlet />;
+  return <>{children ?? <Outlet />}</>;
 };

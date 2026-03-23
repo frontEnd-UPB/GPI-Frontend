@@ -6,9 +6,12 @@ import {
   useRoutes,
   type RouteObject,
 } from "react-router-dom";
+
+import { USER_ROLES } from "../core/constants/roles"; 
+
 import { EmptyState, MainLayout } from "../core/components";
 import NotFoundPage from "../core/pages/NotFoundPage";
-import UnauthorizedPage from "../core/pages/UnauthorizedPage";
+import { UnauthorizedPage } from "../core/pages/UnauthorizedPage";
 import ComponentsDemoPage from "../core/pages/ComponentsDemoPage";
 import StaffDirectoryPage from "../modules/staff-directory/pages/StaffDirectoryPage";
 import VacationManagementPage from "../modules/vacation/vacation-management/pages/VacationManagementPage";
@@ -61,12 +64,10 @@ const appRoutes: RouteObject[] = [
     path: ROUTE_PATHS.HR.slice(1),
     element: <Navigate to={ROUTE_PATHS.ADMIN_STAFF_DIRECTORY} replace />,
   },
-
   {
     path: ROUTE_PATHS.DEMO.slice(1),
     element: <ComponentsDemoPage />,
   },
-
   {
     path: ROUTE_PATHS.ADMIN_STAFF_DIRECTORY.slice(1),
     element: <StaffDirectoryPage />,
@@ -86,7 +87,6 @@ const appRoutes: RouteObject[] = [
       path: route.path?.slice(1),
     })),
   },
-
   {
     path: ROUTE_PATHS.AGENDA.slice(1),
     element: comingSoon("Agenda"),
@@ -114,64 +114,51 @@ const appRoutes: RouteObject[] = [
 ];
 
 const routes: RouteObject[] = [
+  { path: ROUTE_PATHS.LOGIN, element: <AdminLoginPage /> },
+  { path: ROUTE_PATHS.SIGN_UP, element: <SignUpPage /> },
+  { path: ROUTE_PATHS.RESET_PASSWORD, element: <ResetPasswordPage /> },
+  { path: ROUTE_PATHS.PATIENT_LOGIN, element: <PacientLoginPge /> },
+  { path: ROUTE_PATHS.OTP_VERIFICATION, element: <OtpVerification /> },
+  { path: ROUTE_PATHS.FORGOT_PASSWORD, element: <ForgotPasswordPage /> },
+  { path: "/HomePage", element: <Navigate to={ROUTE_PATHS.HOME} replace /> },
+  
+  { path: ROUTE_PATHS.UNAUTHORIZED, element: <UnauthorizedPage /> },
+
   {
-    path: ROUTE_PATHS.LOGIN,
-    element: <AdminLoginPage />,
-  },
-  {
-    path: ROUTE_PATHS.SIGN_UP,
-    element: <SignUpPage />,
-  },
-  {
-    path: ROUTE_PATHS.RESET_PASSWORD,
-    element: <ResetPasswordPage />,
-  },
-  {
-    path: ROUTE_PATHS.PATIENT_LOGIN,
-    element: <PacientLoginPge />,
-  },
-  {
-    path: ROUTE_PATHS.OTP_VERIFICATION,
-    element: <OtpVerification />,
-  },
-  {
-    path: ROUTE_PATHS.FORGOT_PASSWORD,
-    element: <ForgotPasswordPage />,
-  },
-  {
-    path: "/HomePage",
-    element: <Navigate to={ROUTE_PATHS.HOME} replace />,
-  },
-  {
-    element: <ProtectedRoute />,
+    element: <ProtectedRoute />, 
     children: [
-      {
-        path: ROUTE_PATHS.UNAUTHORIZED,
-        element: <UnauthorizedPage />,
-      },
-      {
-        path: ROUTE_PATHS.ADMIN_DASHBOARD,
-        element: <AdminDashboard />,
-      },
-      {
-        path: ROUTE_PATHS.DOCTOR_DASHBOARD,
-        element: <DoctorDashboard />,
-      },
       {
         element: <MainLayout />,
         children: appRoutes,
       },
     ],
   },
+
   {
-    path: "*",
-    element: <NotFoundPage />,
+    element: <ProtectedRoute allowedRoles={[USER_ROLES.ADMIN]} />,
+    children: [
+      {
+        path: ROUTE_PATHS.ADMIN_DASHBOARD,
+        element: <AdminDashboard />,
+      },
+    ],
   },
+
+  {
+    element: <ProtectedRoute allowedRoles={[USER_ROLES.DOCTOR]} />,
+    children: [
+      {
+        path: ROUTE_PATHS.DOCTOR_DASHBOARD,
+        element: <DoctorDashboard />,
+      },
+    ],
+  },
+
+  { path: "*", element: <NotFoundPage /> },
 ];
 
 const RoutesConfig: React.FC = () => {
   const element = useRoutes(routes);
-
   return element;
 };
 
