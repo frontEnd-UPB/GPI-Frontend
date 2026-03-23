@@ -14,7 +14,6 @@ import { useAuth } from "../../../../context/AuthContext";
 import { ErrorMessage } from "../../../../core/components/feedback/ErrorMessage";
 import { Loader } from "../../../../core/components/feedback/Loader";
 import { EmptyState } from "../../../../core/components/feedback/EmptyState";
-import { Button } from "../../../../ui/button";
 import { USER_ROLES } from "../../../../core/constants";
 
 export const EmployeeVacationPage: React.FC = () => {
@@ -169,14 +168,6 @@ export const EmployeeVacationPage: React.FC = () => {
           <EmptyState
             title="No vacation requests yet"
             description="You haven't requested any vacation days. Use the button above to create your first request."
-            action={
-              <Button
-                variant="secondary"
-                onClick={() => setRequestFormOpen(true)}
-              >
-                Request vacation leave
-              </Button>
-            }
           />
         ) : (
           <VacationStatusTable vacations={requests} onView={handleView} />

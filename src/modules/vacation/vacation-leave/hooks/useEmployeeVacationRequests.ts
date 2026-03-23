@@ -1,11 +1,42 @@
 import { useCallback, useEffect, useState } from "react";
 import type { VacationRequest } from "../../../../core/mocks/data";
+import { ApiError } from "../../../../core/services/httpClient";
 import {
   cancelVacationRequest,
   listEmployeeVacationRequests,
   updateVacationRequest,
   type UpdateVacationRequestData,
 } from "../services/vacationDoctorService";
+
+function isNoVacationsResponse(error: unknown): boolean {
+  if (error instanceof ApiError && error.status === 404) {
+    const detail =
+      typeof error.data === "object" &&
+      error.data !== null &&
+      "detail" in error.data &&
+      typeof error.data.detail === "string"
+        ? error.data.detail
+        : "";
+
+    const message = `${detail} ${error.message}`.toLowerCase();
+    return (
+      message.includes("no vacations") ||
+      message.includes("no vacation requests") ||
+      message.includes("has no vacations")
+    );
+  }
+
+  if (error instanceof Error) {
+    const message = error.message.toLowerCase();
+    return (
+      message.includes("no vacations") ||
+      message.includes("no vacation requests") ||
+      message.includes("has no vacations")
+    );
+  }
+
+  return false;
+}
 
 interface UseEmployeeVacationRequestsResult {
   requests: VacationRequest[];
@@ -44,6 +75,12 @@ export function useEmployeeVacationRequests(
       const data = await listEmployeeVacationRequests(employeeId);
       setRequests(data);
     } catch (err) {
+      if (isNoVacationsResponse(err)) {
+        setRequests([]);
+        setError(null);
+        return;
+      }
+
       const message =
         err instanceof Error ? err.message : "Failed to load vacation requests.";
       setError(message);
