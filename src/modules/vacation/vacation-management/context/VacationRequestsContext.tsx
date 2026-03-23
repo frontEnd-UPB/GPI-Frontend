@@ -7,17 +7,18 @@ import React, {
   useState,
 } from "react";
 import type { VacationRequest } from "../../../../core/mocks/data";
-import { mockEmployees } from "../../../../core/mocks/data";
 import { VACATION_STATUS } from "../../../../core/constants";
 import {
   approveVacationRequest,
   fetchVacationRequests,
   rejectVacationRequest,
   setVacationRequestPending,
+  fetchEmployeeProfile,
 } from "../services/vacationRequestsApi";
 
 export interface VacationRequestsContextValue {
   requests: VacationRequest[];
+  error: string | null;
   approveRequest: (id: string) => Promise<void>;
   rejectRequest: (id: string, reason: string) => Promise<void>;
   setRequestPending: (id: string) => Promise<void>;
@@ -29,7 +30,7 @@ export interface VacationRequestsContextValue {
   // Calendar-friendly events derived from requests and current filters
   calendarEvents: Array<{
     id: string;
-    doctorName: string;
+    employeeName: string;
     department: string;
     startDate: string;
     endDate: string;
@@ -44,47 +45,123 @@ export const VacationRequestsProvider: React.FC<{ children: React.ReactNode }> =
   children,
 }) => {
   const [requests, setRequests] = useState<VacationRequest[]>([]);
+  const [employeeProfiles, setEmployeeProfiles] = useState<
+    Record<string, { firstname: string; lastname: string; department?: string }>
+  >({});
+  const [loadedEmployeeIds, setLoadedEmployeeIds] = useState<Set<string>>(
+    new Set()
+  );
+  const [error, setError] = useState<string | null>(null);
   const [search, setSearch] = useState<string>("");
   const [specialtyFilter, setSpecialtyFilter] = useState<string>("");
 
+  // Fetch individual employee profile by ID (same way auth does after login)
+  // Using useCallback with NO dependency on employeeProfiles to avoid circular deps
+  const fetchAndCacheEmployeeProfile = useCallback(
+    async (employeeId: string) => {
+      // Skip if already loaded
+      if (loadedEmployeeIds.has(employeeId)) return;
+
+      try {
+        const profile = await fetchEmployeeProfile(employeeId);
+        setEmployeeProfiles((prev) => ({
+          ...prev,
+          [employeeId]: profile,
+        }));
+        setLoadedEmployeeIds((prev) => new Set(prev).add(employeeId));
+      } catch (err) {
+        // Mark as attempted to avoid repeated failures
+        setLoadedEmployeeIds((prev) => new Set(prev).add(employeeId));
+        // If fetch fails, continue without this employee's profile
+      }
+    },
+    [loadedEmployeeIds]
+  );
+
   const loadRequests = useCallback(async () => {
     try {
+      setError(null);
       const nextRequests = await fetchVacationRequests();
       setRequests(nextRequests);
-    } catch {
+
+      // Fetch employee profiles for all unique employee IDs in the requests
+      const uniqueEmployeeIds = Array.from(
+        new Set(nextRequests.map((r) => r.employeeId))
+      );
+      
+      // Fetch all profiles in parallel
+      await Promise.allSettled(
+        uniqueEmployeeIds.map((id) => fetchAndCacheEmployeeProfile(id))
+      );
+    } catch (err) {
       setRequests([]);
+      const message =
+        err instanceof Error
+          ? err.message
+          : "Failed to load vacation requests.";
+      setError(message);
     }
-  }, []);
+  }, [fetchAndCacheEmployeeProfile]);
 
   useEffect(() => {
     void loadRequests();
   }, [loadRequests]);
 
   const approveRequest = async (id: string) => {
-    await approveVacationRequest(id);
-    await loadRequests();
+    try {
+      setError(null);
+      await approveVacationRequest(id);
+      await loadRequests();
+    } catch (err) {
+      const message =
+        err instanceof Error
+          ? err.message
+          : "Failed to approve vacation request.";
+      setError(message);
+      throw err;
+    }
   };
 
   const rejectRequest = async (id: string, reason: string) => {
-    await rejectVacationRequest(id, reason);
-    await loadRequests();
+    try {
+      setError(null);
+      await rejectVacationRequest(id, reason);
+      await loadRequests();
+    } catch (err) {
+      const message =
+        err instanceof Error
+          ? err.message
+          : "Failed to reject vacation request.";
+      setError(message);
+      throw err;
+    }
   };
 
   const setRequestPending = async (id: string) => {
-    await setVacationRequestPending(id);
-    await loadRequests();
+    try {
+      setError(null);
+      await setVacationRequestPending(id);
+      await loadRequests();
+    } catch (err) {
+      const message =
+        err instanceof Error
+          ? err.message
+          : "Failed to update vacation request status.";
+      setError(message);
+      throw err;
+    }
   };
 
   const value = useMemo(
     () => {
-      // Derive calendar events from requests and employee data
+      // Derive calendar events from requests and employee profiles fetched by ID
       const empMap: Record<string, { fullName: string; department: string }> = {};
 
-      mockEmployees.forEach((e) => {
-        const fullName = `${e.firstname} ${e.lastname}`;
-        empMap[e.id] = {
+      Object.entries(employeeProfiles).forEach(([empId, profile]) => {
+        const fullName = `${profile.firstname} ${profile.lastname}`.trim();
+        empMap[empId] = {
           fullName,
-          department: e.department ?? "",
+          department: profile.department ?? "",
         };
       });
 
@@ -93,18 +170,18 @@ export const VacationRequestsProvider: React.FC<{ children: React.ReactNode }> =
         .filter((r) => r.status === VACATION_STATUS.APPROVED)
         .map((r) => ({
           id: r.id,
-          doctorName: empMap[r.employeeId]?.fullName ?? "Unknown employee",
+          employeeName: empMap[r.employeeId]?.fullName ?? "Unknown employee",
           department: empMap[r.employeeId]?.department ?? "",
           startDate: r.startDate,
           endDate: r.endDate,
         }));
       const allEvents = [...fromRequests];
 
-      // Apply centralized filtering (search by doctor name and specialty)
+      // Apply centralized filtering (search by employee name and specialty)
       const filteredEvents = allEvents.filter((evt) => {
         if (search.trim()) {
           const term = search.toLowerCase();
-          if (!evt.doctorName.toLowerCase().includes(term)) return false;
+          if (!evt.employeeName.toLowerCase().includes(term)) return false;
         }
 
         if (specialtyFilter) {
@@ -116,6 +193,7 @@ export const VacationRequestsProvider: React.FC<{ children: React.ReactNode }> =
 
       return {
         requests,
+        error,
         approveRequest,
         rejectRequest,
         setRequestPending,
@@ -126,7 +204,7 @@ export const VacationRequestsProvider: React.FC<{ children: React.ReactNode }> =
         calendarEvents: filteredEvents,
       };
     },
-    [requests, search, specialtyFilter]
+    [error, requests, search, specialtyFilter, employeeProfiles]
   );
 
   return (

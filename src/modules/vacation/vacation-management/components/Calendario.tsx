@@ -4,7 +4,7 @@ import { Button } from "../../../../ui/button";
 
 export type CalendarEvent = {
   id: string;
-  doctorName: string;
+  employeeName: string;
   department: string;
   startDate: string;
   endDate: string;
@@ -230,7 +230,7 @@ export default function Calendario({ events }: CalendarioProps) {
                             "var(--chart-1)",
                         }}
                       >
-                        {evt.doctorName}
+                        {evt.employeeName}
                       </div>
                     ))}
 

@@ -8,6 +8,7 @@ import VacationFilters from "../components/VacationFilters";
 import Title from "../components/Title";
 import { mockEmployees } from "../../../../core/mocks/data";
 import { useNavigate } from "react-router-dom";
+import { ErrorMessage } from "../../../../core/components/feedback/ErrorMessage";
 
 const VacationManagementPage: React.FC = () => {
   const navigate = useNavigate();
@@ -60,7 +61,14 @@ const InnerContent: React.FC<{
   onToggleSort: (k: "startDate" | "employeeName") => void;
   onViewHistoryClick: () => void;
 }> = ({ sortConfig, onToggleSort, onViewHistoryClick }) => {
-  const { search, setSearch, specialtyFilter, setSpecialtyFilter, calendarEvents } = useVacationRequests();
+  const {
+    search,
+    setSearch,
+    specialtyFilter,
+    setSpecialtyFilter,
+    calendarEvents,
+    error,
+  } = useVacationRequests();
 
   const departments = useMemo(
     () =>
@@ -79,6 +87,12 @@ const InnerContent: React.FC<{
         onSearchChange={setSearch}
         onSpecialtyChange={setSpecialtyFilter}
       />
+
+      {error && (
+        <ErrorMessage
+          message={`Error loading vacation management data: ${error}`}
+        />
+      )}
 
       <div className="flex flex-col items-center justify-center">
         <Calendario events={calendarEvents} />

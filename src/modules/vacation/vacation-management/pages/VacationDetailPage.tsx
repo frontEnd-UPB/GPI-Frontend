@@ -8,11 +8,13 @@ import { VacationInfoCard } from "../components/VacationInfoCard";
 import { AppointmentsCalendar } from "../components/AppointmentsCalendar";
 import { GoBackButton } from "../../../../core/components";
 import { mockEmployees } from "../../../../core/mocks/data";
+import { ErrorMessage } from "../../../../core/components/feedback/ErrorMessage";
 
 const VacationDetailPage: React.FC = () => {
   const { id } = useParams<{ id: string }>();
   const navigate = useNavigate();
-  const { requests, approveRequest, rejectRequest, setRequestPending } = useVacationRequests();
+  const { requests, approveRequest, rejectRequest, setRequestPending, error } =
+    useVacationRequests();
 
   useEffect(() => {
     window.scrollTo({ top: 0, behavior: "smooth" });
@@ -100,6 +102,12 @@ const VacationDetailPage: React.FC = () => {
       </div>
 
       <div className="container mx-auto px-20 py-8 space-y-10">
+        {error && (
+          <ErrorMessage
+            message={`Error in vacation management action: ${error}`}
+          />
+        )}
+
         <Decision
           request={request}
           approveRequest={approveRequest}

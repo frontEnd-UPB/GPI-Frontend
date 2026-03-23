@@ -13,8 +13,8 @@ Scope:
 ## 1. Goals
 
 1. Keep endpoint naming under:
-   - /myprofile/requestvacation (employee/self-service)
-   - /human-resources/vacation-managment (HR/moderation)
+  - /api/v1/myprofile/requestvacation (employee/self-service)
+  - /api/v1/human-resources/vacation-management (HR/moderation)
 2. Keep API payloads and responses aligned with current frontend usage.
 3. Ensure all create/update/cancel/moderation endpoints return a full vacation request object.
 4. Avoid frontend workarounds by making backend fields complete and stable.
@@ -58,14 +58,13 @@ Compatibility notes implemented in frontend services:
 
 ## 3.1 Employee Endpoints
 
-### GET /myprofile/requestvacation
+### GET /api/v1/myprofile/requestvacation/{staff_id}
 
 Purpose:
 - List vacation requests for the current employee history table.
 
-Query params:
+Path params:
 - staff_id: string (required)
-- staff_id_eq: string (optional, development/mock compatibility only)
 
 Success:
 - 200 OK
@@ -75,12 +74,13 @@ Rules:
 - Return all statuses.
 - Sort can be done by backend or frontend; backend should preferably return by start_date ascending.
 
-### GET /myprofile/requestvacation/{request_id}
+### GET /api/v1/myprofile/requestvacation/{staff_id}/{request_id}
 
 Purpose:
 - Fetch single request detail for employee.
 
 Path params:
+- staff_id: string
 - request_id: string
 
 Success:
@@ -90,7 +90,7 @@ Success:
 Errors:
 - 404 Not Found if request does not exist or is not visible to caller.
 
-### POST /myprofile/requestvacation
+### POST /api/v1/myprofile/requestvacation
 
 Purpose:
 - Create new vacation request.
@@ -122,7 +122,7 @@ Rules:
 - status must be pending at creation time.
 - request_date should be set by backend.
 
-### PATCH /myprofile/requestvacation/{request_id}
+### PATCH /api/v1/myprofile/requestvacation/{request_id}
 
 Purpose:
 - Employee edits an existing pending request.
@@ -152,7 +152,7 @@ Rules:
 - Editing should be allowed only while request is pending (recommended).
 - If cancelled is sent here, request status becomes cancelled.
 
-### PATCH /myprofile/requestvacation/{request_id}/cancel (recommended explicit cancel)
+### PATCH /api/v1/myprofile/requestvacation/{request_id}/cancel (recommended explicit cancel)
 
 Purpose:
 - Cancel request without mixing with edit payload.
@@ -162,10 +162,10 @@ Success:
 - Response: VacationRequest with status cancelled
 
 Alternative:
-- If this route is not implemented, PATCH /myprofile/requestvacation/{request_id} must support status=cancelled.
+- If this route is not implemented, PATCH /api/v1/myprofile/requestvacation/{request_id} must support status=cancelled.
 - Frontend currently implements this fallback when /cancel responds with 404 (common in mock migration environments).
 
-### GET /myprofile/requestvacation/balance/{staff_id}
+### GET /api/v1/myprofile/requestvacation/balance/{staff_id}
 
 Purpose:
 - Load vacation balance card.
@@ -176,7 +176,7 @@ Success:
 
 ## 3.2 HR Endpoints
 
-### GET /human-resources/vacation-managment
+### GET /api/v1/human-resources/vacation-management
 
 Purpose:
 - List requests for management views.
@@ -189,7 +189,7 @@ Success:
 - 200 OK
 - Response: VacationRequest[]
 
-### GET /human-resources/vacation-managment/{request_id}
+### GET /api/v1/human-resources/vacation-management/{request_id}
 
 Purpose:
 - Get request detail for management.
@@ -198,7 +198,7 @@ Success:
 - 200 OK
 - Response: VacationRequest
 
-### PATCH /human-resources/vacation-managment/{request_id}
+### PATCH /api/v1/human-resources/vacation-management/{request_id}
 
 Purpose:
 - Moderate request status.
@@ -264,8 +264,8 @@ Reason:
 
 ## 8. Minimum Backend-Frontend Acceptance Checklist
 
-1. Employee can create, list, edit, and cancel requests using /myprofile/requestvacation routes.
-2. HR can list/detail/moderate through /human-resources/vacation-managment routes.
+1. Employee can create, list, edit, and cancel requests using /api/v1/myprofile/requestvacation routes.
+2. HR can list/detail/moderate through /api/v1/human-resources/vacation-management routes.
 3. All responses include full canonical fields.
 4. status values are frontend-compatible.
 5. Error responses include message or error.

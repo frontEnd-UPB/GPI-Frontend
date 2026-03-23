@@ -154,12 +154,6 @@ export const EmployeeVacationPage: React.FC = () => {
           />
         )}
 
-        {submitError && (
-          <ErrorMessage
-            message={`Error submitting request: ${submitError}`}
-          />
-        )}
-
         <VacationBalanceCard balance={balance ?? undefined} />
 
         <VacationRequestButton
@@ -168,6 +162,7 @@ export const EmployeeVacationPage: React.FC = () => {
           open={requestFormOpen}
           onOpenChange={setRequestFormOpen}
           isSubmitting={submitLoading}
+          submitError={submitError}
         />
 
         {hasNoRequests ? (

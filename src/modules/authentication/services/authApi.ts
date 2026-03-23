@@ -17,12 +17,16 @@ interface SignInResult {
 }
 
 interface EmployeeResponseDto {
-	id: string;
-	firstname: string;
-	lastname: string;
-	email: string;
-	role: string;
+	id: string | number;
+	firstname?: string;
+	first_name?: string;
+	lastname?: string;
+	last_name?: string;
+	email?: string;
+	role?: string;
+	role_level?: string;
 	profilePicture?: string | null;
+	profile_pic?: string | null;
 }
 
 function isUserRole(role: string): role is UserRole {
@@ -146,21 +150,36 @@ function mapLoginResponse(email: string, response: LoginResponseDto): SignInResu
 }
 
 function mapEmployeeResponse(response: EmployeeResponseDto): AuthUserPayload {
-	const normalizedRole = normalizeRole(response.role);
-	const fullName = `${response.firstname ?? ""} ${response.lastname ?? ""}`.trim();
+	const normalizedRole = normalizeRole(
+		pickFirstNonEmpty(response.role, response.role_level)
+	);
+	const fullName = `${pickFirstNonEmpty(response.firstname, response.first_name)} ${pickFirstNonEmpty(response.lastname, response.last_name)}`.trim();
 	const normalizedEmail = toTrimmedString(response.email).toLowerCase();
+	const normalizedId = pickFirstNonEmpty(response.id);
 
-	if (!response.id || !normalizedEmail || !fullName || !isUserRole(normalizedRole)) {
+	if (!normalizedId || !normalizedEmail || !fullName || !isUserRole(normalizedRole)) {
 		throw new Error("Current user response is missing required user fields.");
 	}
 
 	return {
-		id: response.id,
+		id: normalizedId,
 		email: normalizedEmail,
 		name: fullName,
 		role: normalizedRole,
-		profilePicture: response.profilePicture ?? null,
+		profilePicture: response.profilePicture ?? response.profile_pic ?? null,
 	};
+}
+
+async function fetchEmployeeByIdWithFallback(id: string): Promise<EmployeeResponseDto> {
+	try {
+		return await apiClient.get<EmployeeResponseDto>(API_ENDPOINTS.EMPLOYEES.DETAIL(id));
+	} catch (error) {
+		if (!(error instanceof ApiError) || error.status !== 404) {
+			throw error;
+		}
+
+		return apiClient.get<EmployeeResponseDto>(`/api/v1/staff/${id}`);
+	}
 }
 
 function isAuthError(error: unknown): boolean {
@@ -244,7 +263,7 @@ export const authApi = {
 	},
 
 	async getCurrentUserById(id: string): Promise<AuthUserPayload> {
-		const response = await apiClient.get<EmployeeResponseDto>(API_ENDPOINTS.EMPLOYEES.DETAIL(id));
+		const response = await fetchEmployeeByIdWithFallback(id);
 		return mapEmployeeResponse(response);
 	},
 

@@ -34,6 +34,10 @@ interface BackendVacationBalance {
   available: number;
 }
 
+interface BackendVacationBalanceEnvelope {
+  vacation_details: BackendVacationBalance;
+}
+
 interface BackendVacationRequest {
   id: string | number;
   staff_id?: string | number;
@@ -53,11 +57,16 @@ interface BackendVacationRequest {
 // Mappers – backend DTO → UI model
 // ---------------------------------------------------------------------------
 
-function toVacationBalance(raw: BackendVacationBalance): VacationBalance {
+function toVacationBalance(
+  raw: BackendVacationBalance | BackendVacationBalanceEnvelope
+): VacationBalance {
+  const details =
+    "vacation_details" in raw ? raw.vacation_details : raw;
+
   return {
-    assigned: raw.assigned,
-    used: raw.used,
-    available: raw.available,
+    assigned: details.assigned,
+    used: details.used,
+    available: details.available,
   };
 }
 
@@ -113,7 +122,9 @@ function toLocalIsoDate(date: Date): string {
 export async function getVacationBalance(
   staffId: string
 ): Promise<VacationBalance | null> {
-  const raw = await apiClient.get<BackendVacationBalance>(
+  const raw = await apiClient.get<
+    BackendVacationBalance | BackendVacationBalanceEnvelope
+  >(
     API_ENDPOINTS.VACATIONS.EMPLOYEE.BALANCE(staffId)
   );
   return toVacationBalance(raw);
@@ -123,20 +134,13 @@ export async function getVacationBalance(
  * Returns all vacation requests submitted by a specific employee, ordered by
  * start date ascending.
  *
- * GET /myprofile/requestvacation?staff_id=:staffId
+ * GET /myprofile/requestvacation/:staffId
  */
 export async function listEmployeeVacationRequests(
   staffId: string
 ): Promise<VacationRequest[]> {
   const rawList = await apiClient.get<BackendVacationRequest[]>(
-    API_ENDPOINTS.VACATIONS.EMPLOYEE.LIST,
-    {
-      query: {
-        staff_id: staffId,
-        // Helps Mockoon CRUD filtering while preserving backend contract param.
-        staff_id_eq: staffId,
-      },
-    }
+    API_ENDPOINTS.VACATIONS.EMPLOYEE.LIST(staffId)
   );
   return rawList
     .map(toVacationRequest)
@@ -236,7 +240,8 @@ export async function cancelVacationRequest(
 ): Promise<VacationRequest | null> {
   try {
     const raw = await apiClient.patch<BackendVacationRequest>(
-      API_ENDPOINTS.VACATIONS.EMPLOYEE.CANCEL(requestId)
+      API_ENDPOINTS.VACATIONS.EMPLOYEE.CANCEL(requestId),
+      { status: "cancelled" }
     );
     return toVacationRequest(raw);
   } catch (error) {

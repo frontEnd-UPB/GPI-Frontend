@@ -5,12 +5,17 @@ import { Modal } from "../../../../ui/core/Modal";
 import { Textarea } from "../../../../ui/core/Textarea";
 import { VACATION_STATUS } from "../../../../core/constants";
 import type { VacationRequest } from "../../../../core/mocks/data";
+import { ErrorMessage } from "../../../../core/components/feedback/ErrorMessage";
+
+// Temporary backend compatibility flag.
+// Backend currently does not allow editing/reverting already approved/rejected decisions.
+const ENABLE_DECISION_EDIT = false;
 
 interface DecisionProps {
   request: VacationRequest;
-  approveRequest: (id: string) => void;
-  rejectRequest: (id: string, reason: string) => void;
-  setRequestPending: (id: string) => void;
+  approveRequest: (id: string) => Promise<void>;
+  rejectRequest: (id: string, reason: string) => Promise<void>;
+  setRequestPending: (id: string) => Promise<void>;
 }
 
 const Decision: React.FC<DecisionProps> = ({
@@ -28,34 +33,49 @@ const Decision: React.FC<DecisionProps> = ({
   );
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [reason, setReason] = useState(request.rejectionReason ?? "");
-  const [error, setError] = useState("");
+  const [reasonError, setReasonError] = useState("");
+  const [actionError, setActionError] = useState("");
 
-  const handleApprove = () => {
-    approveRequest(request.id);
-    setMode("approved");
+  const handleApprove = async () => {
+    try {
+      setActionError("");
+      await approveRequest(request.id);
+      setMode("approved");
+    } catch (err) {
+      const message =
+        err instanceof Error ? err.message : "Failed to approve request.";
+      setActionError(message);
+    }
   };
 
   const openRejectModal = () => {
     setReason(request.rejectionReason ?? "");
-    setError("");
+    setReasonError("");
     setIsModalOpen(true);
   };
 
-  const handleConfirmReject = () => {
+  const handleConfirmReject = async () => {
     const trimmed = reason.trim();
     if (!trimmed) {
-      setError("Rejection reason is required.");
+      setReasonError("Rejection reason is required.");
       return;
     }
 
-    rejectRequest(request.id, trimmed);
-    setIsModalOpen(false);
-    setMode("rejected");
+    try {
+      setActionError("");
+      await rejectRequest(request.id, trimmed);
+      setIsModalOpen(false);
+      setMode("rejected");
+    } catch (err) {
+      const message =
+        err instanceof Error ? err.message : "Failed to reject request.";
+      setActionError(message);
+    }
   };
 
   const handleCancelModal = () => {
     setIsModalOpen(false);
-    setError("");
+    setReasonError("");
   };
 
   return (
@@ -104,18 +124,29 @@ const Decision: React.FC<DecisionProps> = ({
                 <span className="font-semibold tracking-wide">APPROVED</span>
               </Button>
 
-              <Button
-                type="button"
-                variant="ghost"
-                size="lg"
-                className="flex-[0.5] rounded-[30px] border border-border text-primary hover:bg-muted h-[54px] justify-center"
-                  onClick={() => {
-                    setRequestPending(request.id);
-                    setMode("deciding");
+              {ENABLE_DECISION_EDIT && (
+                <Button
+                  type="button"
+                  variant="ghost"
+                  size="lg"
+                  className="flex-[0.5] rounded-[30px] border border-border text-primary hover:bg-muted h-[54px] justify-center"
+                  onClick={async () => {
+                    try {
+                      setActionError("");
+                      await setRequestPending(request.id);
+                      setMode("deciding");
+                    } catch (err) {
+                      const message =
+                        err instanceof Error
+                          ? err.message
+                          : "Failed to reopen decision.";
+                      setActionError(message);
+                    }
                   }}
-              >
-                <span className="font-semibold tracking-wide">EDIT</span>
-              </Button>
+                >
+                  <span className="font-semibold tracking-wide">EDIT</span>
+                </Button>
+              )}
             </div>
           )}
 
@@ -131,19 +162,38 @@ const Decision: React.FC<DecisionProps> = ({
                 <span className="font-semibold tracking-wide">REJECTED</span>
               </Button>
 
-              <Button
-                type="button"
-                variant="ghost"
-                size="lg"
-                className="flex-[0.5] rounded-[30px] border border-border text-primary hover:bg-muted h-[54px] justify-center"
-                  onClick={() => {
-                    setRequestPending(request.id);
-                    setMode("deciding");
+              {ENABLE_DECISION_EDIT && (
+                <Button
+                  type="button"
+                  variant="ghost"
+                  size="lg"
+                  className="flex-[0.5] rounded-[30px] border border-border text-primary hover:bg-muted h-[54px] justify-center"
+                  onClick={async () => {
+                    try {
+                      setActionError("");
+                      await setRequestPending(request.id);
+                      setMode("deciding");
+                    } catch (err) {
+                      const message =
+                        err instanceof Error
+                          ? err.message
+                          : "Failed to reopen decision.";
+                      setActionError(message);
+                    }
                   }}
-              >
-                <span className="font-semibold tracking-wide">EDIT</span>
-              </Button>
+                >
+                  <span className="font-semibold tracking-wide">EDIT</span>
+                </Button>
+              )}
             </div>
+          )}
+
+          {actionError && (
+            <ErrorMessage
+              variant="inline"
+              message={actionError}
+              className="mt-4"
+            />
           )}
         </div>
       </section>
@@ -184,8 +234,8 @@ const Decision: React.FC<DecisionProps> = ({
             placeholder="Please provide a reason for rejection..."
             className="min-h-[140px]"
           />
-          {error && (
-            <p className="text-xs text-destructive mt-1">{error}</p>
+          {reasonError && (
+            <p className="text-xs text-destructive mt-1">{reasonError}</p>
           )}
         </div>
       </Modal>
